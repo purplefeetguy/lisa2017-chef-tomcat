@@ -35,14 +35,15 @@ if ($rg -eq $null)
     New-AzureRMResourceGroup -Name $rgName -Location $location
 }
 
-# Deploy the ARM template
+# Deploy the Storage ARM template
 $deployName = "wba-canary-group-sbx"
 $templateFile = "$path\storage.baseline.json"
 $templateParamFile = "$path\storage.baseline.params.json"
 Test-AzureRmResourceGroupDeployment -ResourceGroupName $rgName -TemplateFile $templateFile  -TemplateParameterFile $templateParamFile -Mode Incremental
 New-AzureRMResourceGroupDeployment -Name $deployName -ResourceGroupName $rgName -TemplateFile $templateFile -TemplateParameterFile $templateParamFile -Mode Incremental
 
-$deployName = "WBA Canary Group Sandbox"
+# Deployt the Computer ARM template
+$deployName = "wba-canary-group-sbx-compute-01"
 $templateFile = "$path\vm.linux.single.json"
 $templateParamFile = "$path\vm.linux.single.chef.params.json"
 Test-AzureRmResourceGroupDeployment -ResourceGroupName $rgName -TemplateFile $templateFile  -TemplateParameterFile $templateParamFile -Mode Incremental

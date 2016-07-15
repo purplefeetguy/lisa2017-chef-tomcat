@@ -125,7 +125,7 @@
     },
     "chefServerUrl": {
       "type": "string",
-      "defaultValue": "https://chef-manage.walgreens.com/walgreenco"
+      "defaultValue": "https://chef-manage.walgreens.com/walgreenco",
       "metadata": {
         "description": "The URL to the Chef server"
       }

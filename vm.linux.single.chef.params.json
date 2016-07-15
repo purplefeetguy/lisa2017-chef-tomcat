@@ -9,7 +9,7 @@
       "value": "Canary"
     },
     "tagAppEnvValue": {
-      "value": "Sandbox"
+      "value": "WAGS Sandbox"
     },
     "tagSecZoneValue": {
       "value": "WAGS Sandbox"
@@ -51,13 +51,13 @@
       "value": "slnawucansbx01"
     },
     "storAcctName": {
-      "value": "slnawucansbx01vm"
+      "value": "slnawucansbx01stor01"
     },
     "dataDiskSizeInGB": {
       "value": 128
     },
     "diagStorAcctName": {
-      "value": "slnawucansbx01diag"
+      "value": "slnawucansbx01stor02"
     },
     "chefServerUrl": {
       "value": "https://chef-manage.walgreens.com/organizations/ecom-digital"

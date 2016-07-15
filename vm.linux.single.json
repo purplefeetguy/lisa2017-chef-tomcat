@@ -1,0 +1,287 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "location": {
+      "type": "string",
+      "defaultValue": "West US",
+      "metadata": {
+        "description": "Deployment location (ex. West US)"
+      }
+    },
+    "tagAppNameValue": {
+      "type": "string",
+      "metadata": {
+        "description": "Tag for application name (ex. PCC)"
+      }
+    },
+    "tagAppEnvValue": {
+      "type": "string",
+      "metadata": {
+        "description": "Tag for application environment (ex. Dev, QA, Prodfix, Perf, Prod)"
+      }
+    },
+    "tagSecZoneValue": {
+      "type": "string",
+      "defaultValue": "West US",
+      "metadata": {
+        "description": "Tag for security zone (ex. Internal Non-Sensitive Dev-Test)"
+      }
+    },
+    "vmName": {
+      "type": "string",
+      "metadata": {
+        "description": "Name of the VM (ex. uldyvm-azpcc01)"
+      }
+    },
+    "vmSize": {
+      "type": "string",
+      "defaultValue": "West US",
+      "metadata": {
+        "description": "Size of the VM (ex. Standard_DS2)"
+      }
+    },
+    "imagePublisher": {
+      "type": "string",
+      "defaultValue": "RedHat",
+      "metadata": {
+        "description": "Publisher for the VM gallery image (ex. RedHat)"
+      }
+    },
+    "imageOffer": {
+      "type": "string",
+      "defaultValue": "RHEL",
+      "metadata": {
+        "description": "Offer for the VM gallery image (ex. RHEL)"
+      }
+    },
+    "osVersion": {
+      "type": "string",
+      "defaultValue": "7.2",
+      "metadata": {
+        "description": "The Linux version for the VM. This will pick the latest available image of this given Linux version. (ex. 7.2)"
+      }
+    },
+    "adminUserName": {
+      "type": "string",
+      "metadata": {
+        "description": "Local admin user for the VM (ex. wagsadmin)"
+      }
+    },
+    "adminPassword": {
+      "type": "string",
+      "metadata": {
+        "description": "Local admin password for the VM"
+      }
+    },
+    "vnetResGrp": {
+      "type": "string",
+      "metadata": {
+        "description": "Resource group for the VNet where the VM is being deployed (ex. drsgrp-azshr01)"
+      }
+    },
+    "vnetName": {
+      "type": "string",
+      "metadata": {
+        "description": "Name of the VNet where the VM is being deployed (ex. dvnetw-azshr01)"
+      }
+    },
+    "subnetName": {
+      "type": "string",
+      "metadata": {
+        "description": "Name of the subnet where the VM is being deployed (ex. WEB, APP, DB, INF)"
+      }
+    },
+    "ipAddress": {
+      "type": "string",
+      "metadata": {
+        "description": "Private IP Address for the VM (ex. 172.17.45.9)"
+      }
+    },
+    "nicName": {
+      "type": "string",
+      "metadata": {
+        "description": "Name of the NIC for the VM (ex. udynic-azpcc01)"
+      }
+    },
+    "storAcctName": {
+      "type": "string",
+      "metadata": {
+        "description": "Storage account for the OS and Data disks (ex. ussacazpcc01)"
+      }
+    },
+    "dataDiskSizeInGB": {
+      "type": "int",
+      "defaultValue": 128,
+      "metadata": {
+        "description": "Size in GB for the data disk attached to the VM (ex. 128)"
+      }
+    },
+    "diagStorAcctName": {
+      "type": "string",
+      "metadata": {
+        "description": "The storage account to use for boot diagnostics data (ex. ussacazpcc03)"
+      }
+    },
+    "chefServerUrl": {
+      "type": "string",
+      "defaultValue": "https://chef-manage.walgreens.com/walgreenco"
+      "metadata": {
+        "description": "The URL to the Chef server"
+      }
+    },
+    "chefRunList": {
+      "type": "string",
+      "defaultValue": "wba-role",
+      "metadata": {
+        "description": "The Chef run list for the new VM (ex. role[wba-base])"
+      }
+    },
+    "chefValidationClientName": {
+      "type": "string",
+      "metadata": {
+        "description": "The Chef validation client name (ex. walgreenco-validator)"
+      }
+    },
+    "chefValidationKeyFormat": {
+      "type": "string",
+      "metadata": {
+        "description": "The Chef validation key format (ex. plaintext)"
+      }
+    },
+    "chefValidationKey": {
+      "type": "string",
+      "metadata": {
+        "description": "The Chef validation key"
+      }
+    }
+  },
+  "variables": {
+    "computeApiVersion": "2016-03-30",
+    "networkApiVersion": "2016-03-30",
+    "tagAppName": "AppName",
+    "tagAppEnv": "AppEnv",
+    "tagSecZone": "SecZone",
+    "vnetId": "[resourceId(parameters('vnetResGrp'), 'Microsoft.Network/virtualNetworks', parameters('vnetName'))]",
+    "subnetId": "[concat(variables('vnetId'),'/subnets/', parameters('subnetName'))]"
+  },
+  "resources": [
+    {
+      "apiVersion": "[variables('networkApiVersion')]",
+      "type": "Microsoft.Network/networkInterfaces",
+      "name": "[parameters('nicName')]",
+      "location": "[parameters('location')]",
+      "tags": {
+        "[variables('tagAppName')]": "[parameters('tagAppNameValue')]",
+        "[variables('tagAppEnv')]": "[parameters('tagAppEnvValue')]",
+        "[variables('tagSecZone')]": "[parameters('tagSecZoneValue')]"
+      },
+      "properties": {
+        "ipConfigurations": [
+          {
+            "name": "ipConfig",
+            "properties": {
+              "privateIPAllocationMethod": "Static",
+              "privateIPAddress": "[parameters('ipAddress')]",
+              "subnet": {
+                "id": "[variables('subnetId')]"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "[variables('computeApiVersion')]",
+      "type": "Microsoft.Compute/virtualMachines",
+      "name": "[parameters('vmName')]",
+      "location": "[parameters('location')]",
+      "tags": {
+        "[variables('tagAppName')]": "[parameters('tagAppNameValue')]",
+        "[variables('tagAppEnv')]": "[parameters('tagAppEnvValue')]",
+        "[variables('tagSecZone')]": "[parameters('tagSecZoneValue')]"
+      },
+      "dependsOn": [
+        "[concat('Microsoft.Network/networkInterfaces/', concat(parameters('nicName')))]"
+      ],
+      "properties": {
+        "hardwareProfile": {
+          "vmSize": "[parameters('vmSize')]"
+        },
+        "storageProfile": {
+          "imageReference": {
+            "publisher": "[parameters('imagePublisher')]",
+            "offer": "[parameters('imageOffer')]",
+            "sku": "[parameters('osVersion')]",
+            "version": "latest"
+          },
+          "osDisk": {
+            "name": "OSDisk",
+            "createOption": "FromImage",
+            "vhd": {
+              "uri": "[concat('https://', parameters('storAcctName'), '.blob.core.windows.net/vhds/', parameters('vmName'), '-os.vhd')]"
+            },
+            "caching": "ReadWrite"
+          },
+          "dataDisks": [
+            {
+              "name": "DataDisk0",
+              "diskSizeGB": "[parameters('dataDiskSizeInGB')]",
+              "lun": 0,
+              "vhd": {
+                "uri": "[concat('https://', parameters('storAcctName'), '.blob.core.windows.net/vhds/', parameters('vmName'), '-data-0.vhd')]"
+              },
+              "createOption": "Empty",
+              "caching": "None"
+            }
+          ]
+        },
+        "osProfile": {
+          "computerName": "[parameters('vmName')]",
+          "adminUsername": "[parameters('adminUserName')]",
+          "adminPassword": "[parameters('adminPassword')]"
+        },
+        "networkProfile": {
+          "networkInterfaces": [
+            {
+              "id": "[resourceId('Microsoft.Network/networkInterfaces', concat(parameters('nicName')))]"
+            }
+          ]
+        },
+        "diagnosticsProfile": {
+          "bootDiagnostics": {
+            "enabled": true,
+            "storageUri": "[concat('https://', parameters('diagStorAcctName'), '.blob.core.windows.net/')]"
+          }
+        }
+      }
+    },
+    {
+      "apiVersion": "[variables('computeApiVersion')]",
+      "type": "Microsoft.Compute/virtualMachines/extensions",
+      "name": "[concat(parameters('vmName'), '/LinuxChefExtension')]",
+      "location": "[parameters('location')]",
+      "dependsOn": [
+        "[concat('Microsoft.Compute/virtualMachines/', concat(parameters('vmName')))]"
+      ],
+        "properties": {
+        "publisher": "Chef.Bootstrap.WindowsAzure",
+        "type": "LinuxChefClient",
+        "typeHandlerVersion": "1210.12",
+        "settings": {
+          "bootstrap_options": {
+            "chef_node_name": "[parameters('vmName')]",
+            "chef_server_url": "[parameters('chefServerUrl')]",
+            "validation_client_name": "[parameters('chefValidationClientName')]",
+            "node_ssl_verify_mode": "none" 
+          },
+          "runList": "[parameters('chefRunList')]",
+          "validation_key_format": "[parameters('chefValidationKeyFormat')]"
+        },
+        "protectedSettings": {
+          "validation_key": "[parameters('chefValidationKey')]"
+        }
+      }
+    }
+  ]
+}

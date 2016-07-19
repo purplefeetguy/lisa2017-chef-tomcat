@@ -256,7 +256,7 @@
         }
       }
     },
-    {
+   {
       "apiVersion": "[variables('computeApiVersion')]",
       "type": "Microsoft.Compute/virtualMachines/extensions",
       "name": "[concat(parameters('vmName'), '/LinuxChefExtension')]",
@@ -273,6 +273,7 @@
             "chef_node_name": "[parameters('vmName')]",
             "chef_server_url": "[parameters('chefServerUrl')]",
             "validation_client_name": "[parameters('chefValidationClientName')]",
+            "node_verify_api_cert": "false",
             "node_ssl_verify_mode": "none" 
           },
           "runList": "[parameters('chefRunList')]",

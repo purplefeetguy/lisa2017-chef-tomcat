@@ -60,7 +60,7 @@
       "value": "slnawucansbx01stor02"
     },
     "chefServerUrl": {
-      "value": "https://chef-manage.walgreens.com/organizations/ecom-digital"
+      "value": "https://chef-manage.walgreens.com/organizations/walgreenco"
     },
     "chefRunList": {
       "value": "role[wba-role]"

@@ -11,44 +11,55 @@
 
 .CHANGELOG
     1.0  07/15/2016  Ed Mondek  Initial commit
+	1.1  07/18/2016  Ed Mondek  Added parameters section
 #>
 
-# Sign in to your Azure account
-<#
-Add-AzureRmAccount
-#>
+# Parameters section
+[CmdletBinding()]
+param(
+	[Parameter(Mandatory=$true, Position=1)]
+	[string] $SubscriptionName,
 
-# Initialize variables
-$subscriptionName = "WAGS Sandbox"
-$location = "West US"
-$path = "."
+	[Parameter(Mandatory=$true, Position=2)]
+	[string] $Location,
+
+	[Parameter(Mandatory=$true, Position=3)]
+	[string] $Path,
+
+	[Parameter(Mandatory=$true, Position=4)]
+	[string] $ResourceGroupName,
+
+	[Parameter(Mandatory=$true, Position=5)]
+	[string] $DeploymentName,
+
+	[Parameter(Mandatory=$true, Position=6)]
+	[string] $TemplateFile,
+
+	[Parameter(Mandatory=$true, Position=7)]
+	[string] $TemplateParametersFile,
+
+	[Parameter(Mandatory=$false, Position=8)]
+	[switch] $Test
+)
 
 # Set the current subscription
-Select-AzureRmSubscription -SubscriptionName $subscriptionName
+Select-AzureRmSubscription -SubscriptionName $SubscriptionName
 
 # Create the resource group if it doesn't already exist
-$rgName = "wba-canary-group-sbx"
-$rg = Get-AzureRmResourceGroup -Name $rgName -Location $location -ErrorAction Ignore
+$rg = Get-AzureRmResourceGroup -Name $ResourceGroupName -Location $Location -ErrorAction Ignore
 if ($rg -eq $null)
 {
-    Write-Output "Creating $rgName in $location"
-    New-AzureRMResourceGroup -Name $rgName -Location $location
+    Write-Output "Creating $ResourceGroupName in $Location"
+    New-AzureRMResourceGroup -Name $ResourceGroupName -Location $Location
 }
 
-# Deploy the Storage ARM template
-$deployName = "wba-canary-group-sbx"
-$templateFile = "$path\storage.baseline.json"
-$templateParamFile = "$path\storage.baseline.params.json"
-Test-AzureRmResourceGroupDeployment -ResourceGroupName $rgName -TemplateFile $templateFile  -TemplateParameterFile $templateParamFile -Mode Incremental
-New-AzureRMResourceGroupDeployment -Name $deployName -ResourceGroupName $rgName -TemplateFile $templateFile -TemplateParameterFile $templateParamFile -Mode Incremental
-
-# Deployt the Computer ARM template
-$deployName = "wba-canary-group-sbx-compute-01"
-$templateFile = "$path\vm.linux.single.json"
-$templateParamFile = "$path\vm.linux.single.chef.params.json"
-Test-AzureRmResourceGroupDeployment -ResourceGroupName $rgName -TemplateFile $templateFile  -TemplateParameterFile $templateParamFile -Mode Incremental
-New-AzureRMResourceGroupDeployment -Name $deployName -ResourceGroupName $rgName -TemplateFile $templateFile -TemplateParameterFile $templateParamFile -Mode Incremental
+# Deploy the ARM templates
+if ($Test) {
+	Test-AzureRmResourceGroupDeployment -ResourceGroupName $ResourceGroupName -TemplateFile $TemplateFile  -TemplateParameterFile $TemplateParametersFile -Mode Incremental -Verbose
+} else {
+	New-AzureRMResourceGroupDeployment -Name $DeploymentName -ResourceGroupName $ResourceGroupName -TemplateFile $TemplateFile -TemplateParameterFile $TemplateParametersFile -Mode Incremental -Verbose
+}
 
 <#
-Remove-AzureRmResourceGroup -Name $rgName
+Remove-AzureRmResourceGroup -Name $ResourceGroupName
 #>

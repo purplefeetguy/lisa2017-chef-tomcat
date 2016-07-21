@@ -1,0 +1,86 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "location": {
+      "type": "string",
+      "defaultValue": "West US",
+      "metadata": {
+        "description": "Deployment location"
+      }
+    },
+    "tagAppNameValue": {
+      "type": "string",
+      "metadata": {
+        "description": "Tag for application name (ex. PCC)"
+      }
+    },
+    "tagAppEnvValue": {
+      "type": "string",
+      "metadata": {
+        "description": "Tag for application environment (ex. Dev, QA, Prodfix, Perf, Prod)"
+      }
+    },
+    "tagSecZoneValue": {
+      "type": "string",
+      "metadata": {
+        "description": "Tag for security zone (ex. Internal Non-Sensitive Dev-Test)"
+      }
+    },
+    "storAcctPrefix": {
+      "type": "string",
+      "metadata": {
+        "description": "Prefix for the storage account name (ex. dssacazpcc0)"
+      }
+    },
+    "storAcctType": {
+      "type": "string",
+      "defaultValue": "Standard_LRS",
+      "allowedValues": [
+        "Standard_LRS",
+        "Standard_GRS",
+        "Standard_ZRS",
+        "Premium_LRS"
+      ],
+      "metadata": {
+        "description": "Storage Account type"
+      }
+    },
+    "storAcctCount": {
+      "type": "int",
+      "defaultValue": 1,
+      "metadata": {
+        "description": "Number of storage accounts to provision"
+      }
+    }
+  },
+  "variables": {
+    "storageApiVersion": "2016-01-01",
+    "tagAppName": "AppName",
+    "tagAppEnv": "AppEnv",
+    "tagSecZone": "SecZone"
+  },
+  "resources": [
+    {
+      "apiVersion": "[variables('storageApiVersion')]",
+      "type": "Microsoft.Storage/storageAccounts",
+      "name": "[concat(parameters('storAcctPrefix'), copyIndex(1))]",
+      "location": "[parameters('location')]",
+      "tags": {
+          "[variables('tagAppName')]": "[parameters('tagAppNameValue')]",
+          "[variables('tagAppEnv')]": "[parameters('tagAppEnvValue')]",
+          "[variables('tagSecZone')]": "[parameters('tagSecZoneValue')]"
+      },
+      "copy": {
+          "name": "standardStorageAccountCopy",
+          "count": "[parameters('storAcctCount')]"
+      },
+      "sku": {
+          "name": "[parameters('storAcctType')]"
+      },
+      "kind": "Storage", 
+      "properties": {
+      }
+    }
+  ]
+}

@@ -1,0 +1,27 @@
+{
+  "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "location": {
+      "value": "West US"
+    },
+    "tagAppNameValue": {
+      "value": "Canary"
+    },
+    "tagAppEnvValue": {
+      "value": "WAGS Sandbox"
+    },
+    "tagSecZoneValue": {
+      "value": "WAGS Sandbox"
+    },
+    "storAcctPrefix": {
+      "value": "slnawucansbx01stor0"
+    },
+    "storAcctType": {
+      "value": "Standard_LRS"
+    },
+    "storAcctCount": {
+      "value": 2
+    }
+  }
+}

@@ -27,10 +27,10 @@
         "description": "Tag for security zone (ex. Internal Non-Sensitive Dev-Test)"
       }
     },
-    "storAcctName": {
+    "storAcctPrefix": {
       "type": "string",
       "metadata": {
-        "description": "Name for the storage account (ex. dssacazpcc01)"
+        "description": "Prefix for the storage account name (ex. dssacazpcc0)"
       }
     },
     "storAcctType": {
@@ -45,6 +45,13 @@
       "metadata": {
         "description": "Storage Account type"
       }
+    },
+    "storAcctCount": {
+      "type": "int",
+      "defaultValue": 1,
+      "metadata": {
+        "description": "Number of storage accounts to provision"
+      }
     }
   },
   "variables": {
@@ -57,12 +64,16 @@
     {
       "apiVersion": "[variables('storageApiVersion')]",
       "type": "Microsoft.Storage/storageAccounts",
-      "name": "[parameters('storAcctName')]",
+      "name": "[concat(parameters('storAcctPrefix'), copyIndex(1))]",
       "location": "[parameters('location')]",
       "tags": {
           "[variables('tagAppName')]": "[parameters('tagAppNameValue')]",
           "[variables('tagAppEnv')]": "[parameters('tagAppEnvValue')]",
           "[variables('tagSecZone')]": "[parameters('tagSecZoneValue')]"
+      },
+      "copy": {
+          "name": "standardStorageAccountCopy",
+          "count": "[parameters('storAcctCount')]"
       },
       "sku": {
           "name": "[parameters('storAcctType')]"

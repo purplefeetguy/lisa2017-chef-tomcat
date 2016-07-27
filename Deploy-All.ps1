@@ -20,7 +20,7 @@ $Location = "West US"
 $Path = "."
 $DeploymentName = $ResourceGroupname
 $StorageTemplateFile = ".\storage.baseline.json"
-$VmTemplateFile = ".\vm.linux.baseline.single.json"
+$VmTemplateFile = ".\vm.linux.baseline.single.chef-extension.json"
 
 
 $StorageParameters = @{

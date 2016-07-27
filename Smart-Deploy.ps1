@@ -11,6 +11,9 @@ $MyDir  = Split-Path $MyPath
 Push-Location $MyDir
 [Environment]::CurrentDirectory = $MyDir
 
+Import-Module ".\Functions-ResourceGroup.psm1"
+Import-Module ".\FUnctions-Storage.psm1"
+
 $Location = "West US"
 $SubscriptionName = "WAGS Sandbox"
 
@@ -48,15 +51,7 @@ else
 #
 # Get the list of existing server names if the resource group exists so it can stop duplicates
 #
-$ResourceGroup = Get-AzureRmResourceGroup -Name $TargetResourceGroup -Location $Location -ErrorAction Ignore
-if ($ResourceGroup -ne $null)
-{
-    $ExistingVms = Get-AzureRmVM -ResourceGroupName $TargetResourceGroup
-    ForEach( $ExistingVm in $ExistingVms )
-    {
-        $ExistingVmNames = $ExistingVmNames + $ExistingVm.Name
-    }
-}
+$ExistingVmNames = Get-ExistingVmNames -ResourceGroupName $TargetResourceGroup -Location $Location
 
 
 #
@@ -91,7 +86,8 @@ $DeploymentName = $TargetResourceGroup + "-deployment"
 $StorageTemplateFile = ".\storage.baseline.single.json"
 $VmTemplateFile = ".\vm.linux.baseline.single.json"
 
-$VmStorageName   = "srposstor0" #this is the starting point name which would be incremented as needed to accomoodate more disks
+
+$VmStorageName   = "srposstor" #this is the starting point name which would be incremented as needed to accomoodate more disks
 $DiagStorageName = "srpdiagstor" #this will only be created if it does not exist
 
 $DiagStorageParameters = @{
@@ -132,7 +128,7 @@ if ($ResourceGroup -eq $null)
     -Verbose
     
     $InitialVmStorParameters = $VmStorageParameters.Clone()
-    $InitialVmStorParameters.Set_Item("storAcctName", $VmStorageName + "1")
+    $InitialVmStorParameters.Set_Item("storAcctName", $VmStorageName + "01")
 
     New-AzureRMResourceGroupDeployment `
     -Name $DeploymentName `
@@ -147,41 +143,14 @@ if ($ResourceGroup -eq $null)
 #
 # Determine if we are going to use an existing storage account or add a new one
 #
-$StorageAccounts = Get-AzureRmStorageAccount -ResourceGroupName $TargetResourceGroup
-$StorageAccountCount = 0 # there is at least one, we just created it if it was empty
-ForEach( $StorageAccount in $StorageAccounts )
-{
-    # we only need to worry about the os disks, not the diag disk
-    # we just want to ignore the the diag one
-    if( $StorageAccount.StorageAccountName -Match $DiagStorageName )
-    {
-        continue
-    }
-    $StorageAccountCount++
-    $VhdCount = 0
-    $Vhds = $StorageAccount | Get-AzureStorageContainer | Get-AzureStorageBlob
-    ForEach( $Vhd in $Vhds )
-    {
-        if( $Vhd.BlobType -ne "PageBlob" )
-        {
-            continue
-        }
-        $VhdCount++
-    }
-    #Write-Host $StorageAccount.StorageAccountName " has " $VhdCount " vhds in it"
-    if( $VhdCount -le 18 )
-    {   # this one has room
-        $TargetStorageAccount = $StorageAccount.StorageAccountName
-        break
-    }
-}
-
+$TargetStorageAccount = Get-TargetStorageAccountName -ResourceGroupName $TargetResourceGroup -DiagStorageName $DiagStorageName
 if( $TargetStorageAccount -eq $null )
 {
     #
     # There is not a storage account that can accomodate this VM, need to create one
     #
-    $TargetStorageAccount = $VmStorageName + ($StorageAccountCount + 1)
+    $StorageAccountCount  = Get-StorageAccountCount -ResourceGroupName $TargetResourceGroup -DiagStorageName $DiagStorageName
+    $TargetStorageAccount = $VmStorageName + ($StorageAccountCount + 1).ToString("00")
 
     $NewVmStorParameters = $VmStorageParameters.Clone()
     $NewVmStorParameters.Set_Item("storAcctName", $TargetStorageAccount)

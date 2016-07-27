@@ -122,38 +122,6 @@
       "metadata": {
         "description": "The storage account to use for boot diagnostics data (ex. ussacazpcc03)"
       }
-    },
-    "chefServerUrl": {
-      "type": "string",
-      "defaultValue": "https://chef-manage.walgreens.com/walgreenco",
-      "metadata": {
-        "description": "The URL to the Chef server"
-      }
-    },
-    "chefRunList": {
-      "type": "string",
-      "defaultValue": "wba-role",
-      "metadata": {
-        "description": "The Chef run list for the new VM (ex. role[wba-base])"
-      }
-    },
-    "chefValidationClientName": {
-      "type": "string",
-      "metadata": {
-        "description": "The Chef validation client name (ex. walgreenco-validator)"
-      }
-    },
-    "chefValidationKeyFormat": {
-      "type": "string",
-      "metadata": {
-        "description": "The Chef validation key format (ex. plaintext)"
-      }
-    },
-    "chefValidationKey": {
-      "type": "string",
-      "metadata": {
-        "description": "The Chef validation key"
-      }
     }
   },
   "variables": {
@@ -253,34 +221,6 @@
             "enabled": true,
             "storageUri": "[concat('https://', parameters('diagStorAcctName'), '.blob.core.windows.net/')]"
           }
-        }
-      }
-    },
-   {
-      "apiVersion": "[variables('computeApiVersion')]",
-      "type": "Microsoft.Compute/virtualMachines/extensions",
-      "name": "[concat(parameters('vmName'), '/LinuxChefExtension')]",
-      "location": "[parameters('location')]",
-      "dependsOn": [
-        "[concat('Microsoft.Compute/virtualMachines/', concat(parameters('vmName')))]"
-      ],
-        "properties": {
-        "publisher": "Chef.Bootstrap.WindowsAzure",
-        "type": "LinuxChefClient",
-        "typeHandlerVersion": "1210.12",
-        "settings": {
-          "bootstrap_options": {
-            "chef_node_name": "[parameters('vmName')]",
-            "chef_server_url": "[parameters('chefServerUrl')]",
-            "validation_client_name": "[parameters('chefValidationClientName')]",
-            "node_verify_api_cert": "false",
-            "node_ssl_verify_mode": "none" 
-          },
-          "runlist": "[parameters('chefRunList')]",
-          "validation_key_format": "[parameters('chefValidationKeyFormat')]"
-        },
-        "protectedSettings": {
-          "validation_key": "[parameters('chefValidationKey')]"
         }
       }
     }

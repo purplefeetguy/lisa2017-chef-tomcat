@@ -26,6 +26,59 @@ param(
 )
 
 
+<#
+.SYNOPSIS
+    Creates a storage account resource and between 1 and 20 virtual machines in sequence
+    using the storage account for their disks
+
+    Returns a list of server names and their corrosponding IP addresses as an array of space delimited strings 
+.DESCRIPTION
+
+.PARAMETER ResourceGroupName
+.PARAMETER SetNumber
+.PARAMETER VmTemplateFile
+.PARAMETER VmParameterObject
+.PARAMETER StorageTemplateFile
+.PARAMETER StorageParameterObject
+#>
+$VmSetBlock = {
+    param($Credentials, $ResourceGroupName, $SetNumber, $VmTemplateFile, $VmParameterObject, $StorageTemplateFile, $StorageParameterObject)
+
+    Add-AzureRmAccount -Credential $Credentials | Out-Null
+    Select-AzureRmSubscription -SubscriptionName $ParameterObject.tagAppEnvValue | Out-Null
+
+    New-AzureRMResourceGroupDeployment `
+        -Name "$($ParameterObject.vmNamePrefix)-set$($SetNumber)-deployment" `
+        -ResourceGroupName $ResourceGroupName `
+        -TemplateFile $StorageTemplateFile `
+        -TemplateParameterObject $StorageParameterObject `
+        -Mode Incremental | Out-Null
+
+    New-AzureRMResourceGroupDeployment `
+        -Name "$($ParameterObject.vmNamePrefix)-set$($SetNumber)-deployment" `
+        -ResourceGroupName $ResourceGroupName `
+        -TemplateFile $VmTemplateFile `
+        -TemplateParameterObject $VmParameterObject `
+        -Mode Incremental | Out-Null
+    
+    $NamePrefix = $ParameterObject.vmNamePrefix
+    $Count      = $ParameterObject.vmCount
+    $Offset     = $ParameterObject.vmIndexOffset
+
+    $Results = @()
+    for( $i = 0; $i -le $Count; $i++ )
+    {
+        $VmIndex  = $i + $Offset
+        $NicName  = "$NamePrefix$($VmIndex.toString("000"))nic01"
+        $Nic      = Get-AzureRmNetworkInterface -Name $NicName -ResourceGroupName $ResourceGroupName
+        $Results += "$NamePrefix$($VmIndex.toString("000")) $($Nic.IpConfigurations[0].PrivateIpAddress)"
+    }
+    #return New-Object PsObject -Property @{name=$ParameterObject.vmName; ip=$Nic.IpConfigurations[0].PrivateIpAddress}
+    return $Results
+}
+
+
+
 $MyPath = $MyInvocation.MyCommand.Path
 $MyDir  = Split-Path $MyPath
 Push-Location $MyDir
@@ -105,7 +158,6 @@ $AppName         = "Bootstrap Testing"
 New-AzureRMResourceGroup -Name $TargetResourceGroup -Location $Location | Out-Null
 
 
-
 #
 # Make the diagnostics data storage account
 #
@@ -119,63 +171,10 @@ $DiagStorageParameters = @{
 }
 
 New-AzureRMResourceGroupDeployment -Name $DeploymentName -ResourceGroupName $TargetResourceGroup -TemplateFile $StorageTemplateFile -TemplateParameterObject $DiagStorageParameters -Mode Incremental | Out-Null
-    
 
-$VmSetBlock = {
-    param($Credentials, $ResourceGroupName, $SetNumber, $VmTemplateFile, $VmParameterObject, $StorTemplateFile, $StorParameterObject)
-
-    Add-AzureRmAccount -Credential $Credentials | Out-Null
-    Select-AzureRmSubscription -SubscriptionName $ParameterObject.tagAppEnvValue | Out-Null
-
-    New-AzureRMResourceGroupDeployment `
-        -Name "$($ParameterObject.vmNamePrefix)-set$($SetNumber)-deployment" `
-        -ResourceGroupName $ResourceGroupName `
-        -TemplateFile $StorTemplateFile `
-        -TemplateParameterObject $StorParameterObject `
-        -Mode Incremental | Out-Null
-
-    New-AzureRMResourceGroupDeployment `
-        -Name "$($ParameterObject.vmNamePrefix)-set$($SetNumber)-deployment" `
-        -ResourceGroupName $ResourceGroupName `
-        -TemplateFile $VmTemplateFile `
-        -TemplateParameterObject $VmParameterObject `
-        -Mode Incremental | Out-Null
-    
-    $NamePrefix = $ParameterObject.vmNamePrefix
-    $Count      = $ParameterObject.vmCount
-    $Offset     = $ParameterObject.vmIndexOffset
-
-    $Results = @()
-    for( $i = 0; $i -le $Count; $i++ )
-    {
-        $VmIndex = $i + $Offset
-        $NicName = "$NamePrefix$($VmIndex.toString("000"))nic01"
-        $Nic = Get-AzureRmNetworkInterface -Name $NicName -ResourceGroupName $ResourceGroupName
-        $Results += "$NamePrefix$($VmIndex.toString("000")) $($Nic.IpConfigurations[0].PrivateIpAddress)"
-    }
-    #return New-Object PsObject -Property @{name=$ParameterObject.vmName; ip=$Nic.IpConfigurations[0].PrivateIpAddress}
-    return $Results
-}
 
 #
-# for this i want to break the vms into groups of 20, for each one start a thread
-# in there i will create the storage account for that set of VMs
-#
-$ThreadLimit = 10
-
-$VmGroupJobs = @()
-$ActiveCount = 0
-
-$AllResults  = @()
-
-$VmSets = [Math]::Ceiling( $MachineCount / 20 )
-for( $i = 1; $i -le $VmSets; $i++ )
-{
-
-}
-
-#
-# Make the correct number of storage accounts for the number of VMs being created (1 for every 20 VMs)
+# Storage Account parameter object used when creating accounts to house virtual machine disks
 #
 $VmStorageParameters = @{
     location=$Location;
@@ -186,22 +185,18 @@ $VmStorageParameters = @{
     storAcctType="Standard_LRS";
 }
 
-$NeededStorageAccounts = [Math]::Ceiling( $MachineCount / 20 )
-for ($i = 1; $i -le $NeededStorageAccounts; $i++) 
-{
-    $ThisVmStorParameters = $VmStorageParameters.Clone()
-    $ThisVmStorParameters.Set_Item("storAcctName", $VmStoragePrefix + $i.toString("00") )
 
-    New-AzureRMResourceGroupDeployment -Name $DeploymentName -ResourceGroupName $TargetResourceGroup -TemplateFile $StorageTemplateFile -TemplateParameterObject $ThisVmStorParameters -Mode Incremental | Out-Null
-}
-
-
+#
+# Virtual machine template parameters used for creating sets of VMs
+#
 $VmParameters = @{
     location=$Location;
     tagAppNameValue=$AppName;
     tagAppEnvValue=$SubscriptionName;
     tagSecZoneValue=$SubscriptionName;
-    vmName=$VmPrefix;
+    vmNamePrefix=$VmPrefix;
+    vmCount=1;
+    vmIndexOffset=1;
     vmSize="Standard_D2";
     imagePublisher="RedHat";
     imageOffer="RHEL";
@@ -211,48 +206,68 @@ $VmParameters = @{
     vnetResGrp="srsgrp-azshr01";
     vnetName="svnetw-azshr01";
     subnetName="APP";
-    nicName=$VmNicSuffix;
     storAcctName=$VmStoragePrefix;
     dataDiskSizeInGB=128;
     diagStorAcctName=$DiagStorageName;
 }
 
 
-
-$Block = 
-{
-    param( $Credentials, $ResourceGroupName, $TemplateFile, $ParameterObject )
-
-    Add-AzureRmAccount -Credential $Credentials | Out-Null
-    Select-AzureRmSubscription -SubscriptionName $ParameterObject.tagAppEnvValue | Out-Null
-    New-AzureRMResourceGroupDeployment `
-        -Name "$($ParameterObject.vmName)-deployment" `
-        -ResourceGroupName $ResourceGroupName `
-        -TemplateFile $TemplateFile `
-        -TemplateParameterObject $ParameterObject `
-        -Mode Incremental | Out-Null
-
-    $Nic = Get-AzureRmNetworkInterface -Name $ParameterObject.nicName -ResourceGroupName $ResourceGroupName
-    #return New-Object PsObject -Property @{name=$ParameterObject.vmName; ip=$Nic.IpConfigurations[0].PrivateIpAddress}
-    return "$($ParameterObject.vmName) $($Nic.IpConfigurations[0].PrivateIpAddress)"
-}
-
-
-
 #
 # Start the jobs to create the VMs
 #
-$VmCreationJobs = @()
-for ($i = 1; $i -le $MachineCount; $i++) 
+$ThreadLimit = 20
+$VmGroupJobs = @()
+$ActiveCount = 0
+$AllResults  = @()
+
+$VmSetCount = [Math]::Ceiling( $MachineCount / 20 )
+for( $Set = 1; $Set -le $VmSetCount; $Set++ )
 {
+    # i need to get how many vms are being created in this set 
+    # and figure out how many have already been set
+    $ThisStartingIndex = ($Set * 20) - 20 + 1
+    $ThisCount = $MachineCount - $ThisStartingIndex
+    $ThisVmStorageParameters = $VmStorageParameters.Clone()
+    $ThisVmStorageParameters.Set_Item("storAcctName", $VmStoragePrefix + $Set.toString("00") )
+
     $ThisVmParameters = $VmParameters.Clone()
-    $ThisVmParameters.Set_Item("vmName", $VmPrefix + $i.toString("00" ))
-    $ThisVmParameters.Set_Item("nicName", $ThisVmParameters.vmName + $VmNicSuffix)
-    $ThisVmParameters.Set_Item("storAcctName", $VmStoragePrefix + ([Math]::Ceiling($i / 20)).toString("00"))
+    $ThisVmParameters.Set_Item("storAcctName", $ThisVmStorageParameters.storeAcctName)
+    $ThisVmParameters.Set_Item("vmIndexOffset", $ThisStartingIndex)
+    $ThisVmParameters.Set_Item("vmCount", $ThisCount)
     
-    $VmCreationJobs += Start-Job -ScriptBlock $Block -ArgumentList $Credentials, $TargetResourceGroup, $VmTemplateFile, $ThisVmParameters
+    $VmGroupJobs += Start-Job -ScriptBlock $VmSetBlock -ArgumentList $Credentials, $TargetResourceGroup, $Set, $VmTemplateFile, $ThisVmParameters, $StorageTemplateFile, $ThisVmStorageParameters
+    $ActiveCount++
+
+    if( $ActiveCount -ge $ThreadLimit )
+    {   # if we have reached the thread limit (roughtly) block until some jobs are done
+        # get the results from the done ones, and remove them to allow the loop to continue
+        $DoneJobs = Wait-Job -Job $VmGroupJobs -Any
+        ForEach( $DoneJob in $DoneJobs )
+        {
+            $Result = Receive-Job -Job $DoneJobs
+            $AllResults += $Result
+
+            #
+            # Remove this job off of the overall list so we don't receive it again
+            #
+            $JobsList = New-Object System.Collections.ArrayList(,$VmGroupJobs)
+            $JobsList.Remove( $DoneJob )
+            $VmGroupJobs = $JobsList.ToArray()
+        }
+        
+        $ActiveCount = $ActiveCount - $DoneJobs.Length
+    }
 }
 
-Wait-Job -Job $VmCreationJobs | Out-Null
-$ReturnedInformation = Receive-Job -Job $VmCreationJobs
-return $ReturnedInformation
+
+#
+# Everything should be done at this point, handle the remaining jobs that are finishing up
+#
+$DoneJobs = Wait-Job -Job $VmGroupJobs
+ForEach( $DoneJob in $DoneJobs )
+{
+    $Result = Receive-Job -Job $DoneJob
+    $AllResults += $Result
+}
+
+return $AllResults

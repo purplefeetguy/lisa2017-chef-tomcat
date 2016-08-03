@@ -45,28 +45,28 @@ $VmSetBlock = {
     param($Credentials, $ResourceGroupName, $SetNumber, $VmTemplateFile, $VmParameterObject, $StorageTemplateFile, $StorageParameterObject)
 
     Add-AzureRmAccount -Credential $Credentials | Out-Null
-    Select-AzureRmSubscription -SubscriptionName $ParameterObject.tagAppEnvValue | Out-Null
+    Select-AzureRmSubscription -SubscriptionName $VmParameterObject.tagAppEnvValue | Out-Null
 
     New-AzureRMResourceGroupDeployment `
-        -Name "$($ParameterObject.vmNamePrefix)-set$($SetNumber)-deployment" `
+        -Name "$($VmParameterObject.vmNamePrefix)-set$($SetNumber)-deployment" `
         -ResourceGroupName $ResourceGroupName `
         -TemplateFile $StorageTemplateFile `
         -TemplateParameterObject $StorageParameterObject `
         -Mode Incremental | Out-Null
 
     New-AzureRMResourceGroupDeployment `
-        -Name "$($ParameterObject.vmNamePrefix)-set$($SetNumber)-deployment" `
+        -Name "$($VmParameterObject.vmNamePrefix)-set$($SetNumber)-deployment" `
         -ResourceGroupName $ResourceGroupName `
         -TemplateFile $VmTemplateFile `
         -TemplateParameterObject $VmParameterObject `
         -Mode Incremental | Out-Null
     
-    $NamePrefix = $ParameterObject.vmNamePrefix
-    $Count      = $ParameterObject.vmCount
-    $Offset     = $ParameterObject.vmIndexOffset
+    $NamePrefix = $VmParameterObject.vmNamePrefix
+    $Count      = $VmParameterObject.vmCount
+    $Offset     = $VmParameterObject.vmIndexOffset
 
     $Results = @()
-    for( $i = 0; $i -le $Count; $i++ )
+    for( $i = 0; $i -lt $Count; $i++ )
     {
         $VmIndex  = $i + $Offset
         $NicName  = "$NamePrefix$($VmIndex.toString("000"))nic01"
@@ -226,12 +226,17 @@ for( $Set = 1; $Set -le $VmSetCount; $Set++ )
     # i need to get how many vms are being created in this set 
     # and figure out how many have already been set
     $ThisStartingIndex = ($Set * 20) - 20 + 1
-    $ThisCount = $MachineCount - $ThisStartingIndex
+    $ThisCount = 20
+    if( ($Set * 20) -gt $MachineCount )
+    {
+        $ThisCount = $MachineCount - (($Set * 20) - 20)
+    }
+
     $ThisVmStorageParameters = $VmStorageParameters.Clone()
     $ThisVmStorageParameters.Set_Item("storAcctName", $VmStoragePrefix + $Set.toString("00") )
 
     $ThisVmParameters = $VmParameters.Clone()
-    $ThisVmParameters.Set_Item("storAcctName", $ThisVmStorageParameters.storeAcctName)
+    $ThisVmParameters.Set_Item("storAcctName", $ThisVmStorageParameters.storAcctName)
     $ThisVmParameters.Set_Item("vmIndexOffset", $ThisStartingIndex)
     $ThisVmParameters.Set_Item("vmCount", $ThisCount)
     

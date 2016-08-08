@@ -1,0 +1,236 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "location": {
+      "type": "string",
+      "defaultValue": "West US",
+      "metadata": {
+        "description": "Deployment location (ex. West US)"
+      }
+    },
+    "tagAppNameValue": {
+      "type": "string",
+      "metadata": {
+        "description": "Tag for application name (ex. PCC)"
+      }
+    },
+    "tagAppEnvValue": {
+      "type": "string",
+      "metadata": {
+        "description": "Tag for application environment (ex. Dev, QA, Prodfix, Perf, Prod)"
+      }
+    },
+    "tagSecZoneValue": {
+      "type": "string",
+      "defaultValue": "West US",
+      "metadata": {
+        "description": "Tag for security zone (ex. Internal Non-Sensitive Dev-Test)"
+      }
+    },
+    "vmNamePrefix": {
+      "type": "string",
+      "metadata": {
+        "description": "Name of the VM (ex. uldyvm-azpcc)"
+      }
+    },
+    "vmCount": {
+      "type": "int",
+      "metadata": {
+        "description": "number of VMs to create for this set"
+      }
+    },
+    "vmIndexOffset": {
+      "type": "int",
+      "metadata": {
+        "description": "the beginning index for the set of VMs being created (ex. 20 -> uldyvm-azpcc20,21,22,23,etc)"
+      }
+    },
+    "vmSize": {
+      "type": "string",
+      "defaultValue": "West US",
+      "metadata": {
+        "description": "Size of the VM (ex. Standard_DS2)"
+      }
+    },
+    "imagePublisher": {
+      "type": "string",
+      "defaultValue": "RedHat",
+      "metadata": {
+        "description": "Publisher for the VM gallery image (ex. RedHat)"
+      }
+    },
+    "imageOffer": {
+      "type": "string",
+      "defaultValue": "RHEL",
+      "metadata": {
+        "description": "Offer for the VM gallery image (ex. RHEL)"
+      }
+    },
+    "osVersion": {
+      "type": "string",
+      "defaultValue": "7.2",
+      "metadata": {
+        "description": "The Linux version for the VM. This will pick the latest available image of this given Linux version. (ex. 7.2)"
+      }
+    },
+    "adminUserName": {
+      "type": "string",
+      "metadata": {
+        "description": "Local admin user for the VM (ex. wagsadmin)"
+      }
+    },
+    "adminPassword": {
+      "type": "string",
+      "metadata": {
+        "description": "Local admin password for the VM"
+      }
+    },
+    "vnetResGrp": {
+      "type": "string",
+      "metadata": {
+        "description": "Resource group for the VNet where the VM is being deployed (ex. drsgrp-azshr01)"
+      }
+    },
+    "vnetName": {
+      "type": "string",
+      "metadata": {
+        "description": "Name of the VNet where the VM is being deployed (ex. dvnetw-azshr01)"
+      }
+    },
+    "subnetName": {
+      "type": "string",
+      "metadata": {
+        "description": "Name of the subnet where the VM is being deployed (ex. WEB, APP, DB, INF)"
+      }
+    },
+    "storAcctName": {
+      "type": "string",
+      "metadata": {
+        "description": "Storage account for the OS and Data disks (ex. ussacazpcc01)"
+      }
+    },
+    "dataDiskSizeInGB": {
+      "type": "int",
+      "defaultValue": 128,
+      "metadata": {
+        "description": "Size in GB for the data disk attached to the VM (ex. 128)"
+      }
+    },
+    "diagStorAcctName": {
+      "type": "string",
+      "metadata": {
+        "description": "The storage account to use for boot diagnostics data (ex. ussacazpcc03)"
+      }
+    }
+  },
+  "variables": {
+    "computeApiVersion": "2016-03-30",
+    "networkApiVersion": "2016-03-30",
+    "tagAppName": "AppName",
+    "tagAppEnv": "AppEnv",
+    "tagSecZone": "SecZone",
+    "vnetId": "[resourceId(parameters('vnetResGrp'), 'Microsoft.Network/virtualNetworks', parameters('vnetName'))]",
+    "subnetId": "[concat(variables('vnetId'),'/subnets/', parameters('subnetName'))]"
+  },
+  "resources": [
+    {
+      "apiVersion": "[variables('networkApiVersion')]",
+      "type": "Microsoft.Network/networkInterfaces",
+      "name": "[concat(parameters('vmNamePrefix'), padLeft(copyIndex(parameters('vmIndexOffset')),3,'0'), 'nic01')]",
+      "location": "[parameters('location')]",
+      "tags": {
+        "[variables('tagAppName')]": "[parameters('tagAppNameValue')]",
+        "[variables('tagAppEnv')]": "[parameters('tagAppEnvValue')]",
+        "[variables('tagSecZone')]": "[parameters('tagSecZoneValue')]"
+      },
+      "copy":{
+        "name": "niccopy",
+        "count" : "[parameters('vmCount')]"
+      },
+      "properties": {
+        "ipConfigurations": [
+          {
+            "name": "ipConfig",
+            "properties": {
+              "privateIPAllocationMethod": "Dynamic",
+              /*"privateIPAddress": "[parameters('ipAddress')]",*/
+              "subnet": {
+                "id": "[variables('subnetId')]"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "[variables('computeApiVersion')]",
+      "type": "Microsoft.Compute/virtualMachines",
+      "name": "[concat(parameters('vmNamePrefix'), padLeft(copyIndex(parameters('vmIndexOffset')),3,'0'))]",
+      "location": "[parameters('location')]",
+      "tags": {
+        "[variables('tagAppName')]": "[parameters('tagAppNameValue')]",
+        "[variables('tagAppEnv')]": "[parameters('tagAppEnvValue')]",
+        "[variables('tagSecZone')]": "[parameters('tagSecZoneValue')]"
+      },
+      "copy":{
+        "name": "vmcopy",
+        "count": "[parameters('vmCount')]"
+      },
+      "dependsOn": [
+        "[concat('Microsoft.Network/networkInterfaces/', parameters('vmNamePrefix'), padLeft(copyIndex(parameters('vmIndexOffset')),3,'0'), 'nic01')]"
+      ],
+      "properties": {
+        "hardwareProfile": {
+          "vmSize": "[parameters('vmSize')]"
+        },
+        "storageProfile": {
+          "imageReference": {
+            "publisher": "[parameters('imagePublisher')]",
+            "offer": "[parameters('imageOffer')]",
+            "sku": "[parameters('osVersion')]",
+            "version": "latest"
+          },
+          "osDisk": {
+            "name": "OSDisk",
+            "createOption": "FromImage",
+            "vhd": {
+              "uri": "[concat('https://', parameters('storAcctName'), '.blob.core.windows.net/vhds/', parameters('vmNamePrefix'), padLeft(copyIndex(parameters('vmIndexOffset')),3,'0'), '-os.vhd')]"
+            },
+            "caching": "ReadWrite"
+          },
+          "dataDisks": [
+            {
+              "name": "DataDisk0",
+              "diskSizeGB": "[parameters('dataDiskSizeInGB')]",
+              "lun": 0,
+              "vhd": {
+                "uri": "[concat('https://', parameters('storAcctName'), '.blob.core.windows.net/vhds/', parameters('vmNamePrefix'), padLeft(copyIndex(parameters('vmIndexOffset')),3,'0'), '-data-0.vhd')]"
+              },
+              "createOption": "Empty",
+              "caching": "None"
+            }
+          ]
+        },
+        "osProfile": {
+          "computerName": "[concat(parameters('vmNamePrefix'), padLeft(copyIndex(parameters('vmIndexOffset')),3,'0'))]",
+          "adminUsername": "[parameters('adminUserName')]",
+          "adminPassword": "[parameters('adminPassword')]"
+        },
+        "networkProfile": {
+          "networkInterfaces": [
+            {
+              "id": "[resourceId('Microsoft.Network/networkInterfaces/', concat(parameters('vmNamePrefix'), padLeft(copyIndex(parameters('vmIndexOffset')),3,'0'), 'nic01'))]"
+            }
+          ]
+        },
+        "diagnosticsProfile": {
+          "bootDiagnostics": {
+            "enabled": true,
+            "storageUri": "[concat('https://', parameters('diagStorAcctName'), '.blob.core.windows.net/')]"
+          }
+        }
+      }
+    }
+  ]
+}

@@ -150,7 +150,12 @@ if ($ResourceGroup -eq $null)
 # the resource group that is named after the resource group with diagstore on the end
 # (with dashes removed since storage accounts cant have those)
 #
-$DiagStorageName = ($ResourceGroupName -Replace '-') + 'diagstore01'
+$DiagStorageName = ($ResourceGroupName -Replace '-')
+if( $DiagStorageName.Length -gt 18 )
+{
+  $DiagStorageName = $DiagStorageName.Substring( 0, 18 )
+}
+$DiagStorageName = $DiagStorageName + 'diag01'
 $DiagStorage     = Get-AzureRmStorageAccount -ResourceGroupName $ResourceGroupName -Name $DiagStorageName -ErrorAction Ignore
 if( $DiagStorage -eq $null )
 {
@@ -162,7 +167,7 @@ if( $DiagStorage -eq $null )
     storAcctType='Standard_LRS';
   }
 
-  New-AzureRMResourceGroupDeployment -Name "$(Get-Date -Format yyyyMMddHHmmss)-diag" `
+  New-AzureRMResourceGroupDeployment -Name "$($ResourceGroupName)-diag-$(Get-Date -Format yyyyMMddHHmmss)" `
                                      -ResourceGroupName $ResourceGroupName `
                                      -TemplateFile $StorageTemplateFile `
                                      -TemplateParameterObject $DiagStorageParameters `
@@ -218,7 +223,7 @@ $VmParameters = @{
 }
 
 Write-Host "[$(Get-Date)] Creating [ $($VmCount) ] virtual machine(s)..."
-New-AzureRMResourceGroupDeployment -Name "$(Get-Date -Format yyyyMMddHHmmss)-vm" `
+New-AzureRMResourceGroupDeployment -Name "$($VmPrefix)-vm-$(Get-Date -Format yyyyMMddHHmmss)" `
                                    -ResourceGroupName $ResourceGroupName `
                                    -TemplateFile $VmMultiTemplateFile `
                                    -TemplateParameterObject $VmParameters `

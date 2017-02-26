@@ -162,7 +162,7 @@ if( $DiagStorage -eq $null )
     storAcctType='Standard_LRS';
   }
 
-  New-AzureRMResourceGroupDeployment -Name "$($ResourceGroupName)-diag-$(Get-Date -Format yyyyMMddHHmmss)" `
+  New-AzureRMResourceGroupDeployment -Name "$(Get-Date -Format yyyyMMddHHmmss)-diag" `
                                      -ResourceGroupName $ResourceGroupName `
                                      -TemplateFile $StorageTemplateFile `
                                      -TemplateParameterObject $DiagStorageParameters `
@@ -218,7 +218,7 @@ $VmParameters = @{
 }
 
 Write-Host "[$(Get-Date)] Creating [ $($VmCount) ] virtual machine(s)..."
-New-AzureRMResourceGroupDeployment -Name "$($VmParameters.vmNamePrefix)-vm-$(Get-Date -Format yyyyMMddHHmmss)" `
+New-AzureRMResourceGroupDeployment -Name "$(Get-Date -Format yyyyMMddHHmmss)-vm" `
                                    -ResourceGroupName $ResourceGroupName `
                                    -TemplateFile $VmMultiTemplateFile `
                                    -TemplateParameterObject $VmParameters `

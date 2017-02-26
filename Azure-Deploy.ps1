@@ -239,12 +239,6 @@ for( $i = $VmParameters.vmIndexOffset; $i -lt ( $VmParameters.vmIndexOffset + $V
 
   #
   # Now to create the parameter file with all of the details about this system
-  # 
-  # There are some things that are not specified in the template that still need
-  # to be stored in the parameter file for use by something reading it
-  # SubscriptionName
-  # ResourceGroupName
-  # TemplateName
   #
   $ThisVmParam                          = New-ParameterObject
   $ThisVmParam.location.value           = $VmParameters.location
@@ -268,11 +262,10 @@ for( $i = $VmParameters.vmIndexOffset; $i -lt ( $VmParameters.vmIndexOffset + $V
   $ThisVmParam.ipAddress.value          = $Nic.IpConfigurations[0].PrivateIpAddress
   $ThisVmParam.diagStorAcctName.value   = $VmParameters.diagStorAcctName
 
-  $ThisVmParam.subscriptionName.value   = $SubscriptionName
-  $ThisVmParam.resourceGroupName.value  = $ResourceGroupName
-  $ThisVmParam.templateFile.value       = $VmSingleTemplateFile
-
   $ThisVmParamFile = New-ParamFileObject -ParameterObject $ThisVmParam
+  $ThisVmParamFile.deploymentDetails.subscriptionName   = $SubscriptionName
+  $ThisVmParamFile.deploymentDetails.resourceGroupName  = $ResourceGroupName
+  $ThisVmParamFile.deploymentDetails.templateFile       = $VmSingleTemplateFile
   Save-ParamFile -ResourceName $ThisVmName -ParamFileObject $ThisVmParamFile
 }
 

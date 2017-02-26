@@ -176,7 +176,7 @@ if( $DiagStorage -eq $null )
 
 
 $AzureSize = Get-MappedTshirtSize -TshirtSize $VmSize
-$OsSize    = 128
+#$OsSize    = 128
 $DataSize  = Get-MappedDataSize -TshirtSize $VmSize
 
 $DiskType  = 'Standard_LRS'
@@ -201,7 +201,7 @@ $VmParameters = @{
   vmIndexOffset=$VmIndex;
   vmCount=$VmCount;
   vmSize=$AzureSize;
-  osDiskSizeInGB=$OsSize;
+  #osDiskSizeInGB=$OsSize;
   dataDiskSizeInGB=$DataSize;
 
   # This will need to be specified
@@ -252,7 +252,7 @@ for( $i = $VmParameters.vmIndexOffset; $i -lt ( $VmParameters.vmIndexOffset + $V
   $ThisVmParam.tagSecZoneValue.value    = $VmParameters.tagSecZoneValue
   $ThisVmParam.vmName.value             = $ThisVmName
   $ThisVmParam.vmSize.value             = $VmParameters.vmSize
-  $ThisVmParam.osDiskSizeInGB.value     = $VmParameters.osDiskSizeInGB
+  #$ThisVmParam.osDiskSizeInGB.value     = $VmParameters.osDiskSizeInGB
   $ThisVmParam.dataDiskSizeInGB.value   = $VmParameters.dataDiskSizeInGB
   $ThisVmParam.managedDiskType.value    = $VmParameters.managedDiskType
   $ThisVmParam.imagePublisher.value     = $VmParameters.imagePublisher

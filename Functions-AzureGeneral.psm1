@@ -54,8 +54,8 @@ function New-ParameterObject()
   $vmSize = New-PVO -Value ''
   $p | Add-Member -MemberType NoteProperty -Name 'vmSize' -Value $vmSize
   # osDiskSizeInGB
-  $osDiskSizeInGB = New-PVO -Value 0 -Type 'Integer'
-  $p | Add-Member -MemberType NoteProperty -Name 'osDiskSizeInGB' -Value $osDiskSizeInGB
+  #$osDiskSizeInGB = New-PVO -Value 0 -Type 'Integer'
+  #$p | Add-Member -MemberType NoteProperty -Name 'osDiskSizeInGB' -Value $osDiskSizeInGB
   # dataDiskSizeInGB
   $dataDiskSizeInGB = New-PVO -Value 0 -Type 'Integer'
   $p | Add-Member -MemberType NoteProperty -Name 'dataDiskSizeInGB' -Value $dataDiskSizeInGB

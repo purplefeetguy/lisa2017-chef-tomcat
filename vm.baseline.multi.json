@@ -65,6 +65,7 @@
         "description": "Size of the VM (ex. Standard_DS2)"
       }
     },
+    /*
     "osDiskSizeInGB": {
       "type": "int",
       "defaultValue": 128,
@@ -72,6 +73,7 @@
         "description": "Size in GB for the OS disk attached to the VM (ex. 128)"
       }
     },
+    */
     "dataDiskSizeInGB": {
       "type": "int",
       "defaultValue": 128,
@@ -229,7 +231,7 @@
           "osDisk": {
             "name": "[concat(parameters('vmNamePrefix'), padLeft(copyIndex(parameters('vmIndexOffset')),3,'0'), '-OS')]",
             "createOption": "FromImage",
-            "diskSizeGB": "[parameters('osDiskSizeInGB')]",
+            /*"diskSizeGB": "[parameters('osDiskSizeInGB')]",*/
             "caching": "ReadWrite",
             "managedDisk": {"storageAccountType": "[parameters('managedDiskType')]"}
           },

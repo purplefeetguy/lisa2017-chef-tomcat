@@ -90,3 +90,34 @@ function Save-ParamFile( $ParamFileObject )
   # not be a problem since we want this to be true anyway
 
 }
+
+
+function Select-SubscriptionName( )
+{
+  $Subscriptions = Get-AzureSubscription
+
+  $SelectedIndex = 0
+  for( $i = 0; $i -lt $Subscriptions.Length; $i++ )
+  {
+    Write-Host "$($i+1)) $($Subscriptions[$i].SubscriptionName)"
+  }
+  $SelectedIndex = Read-Host "Select a subscription"
+
+  return $Subscriptions[$SelectedIndex-1].SubscriptionName
+}
+
+
+function Get-MappedTshirtSize( $TshirtSize )
+{
+  $AzureSize = "Standard_F2S"
+  Switch( $TshirtSize.ToLower() )
+  {
+    "xsmall" { $AzureSize = "Standard_F1S" }
+    "small"  { $AzureSize = "Standard_F2S" }
+    "medium" { $AzureSize = "Standard_F4S" }
+    "large"  { $AzureSize = "Standard_F8S" }
+    "xlarge" { $AzureSize = "Standard_F16S" }
+  }
+
+  return $AzureSize
+}

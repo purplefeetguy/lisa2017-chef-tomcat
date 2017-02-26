@@ -16,13 +16,17 @@
     created resource and the prefix used for all components created within it
 .PARAMETER MachineCount
     The number of virtual machines to create
+.PARAMETER Credentials
+    User account details for interacting with Azure
 #>
 [CmdletBinding()]
 param(
     [Parameter(Mandatory=$false)]
     [string] $ResourceGroupName,
     [Parameter(Mandatory=$false)]
-    [int] $MachineCount
+    [int] $MachineCount,
+    [Parameter(Mandatory=$false)]
+    [PsCredential] $Credentials
 )
 
 
@@ -88,7 +92,11 @@ Push-Location $MyDir
 $StorageTemplateFile = ".\storage.baseline.single.json"
 $VmTemplateFile      = ".\vm.linux.baseline.multi.json"
 
-$Credentials      = Get-Credential
+if( $Credentials -eq $null )
+{
+    $Credentials      = Get-Credential
+}
+
 $Location         = "West US"
 $SubscriptionName = "WAGS Sandbox"
 
@@ -127,7 +135,7 @@ if( $MachineCount -eq 0 )
     $MachineCount = Read-Host "Virtual Machine Count"
 }
 
-Write-Host "Creating resource group $TargetResourceGroup with $MachineCount virtual machines"
+Write-Host "[$(Get-Date)] Creating resource group $TargetResourceGroup with $MachineCount virtual machines"
 
 #
 # Make sure the resource group does not exist before we go any further
@@ -200,14 +208,14 @@ $VmParameters = @{
     vmSize="Standard_D2";
     imagePublisher="RedHat";
     imageOffer="RHEL";
-    osVersion="7.2";
-    adminUserName="wbaadmin";
+    osVersion="7.3";
+    adminUserName="wagsadmin";
     adminPassword="Welcome123!";
     vnetResGrp="srsgrp-azshr01";
     vnetName="svnetw-azshr01";
     subnetName="APP";
     storAcctName=$VmStoragePrefix;
-    dataDiskSizeInGB=128;
+    dataDiskSizeInGB=512;
     diagStorAcctName=$DiagStorageName;
 }
 

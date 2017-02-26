@@ -44,6 +44,9 @@ param(
     [Parameter(Mandatory=$false)]
     [string] $SubscriptionName,
     [Parameter(Mandatory=$false)]
+    [ValidateSet("West US","East US","North-Central US")]
+    [string] $Location = "West US",
+    [Parameter(Mandatory=$false)]
     [string] $SubnetName,
     [Parameter(Mandatory=$false)]
     [string] $ResourceGroupName,
@@ -84,6 +87,12 @@ if ( $Credentials -eq $null )
 Add-AzureRmAccount -Credential $Credentials | Out-Null
 
 
+#$Location = "West US"
+#if( $Location -eq $null )
+#{
+#  Read-Host "Enter Target Location"
+#}
+
 #
 # Validate or select target subscription
 # and then gather associated information needed
@@ -95,6 +104,31 @@ if ( $SubscriptionName -eq $null )
 $Subscription = Select-AzureRmSubscription -SubscriptionName $SubscriptionName | Out-Null
 $VnetRgName   = Get-VnetResourceGroupName -SubscriptionName $SubscriptionName
 $VnetName     = Get-VnetName -SubscriptionName $SubscriptionName
+
+
+#
+# Test to ensure that there are no overlaps with existing VM names
+# (We are doing this as early as possible to save steps and empty creations)
+#
+$ExisingVmNames = Get-ExistingVmNames -ResourceGroupName $ResourceGroupName -Location $Location
+$ClashingNames  = @()
+$IncrementPad   = 3
+for( $i = $VmIndex; $i -le ( $VmIndex + $VmCount ); $i++ )
+{
+  $TargetVmName = $VmPrefix + $i.ToString().PadLeft( $IncrementPad, '0' )
+  if( $ExisingVmNames -Contains $TargetVmName )
+  {
+    $ClashingNames += $TargetVmName
+  }
+}
+
+if( $ClashingNames.Length -gt 0 )
+{
+  Write-Host "ERROR: The following existing VMs were found with overlapping names:"
+  Write-Host "       $($ClashingNames -Join ', ')"
+  Write-Host "       Adjust your range values and try again."
+  exit
+}
 
 
 #
@@ -116,6 +150,7 @@ if ($ResourceGroup -eq $null)
   New-AzureRMResourceGroup -Name $ResourceGroupName -Location $Location | Out-Null
 }
 
+
 #
 # Working on the assumption that a storage account will exist within
 # the resource group that is named after the resource group with diagstore on the end
@@ -133,7 +168,7 @@ if( $DiagStorage -eq $null )
     storAcctType="Standard_LRS";
   }
 
-  New-AzureRMResourceGroupDeployment -Name $DeploymentName `
+  New-AzureRMResourceGroupDeployment -Name "$($ResourceGroupName)-diag-$(Get-Date)-" `
                                      -ResourceGroupName $ResourceGroupName `
                                      -TemplateFile $StorageTemplateFile `
                                      -TemplateParameterObject $DiagStorageParameters `
@@ -141,10 +176,15 @@ if( $DiagStorage -eq $null )
 }
 
 
-# Now we need to make sure that none of the vms to be created already exist since that would
-# be a problem
+$AzureSize = Get-MappedTshirtSize -TshirtSize $VmSize
+$OsSize    = 128
+$DataSize  = Get-MappedDataSize -TshirtSize $VmSize
 
-$AzureSize = Get-MappedTshirtSize( $VmSize )
+
+
+# @NOTE: one issue is going to be with translating the latest to a timestamp value so it can be kept the same
+
+
 
 # there will be two modes of operation
 # Dynamic provisioning of new systems, this will take parameters to deploy 1 or more systems

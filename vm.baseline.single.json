@@ -53,6 +53,33 @@
         "description": "Size of the VM (ex. Standard_DS2)"
       }
     },
+    "osDiskSizeInGB": {
+      "type": "int",
+      "defaultValue": 128,
+      "metadata": {
+        "description": "Size in GB for the OS disk attached to the VM (ex. 128)"
+      }
+    },
+    "dataDiskSizeInGB": {
+      "type": "int",
+      "defaultValue": 128,
+      "metadata": {
+        "description": "Size in GB for the data disk attached to the VM (ex. 128)"
+      }
+    },
+    "managedDiskType": {
+      "type": "string",
+      "defaultValue": "Standard_LRS",
+      "allowedValues": [
+        "Standard_LRS",
+        "Standard_GRS",
+        "Standard_ZRS",
+        "Premium_LRS"
+      ],
+      "metadata": {
+        "description": "Storage Account type"
+      }
+    },
     "imagePublisher": {
       "type": "string",
       "defaultValue": "RedHat",
@@ -117,33 +144,6 @@
       "type": "string",
       "metadata": {
         "description": "Private IP Address for the VM (ex. 172.17.45.9)"
-      }
-    },
-    "osDiskSizeInGB": {
-      "type": "int",
-      "defaultValue": 128,
-      "metadata": {
-        "description": "Size in GB for the OS disk attached to the VM (ex. 128)"
-      }
-    },
-    "dataDiskSizeInGB": {
-      "type": "int",
-      "defaultValue": 128,
-      "metadata": {
-        "description": "Size in GB for the data disk attached to the VM (ex. 128)"
-      }
-    },
-    "managedDiskType": {
-      "type": "string",
-      "defaultValue": "Standard_LRS",
-      "allowedValues": [
-        "Standard_LRS",
-        "Standard_GRS",
-        "Standard_ZRS",
-        "Premium_LRS"
-      ],
-      "metadata": {
-        "description": "Storage Account type"
       }
     },
     "diagStorAcctName": {

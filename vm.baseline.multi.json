@@ -46,16 +46,16 @@
         "description": "Name of the VM (ex. uldyvm-azpcc)"
       }
     },
-    "vmCount": {
-      "type": "int",
-      "metadata": {
-        "description": "number of VMs to create for this set"
-      }
-    },
     "vmIndexOffset": {
       "type": "int",
       "metadata": {
         "description": "the beginning index for the set of VMs being created (ex. 20 -> uldyvm-azpcc20,21,22,23,etc)"
+      }
+    },
+    "vmCount": {
+      "type": "int",
+      "metadata": {
+        "description": "number of VMs to create for this set"
       }
     },
     "vmSize": {
@@ -77,6 +77,19 @@
       "defaultValue": 128,
       "metadata": {
         "description": "Size in GB for the data disk attached to the VM (ex. 128)"
+      }
+    },
+    "managedDiskType": {
+      "type": "string",
+      "defaultValue": "Standard_LRS",
+      "allowedValues": [
+        "Standard_LRS",
+        "Standard_GRS",
+        "Standard_ZRS",
+        "Premium_LRS"
+      ],
+      "metadata": {
+        "description": "Storage Account type"
       }
     },
     "imagePublisher": {
@@ -137,19 +150,6 @@
       "type": "string",
       "metadata": {
         "description": "Name of the subnet where the VM is being deployed (ex. WEB, APP, DB, INF)"
-      }
-    },
-    "managedDiskType": {
-      "type": "string",
-      "defaultValue": "Standard_LRS",
-      "allowedValues": [
-        "Standard_LRS",
-        "Standard_GRS",
-        "Standard_ZRS",
-        "Premium_LRS"
-      ],
-      "metadata": {
-        "description": "Storage Account type"
       }
     },
     "diagStorAcctName": {

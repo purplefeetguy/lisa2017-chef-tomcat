@@ -3,68 +3,100 @@
   This is a simple wrapper function to produce the 
   object that will be serialized out to disk as a json parameter file
 #>
-function New-ParamFileObject( $ParameterObject )
+function New-ParamFileObject( $ParameterObject, $ParameterVersion = '1.0.0.0' )
 {
-  $Version = '1.0.0.0'
-  # this should be overridable if needed
+  $ParamFileObject = New-Object PSObject
 
-  $ParamFileObject = New-Object PSObject 
   Add-Member -InputObject $ParamFileObject -MemberType NoteProperty -Name '$schema' -Value "http://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#"
-  Add-Member -InputObject $ParamFileObject -MemberType NoteProperty -Name 'contentVersion' -Value $Version
+  Add-Member -InputObject $ParamFileObject -MemberType NoteProperty -Name 'contentVersion' -Value $ParameterVersion
   Add-Member -InputObject $ParamFileObject -MemberType NoteProperty -Name 'parameters' -Value $ParameterObject
+
+  #
+  # Extra items
+  #
+  $ep = New-Object PSObject
+  $ep | Add-Member -MemberType NoteProperty -Name 'subscriptionName' -Value ''
+  $ep | Add-Member -MemberType NoteProperty -Name 'resourceGroupName' -Value ''
+  $ep | Add-Member -MemberType NoteProperty -Name 'templateFile' -Value ''
+
+  Add-Member -InputObject $ParamFileObject -MemberType NoteProperty -Name 'deploymentDetails' -Value $ep
+
 
   return $ParamFileObject
 }
 
+
+<#
+.SYNOPSIS
+  Generates a blank parameter object to use for serializing
+  the settings of individual system definitions to a parameter file
+#>
 function New-ParameterObject()
 {
-  # i will need to ensure that the parameter specifications are consistent
-  # so that it can be relied on to have specific properties
-  # this can populate default values
-
-  # after i get these all defined i can move around the ones that
-  # cannot have a defaulted value
-
-  # i need a method to identify the resource group and name of each
-  # subscriptions real vnet so it can be 
-  # it might be easier to look at if i seperate the values and
-  # object building
-
   $p = New-Object PSObject 
 
-  $location = New-PVO 'West-US'
+  # location
+  $location = New-PVO -Value ''
   $p | Add-Member -MemberType NoteProperty -Name 'location' -Value $location
-
-  $vmName = New-PVO 'Invalid'
+  # tagAppNameValue
+  $tagAppNameValue = New-PVO -Value ''
+  $p | Add-Member -MemberType NoteProperty -Name 'tagAppNameValue' -Value $tagAppNameValue
+  # tagAppEnvValue
+  $tagAppEnvValue = New-PVO -Value ''
+  $p | Add-Member -MemberType NoteProperty -Name 'tagAppEnvValue' -Value $tagAppEnvValue
+  # tagSecZoneValue
+  $tagSecZoneValue = New-PVO -Value ''
+  $p | Add-Member -MemberType NoteProperty -Name 'tagSecZoneValue' -Value $tagSecZoneValue
+  # vmName
+  $vmName = New-PVO -Value ''
   $p | Add-Member -MemberType NoteProperty -Name 'vmName' -Value $vmName
-
-  $vmSize = New-PVO 'Standard_D1'
+  # vmSize
+  $vmSize = New-PVO -Value ''
   $p | Add-Member -MemberType NoteProperty -Name 'vmSize' -Value $vmSize
-
-  $adminUserName = New-PVO 'wbaadmin'
+  # osDiskSizeInGB
+  $osDiskSizeInGB = New-PVO -Value 0 -Type 'Integer'
+  $p | Add-Member -MemberType NoteProperty -Name 'osDiskSizeInGB' -Value $osDiskSizeInGB
+  # dataDiskSizeInGB
+  $dataDiskSizeInGB = New-PVO -Value 0 -Type 'Integer'
+  $p | Add-Member -MemberType NoteProperty -Name 'dataDiskSizeInGB' -Value $dataDiskSizeInGB
+  # managedDiskType
+  $managedDiskType = New-PVO -Value ''
+  $p | Add-Member -MemberType NoteProperty -Name 'managedDiskType' -Value $managedDiskType
+  # imagePublisher
+  $imagePublisher = New-PVO -Value ''
+  $p | Add-Member -MemberType NoteProperty -Name 'imagePublisher' -Value $imagePublisher
+  # imageOffer
+  $imageOffer = New-PVO -Value ''
+  $p | Add-Member -MemberType NoteProperty -Name 'imageOffer' -Value $imageOffer
+  # imageVersion
+  $imageVersion = New-PVO -Value ''
+  $p | Add-Member -MemberType NoteProperty -Name 'imageVersion' -Value $imageVersion
+  # imageRelease
+  $imageRelease = New-PVO -Value ''
+  $p | Add-Member -MemberType NoteProperty -Name 'imageRelease' -Value $imageRelease
+  # adminUserName
+  $adminUserName = New-PVO -Value ''
   $p | Add-Member -MemberType NoteProperty -Name 'adminUserName' -Value $adminUserName
-
-  $adminPassword = New-PVO 'Welcome1234!'
+  # adminPassword
+  $adminPassword = New-PVO -Value ''
   $p | Add-Member -MemberType NoteProperty -Name 'adminPassword' -Value $adminPassword
-
-  $vnetResGrp = New-PVO 'Invalid'
+  # vnetResGrp
+  $vnetResGrp = New-PVO -Value ''
   $p | Add-Member -MemberType NoteProperty -Name 'vnetResGrp' -Value $vnetResGrp
-
-  $vnetName = New-PVO 'Invalid'
+  # vnetName
+  $vnetName = New-PVO -Value ''
   $p | Add-Member -MemberType NoteProperty -Name 'vnetName' -Value $vnetName
-
-  $subnetName = New-PVO 'Invalid' # should i have a default for this?
+  # subnetName
+  $subnetName = New-PVO -Value ''
   $p | Add-Member -MemberType NoteProperty -Name 'subnetName' -Value $subnetName
-
-  $nicName = New-PVO 'Invalid'
-  $p | Add-Member -MemberType NoteProperty -Name 'nicName' -Value $nicName
-
-  # i would want to ensure the same IP gets reused once it is assigned
-  # until it is released. so even when it is dynamic, it is static
-  # when it comes time to plastisize the parameter file for it.
-  $ipAddress = 'Dynamic' # this would be different properties
+  # ipAddress
+  $ipAddress = New-PVO -Value ''
   $p | Add-Member -MemberType NoteProperty -Name 'ipAddress' -Value $ipAddress
+  # diagStorAcctName
+  $diagStorAcctName = New-PVO -Value ''
+  $p | Add-Member -MemberType NoteProperty -Name 'diagStorAcctName' -Value $diagStorAcctName
 
+  return $p
 }
 
 
@@ -74,27 +106,43 @@ function New-ParameterObject()
   objects with single 'value' properties, to simplify the 
   New-ParameterObject method body
 #>
-function New-PVO( $Value )
+function New-PVO( $Value, $Type = 'String' )
 {
   $o = New-Object PSObject 
-  $o | Add-Member -MemberType NoteProperty -Name 'value' -Value $Value
+  $o | Add-Member -MemberType NoteProperty -Name 'value' -TypeName $Type -Value $Value
 
   return $o
 }
 
 
-function Save-ParamFile( $ParamFileObject )
+<#
+.SYNOPSIS
+  Save the file to disk
+#>
+function Save-ParamFile( $ResourceName, $ParamFileObject )
 {
-  #this will save the file as....
-  # for this to work i need to force that vm names are unique, NOW!, this should
-  # not be a problem since we want this to be true anyway
-
+  New-Item -ItemType Directory -Path .\created -Force | Out-Null
+  try {
+    $ParamFileObject | ConvertTo-Json -Depth 10 | Out-File ".\created\$($ResourceName).param.json" -NoClobber
+  }
+  catch 
+  {
+    Write-Host 'ERROR: Failed to save parameter file because one already existed.'
+    Write-Host "       Saving backup copy as [ .\created\$($ResourceName).param.failed.json ]"
+    $ParamFileObject | ConvertTo-Json -Depth 10 | Out-File ".\created\$($ResourceName).param.failed.json"
+  }
+  
 }
 
 
+<#
+.SYNOPSIS
+  Generate the console prompts to Select
+  a subscription to be used
+#>
 function Select-SubscriptionName( )
 {
-  $Subscriptions = Get-AzureSubscription
+  $Subscriptions = Get-AzureRmSubscription
 
   $SelectedIndex = 0
   for( $i = 0; $i -lt $Subscriptions.Length; $i++ )

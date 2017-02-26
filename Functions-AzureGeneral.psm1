@@ -162,10 +162,15 @@ function Get-MappedTshirtSize( $TshirtSize )
   $AzureSize = "Standard_F2S"
   Switch( $TshirtSize.ToLower() )
   {
+    # 1 Core, 2GB Memory
     "xsmall" { $AzureSize = "Standard_F1S" }
+    # 2 Core, 4GB Memory
     "small"  { $AzureSize = "Standard_F2S" }
+    # 4 Core, 8GB Memory
     "medium" { $AzureSize = "Standard_F4S" }
+    # 8 Core, 16GB Memory
     "large"  { $AzureSize = "Standard_F8S" }
+    # 16 Core, 32GB Memory
     "xlarge" { $AzureSize = "Standard_F16S" }
   }
 

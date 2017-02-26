@@ -107,6 +107,11 @@ function Select-SubscriptionName( )
 }
 
 
+<#
+.SYNOPSIS
+  Translate a tshirt size string into the related
+  Azure VM size value
+#>
 function Get-MappedTshirtSize( $TshirtSize )
 {
   $AzureSize = "Standard_F2S"
@@ -120,4 +125,25 @@ function Get-MappedTshirtSize( $TshirtSize )
   }
 
   return $AzureSize
+}
+
+
+<#
+.SYNOPSIS
+  Translate a tshirt size string into the related
+  data disk size (in GB)
+#>
+function Get-MappedDataSize( $TshirtSize )
+{
+  $DataSize = 64
+  Switch( $TshirtSize.ToLower() )
+  {
+    "xsmall" { $DataSize = 64   }
+    "small"  { $DataSize = 128  }
+    "medium" { $DataSize = 256  }
+    "large"  { $DataSize = 512  }
+    "xlarge" { $DataSize = 1024 }
+  }
+
+  return $DataSize
 }

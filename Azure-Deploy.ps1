@@ -92,7 +92,7 @@ Add-AzureRmAccount -Credential $Credentials | Out-Null
 # Validate or select target subscription
 # and then gather associated information needed
 #
-if ( $SubscriptionName -eq $null )
+if ( $SubscriptionName -eq $null -Or $SubscriptionName -eq '' )
 {
   $SubscriptionName = Select-SubscriptionName
 }
@@ -107,10 +107,9 @@ $VnetName     = Get-VnetName -SubscriptionName $SubscriptionName
 #
 $ExisingVmNames = Get-ExistingVmNames -ResourceGroupName $ResourceGroupName -Location $Location
 $ClashingNames  = @()
-$IncrementPad   = 3
-for( $i = $VmIndex; $i -le ( $VmIndex + $VmCount ); $i++ )
+for( $i = $VmIndex; $i -lt ( $VmIndex + $VmCount ); $i++ )
 {
-  $TargetVmName = $VmPrefix + $i.ToString().PadLeft( $IncrementPad, '0' )
+  $TargetVmName = $VmPrefix + $i.ToString().PadLeft( 3, '0' )
   if( $ExisingVmNames -Contains $TargetVmName )
   {
     $ClashingNames += $TargetVmName
@@ -129,7 +128,7 @@ if( $ClashingNames.Length -gt 0 )
 #
 # Validate or select the target subnet name
 #
-if( $SubnetName -eq $null )
+if( $SubnetName -eq $null -Or $SubnetName -eq '' )
 {
   $SubnetName = Select-SubnetName -SubscriptionName $SubscriptionName
 }
@@ -163,7 +162,7 @@ if( $DiagStorage -eq $null )
     storAcctType='Standard_LRS';
   }
 
-  New-AzureRMResourceGroupDeployment -Name "$($ResourceGroupName)-diag-$(Get-Date)-" `
+  New-AzureRMResourceGroupDeployment -Name "$($ResourceGroupName)-diag-$(Get-Date -Format yyyyMMddHHmmss)" `
                                      -ResourceGroupName $ResourceGroupName `
                                      -TemplateFile $StorageTemplateFile `
                                      -TemplateParameterObject $DiagStorageParameters `
@@ -218,35 +217,63 @@ $VmParameters = @{
   diagStorAcctName=$DiagStorageName;
 }
 
+Write-Host "[$(Get-Date)] Creating [ $($VmCount) ] virtual machine(s)..."
+New-AzureRMResourceGroupDeployment -Name "$($VmParameters.vmNamePrefix)-vm-$(Get-Date -Format yyyyMMddHHmmss)" `
+                                   -ResourceGroupName $ResourceGroupName `
+                                   -TemplateFile $VmMultiTemplateFile `
+                                   -TemplateParameterObject $VmParameters `
+                                   -Mode Incremental | Out-Null
 
-
-
-# there will be two modes of operation
-# Dynamic provisioning of new systems, this will take parameters to deploy 1 or more systems
-# each one being deployed should be saved for future reference as a parameter file
-# (thanks to managed disks i no longer need to have threading)
 #
-# Existing instance redeploy. this will take a name and read the parameter file
-# to interact with an existing system. (rerun the template, or destroy and then rerun the template)
+# Afterwards we need to collect the information about each of them
+# so that we can create the parameter files
+# and also to return the appropriate list for bootstrapping
 #
-# It should take a credential object in either case, prompting if not supplied
-# It can take a subscription object for multi (or prompt for it if null)
-# - maybe i can detect the vnet resource group and vnet name automatically
+$Results = @()
+for( $i = $VmParameters.vmIndexOffset; $i -lt ( $VmParameters.vmIndexOffset + $VmParameters.vmCount ); $i++ )
+{
+  $ThisVmName = "$($VmParameters.vmNamePrefix)$($i.ToString().PadLeft( 3, '0' ))"
+  $NicName    = "$($ThisVmName)nic01"
+  $Nic        = Get-AzureRmNetworkInterface -Name $NicName -ResourceGroupName $ResourceGroupName
+  $Results   += "$($ThisVmName) $($Nic.IpConfigurations[0].PrivateIpAddress)"
 
-# it needs to take an existing instance name, this would be for an existing
-# machine and would likely be re-running the template, might need an additional
-# flag that would distroy and re-deploy it using the same parameters.
+  #
+  # Now to create the parameter file with all of the details about this system
+  # 
+  # There are some things that are not specified in the template that still need
+  # to be stored in the parameter file for use by something reading it
+  # SubscriptionName
+  # ResourceGroupName
+  # TemplateName
+  #
+  $ThisVmParam                          = New-ParameterObject
+  $ThisVmParam.location.value           = $VmParameters.location
+  $ThisVmParam.tagAppNameValue.value    = $VmParameters.tagAppNameValue
+  $ThisVmParam.tagAppEnvValue.value     = $VmParameters.tagAppEnvValue
+  $ThisVmParam.tagSecZoneValue.value    = $VmParameters.tagSecZoneValue
+  $ThisVmParam.vmName.value             = $ThisVmName
+  $ThisVmParam.vmSize.value             = $VmParameters.vmSize
+  $ThisVmParam.osDiskSizeInGB.value     = $VmParameters.osDiskSizeInGB
+  $ThisVmParam.dataDiskSizeInGB.value   = $VmParameters.dataDiskSizeInGB
+  $ThisVmParam.managedDiskType.value    = $VmParameters.managedDiskType
+  $ThisVmParam.imagePublisher.value     = $VmParameters.imagePublisher
+  $ThisVmParam.imageOffer.value         = $VmParameters.imageOffer
+  $ThisVmParam.imageVersion.value       = $VmParameters.imageVersion
+  $ThisVmParam.imageRelease.value       = $VmParameters.imageRelease # Need to find a way to convert the 'latest' value into which one it was
+  $ThisVmParam.adminUserName.value      = $VmParameters.adminUserName
+  $ThisVmParam.adminPassword.value      = $VmParameters.adminPassword
+  $ThisVmParam.vnetResGrp.value         = $VmParameters.vnetResGrp
+  $ThisVmParam.vnetName.value           = $VmParameters.vnetName
+  $ThisVmParam.subnetName.value         = $VmParameters.subnetName
+  $ThisVmParam.ipAddress.value          = $Nic.IpConfigurations[0].PrivateIpAddress
+  $ThisVmParam.diagStorAcctName.value   = $VmParameters.diagStorAcctName
 
-# i won't be able to directly leverage the parameters files if i am deploying in
-# a set since i can deploy it faster going with a template that can do 
-# grouped deployments, but i want to interact with them individually 
+  $ThisVmParam.subscriptionName.value   = $SubscriptionName
+  $ThisVmParam.resourceGroupName.value  = $ResourceGroupName
+  $ThisVmParam.templateFile.value       = $VmSingleTemplateFile
 
-# that means i need to have templates that are compatible between the .multi and .single forms
+  $ThisVmParamFile = New-ParamFileObject -ParameterObject $ThisVmParam
+  Save-ParamFile -ResourceName $ThisVmName -ParamFileObject $ThisVmParamFile
+}
 
-# i'll need to make sure to clean up the storage for the system when i am redeploying
-# of course i could potentially have a persistent storage drive i use on the VM so it
-# only redeploys the OS level
-
-# there would need to be a differenctiation between the market deploy and the custom image
-# not because the template is overly different but there is a lot of extra steps in deploying
-# the vm that uses the image.
+return $Results

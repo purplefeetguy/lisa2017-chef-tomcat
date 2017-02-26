@@ -215,7 +215,7 @@
           "osDisk": {
             "name": "[concat(parameters('vmName'), '-OS')]",
             "createOption": "FromImage",
-            "diskSizeGB": "parameters('osDiskSizeInGB')",
+            "diskSizeGB": "[parameters('osDiskSizeInGB')]",
             "caching": "ReadWrite",
             "managedDisk": {"storageAccountType": "[parameters('managedDiskType')]"}
           },
@@ -238,7 +238,7 @@
         "networkProfile": {
           "networkInterfaces": [
             {
-              "id": "[resourceId(concat('Microsoft.Network/networkInterfaces/', parameters('vmName'), 'nic01'))]"
+              "id": "[resourceId('Microsoft.Network/networkInterfaces/', concat(parameters('vmName'), 'nic01'))]"
             }
           ]
         },

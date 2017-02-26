@@ -69,8 +69,8 @@ Import-Module '.\Functions-ResourceGroup.psm1'
 Import-Module '.\FUnctions-Storage.psm1'
 
 $StorageTemplateFile  = '.\storage.baseline.single.json'
-$VmMultiTemplateFile  = '.\vm.baseline.multi.json'
-$VmSingleTemplateFile = '.\vm.baseline.single.json'
+$VmMultiTemplateFile  = '.\vm.baseline.multi.1.0.json'
+$VmSingleTemplateFile = '.\vm.baseline.single.1.0.json'
 
 #
 # Validate and use Credential Object
@@ -176,7 +176,6 @@ if( $DiagStorage -eq $null )
 
 
 $AzureSize = Get-MappedTshirtSize -TshirtSize $VmSize
-#$OsSize    = 128
 $DataSize  = Get-MappedDataSize -TshirtSize $VmSize
 
 $DiskType  = 'Standard_LRS'
@@ -201,7 +200,6 @@ $VmParameters = @{
   vmIndexOffset=$VmIndex;
   vmCount=$VmCount;
   vmSize=$AzureSize;
-  #osDiskSizeInGB=$OsSize;
   dataDiskSizeInGB=$DataSize;
 
   # This will need to be specified
@@ -252,7 +250,6 @@ for( $i = $VmParameters.vmIndexOffset; $i -lt ( $VmParameters.vmIndexOffset + $V
   $ThisVmParam.tagSecZoneValue.value    = $VmParameters.tagSecZoneValue
   $ThisVmParam.vmName.value             = $ThisVmName
   $ThisVmParam.vmSize.value             = $VmParameters.vmSize
-  #$ThisVmParam.osDiskSizeInGB.value     = $VmParameters.osDiskSizeInGB
   $ThisVmParam.dataDiskSizeInGB.value   = $VmParameters.dataDiskSizeInGB
   $ThisVmParam.managedDiskType.value    = $VmParameters.managedDiskType
   $ThisVmParam.imagePublisher.value     = $VmParameters.imagePublisher

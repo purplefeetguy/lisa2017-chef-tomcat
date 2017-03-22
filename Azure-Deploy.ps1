@@ -44,7 +44,7 @@ param(
     [Parameter(Mandatory=$false)]
     [string] $SubscriptionName,
     [Parameter(Mandatory=$false)]
-    [ValidateSet("West US","East US","North Central US")]
+    [ValidateSet("West US","East US","East US 2","North Central US")]
     [string] $Location = 'West US',
     [Parameter(Mandatory=$false)]
     [string] $SubnetName,

@@ -131,7 +131,7 @@ if( $ClashingNames.Length -gt 0 )
 #
 if( $SubnetName -eq $null -Or $SubnetName -eq '' )
 {
-  $SubnetName = Select-SubnetName -SubscriptionName $SubscriptionName
+  $SubnetName = Select-SubnetName -VnetGroup $VnetRgName -VnetName $VnetName
 }
 
 

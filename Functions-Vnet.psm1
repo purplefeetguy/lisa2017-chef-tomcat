@@ -60,12 +60,9 @@ function Get-VnetInfo( $SubscriptionName, $Location )
   to look up the list of available subnets and returns the
   selected name
 #>
-function Select-SubnetName( $SubscriptionName )
+function Select-SubnetName( $VnetGroup, $VnetName )
 {
-  $VnetRG   = Get-VnetResourceGroupName( $SubscriptionName )
-  $VnetName = Get-VnetName( $SubscriptionName )
-
-  $Vnet     = Get-AzureRmVirtualNetwork -ResourceGroupName $VnetRG -Name $VnetName
+  $Vnet     = Get-AzureRmVirtualNetwork -ResourceGroupName $VnetGroup -Name $VnetName
   $Subnets  = Get-AzureRmVirtualNetworkSubnetConfig -VirtualNetwork $Vnet
 
   $SelectedIndex = 0

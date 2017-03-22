@@ -97,8 +97,9 @@ if ( $SubscriptionName -eq $null -Or $SubscriptionName -eq '' )
   $SubscriptionName = Select-SubscriptionName
 }
 $Subscription = Select-AzureRmSubscription -SubscriptionName $SubscriptionName | Out-Null
-$VnetRgName   = Get-VnetResourceGroupName -SubscriptionName $SubscriptionName
-$VnetName     = Get-VnetName -SubscriptionName $SubscriptionName
+$VnetInfo     = Get-VnetInfo -SubscriptionName $SubscriptionName -Location $Location
+$VnetRgName   = $VnetInfo[0]
+$VnetName     = $VnetInfo[1]
 
 
 #

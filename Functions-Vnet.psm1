@@ -32,7 +32,15 @@ function Get-VnetInfo( $SubscriptionName, $Location )
     'WBA - (NSEN)'              { $VnetGroup = $null }
     'Store Technology Frontier' { $VnetGroup = $null }
     'WBA-DTN'                   { $VnetGroup = $null }
-    'Sensitive Prod'            { $VnetGroup = $null }
+    'Sensitive Prod'            
+    {
+      switch( $Location )
+      {
+        'West US' { $VnetGroup = 'prsgrp-azshr01'; $VnetName = 'pvnetw-azshr01' }
+        'East US 2' { $VnetGroup = 'prsgrp-azshr51'; $VnetName = 'pvnetw-azshr51' }
+      }
+      $VnetGroup = $null
+    }
     'WBA-SEN'                   { $VnetGroup = $null }
     'Sensitive Dev-Test 1'      { $VnetGroup = $null }
     'Non-Sensitive Dev-Test'

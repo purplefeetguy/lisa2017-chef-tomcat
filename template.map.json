@@ -1,0 +1,14 @@
+[
+  {
+    "displayName" : "Standard VM",
+    "mode": "dynamic",
+    "file": "vm.baseline.multi.1.0.json",
+    "companion": "vm.baseline.single.1.0.json"
+  },
+  {
+    "displayName": "Standard VM",
+    "mode": "static",
+    "file": "vm.baseline.single.1.0.json",
+    "companion": "vm.baseline.multi.1.0.json"
+  }
+]

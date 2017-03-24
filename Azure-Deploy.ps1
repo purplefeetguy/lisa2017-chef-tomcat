@@ -68,9 +68,9 @@ Import-Module '.\Functions-Vnet.psm1'
 Import-Module '.\Functions-ResourceGroup.psm1'
 Import-Module '.\FUnctions-Storage.psm1'
 
-$StorageTemplateFile  = '.\storage.baseline.single.json'
-$VmMultiTemplateFile  = '.\vm.baseline.multi.1.0.json'
-$VmSingleTemplateFile = '.\vm.baseline.single.1.0.json'
+$StorageTemplateFile  = '.\templates\storage.baseline.single.json'
+$VmMultiTemplateFile  = '.\templates\vm.baseline.multi.1.0.json'
+$VmSingleTemplateFile = '.\templates\vm.baseline.single.1.0.json'
 
 #
 # Validate and use Credential Object

@@ -18,6 +18,10 @@ function New-ParamFileObject( $ParameterObject, $ParameterVersion = '1.0.0.0' )
   $ep | Add-Member -MemberType NoteProperty -Name 'subscriptionName' -Value ''
   $ep | Add-Member -MemberType NoteProperty -Name 'resourceGroupName' -Value ''
   $ep | Add-Member -MemberType NoteProperty -Name 'templateFile' -Value ''
+  $ep | Add-Member -MemberType NoteProperty -Name 'chefEnvironment' -Value ''
+  $ep | Add-Member -MemberType NoteProperty -Name 'chefTags' -Value ''
+  $ep | Add-Member -MemberType NoteProperty -Name 'chefRunList' -Value ''
+  $ep | Add-Member -MemberType NoteProperty -Name 'chefBootstrapTimeout' -Value 15
 
   Add-Member -InputObject $ParamFileObject -MemberType NoteProperty -Name 'deploymentDetails' -Value $ep
 

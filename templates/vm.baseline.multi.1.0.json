@@ -9,6 +9,18 @@
         "description": "Deployment location (ex. West US)"
       }
     },
+    /* WIP
+     * It should have all of the same tags that we would put in chef
+     * but azure tags are key, value pairs so they need names
+     * which requires some context about the values that is not currently
+     * available
+    "tags": {
+      "type": "array",
+      "metadata": {
+        "description": ""
+      }
+    },
+    */
     "tagAppNameValue": {
       "type": "string",
       "metadata": {
@@ -34,23 +46,43 @@
         "description": "Name of the VM (ex. uldyvm-azpcc)"
       }
     },
-    "vmCount": {
-      "type": "int",
-      "metadata": {
-        "description": "number of VMs to create for this set"
-      }
-    },
     "vmIndexOffset": {
       "type": "int",
       "metadata": {
         "description": "the beginning index for the set of VMs being created (ex. 20 -> uldyvm-azpcc20,21,22,23,etc)"
       }
     },
+    "vmCount": {
+      "type": "int",
+      "metadata": {
+        "description": "number of VMs to create for this set"
+      }
+    },
     "vmSize": {
       "type": "string",
-      "defaultValue": "West US",
+      "defaultValue": "Standard_DS2",
       "metadata": {
         "description": "Size of the VM (ex. Standard_DS2)"
+      }
+    },
+    "dataDiskSizeInGB": {
+      "type": "int",
+      "defaultValue": 128,
+      "metadata": {
+        "description": "Size in GB for the data disk attached to the VM (ex. 128)"
+      }
+    },
+    "managedDiskType": {
+      "type": "string",
+      "defaultValue": "Premium_LRS",
+      "allowedValues": [
+        "Standard_LRS",
+        "Standard_GRS",
+        "Standard_ZRS",
+        "Premium_LRS"
+      ],
+      "metadata": {
+        "description": "Storage Account type"
       }
     },
     "imagePublisher": {
@@ -67,21 +99,30 @@
         "description": "Offer for the VM gallery image (ex. RHEL)"
       }
     },
-    "osVersion": {
+    "imageVersion": {
       "type": "string",
-      "defaultValue": "7.2",
+      "defaultValue": "7.3",
       "metadata": {
-        "description": "The Linux version for the VM. This will pick the latest available image of this given Linux version. (ex. 7.2)"
+        "description": "The Linux version for the VM. (ex. 7.2)"
+      }
+    },
+    "imageRelease": {
+      "type": "string",
+      "defaultValue": "latest",
+      "metadata": {
+        "description": "The release version of the image (ex. 7.3.20161104, latest)"
       }
     },
     "adminUserName": {
       "type": "string",
+      "defaultValue": "wagsadmin",
       "metadata": {
         "description": "Local admin user for the VM (ex. wagsadmin)"
       }
     },
     "adminPassword": {
       "type": "string",
+      "defaultValue": "Welcome123!",
       "metadata": {
         "description": "Local admin password for the VM"
       }
@@ -104,19 +145,6 @@
         "description": "Name of the subnet where the VM is being deployed (ex. WEB, APP, DB, INF)"
       }
     },
-    "storAcctName": {
-      "type": "string",
-      "metadata": {
-        "description": "Storage account for the OS and Data disks (ex. ussacazpcc01)"
-      }
-    },
-    "dataDiskSizeInGB": {
-      "type": "int",
-      "defaultValue": 128,
-      "metadata": {
-        "description": "Size in GB for the data disk attached to the VM (ex. 128)"
-      }
-    },
     "diagStorAcctName": {
       "type": "string",
       "metadata": {
@@ -125,7 +153,7 @@
     }
   },
   "variables": {
-    "computeApiVersion": "2016-03-30",
+    "computeApiVersion": "2016-04-30-preview",
     "networkApiVersion": "2016-03-30",
     "tagAppName": "AppName",
     "tagAppEnv": "AppEnv",
@@ -188,27 +216,23 @@
           "imageReference": {
             "publisher": "[parameters('imagePublisher')]",
             "offer": "[parameters('imageOffer')]",
-            "sku": "[parameters('osVersion')]",
-            "version": "latest"
+            "sku": "[parameters('imageVersion')]",
+            "version": "[parameters('imageRelease')]"
           },
           "osDisk": {
-            "name": "OSDisk",
+            "name": "[concat(parameters('vmNamePrefix'), padLeft(copyIndex(parameters('vmIndexOffset')),3,'0'), '-OS')]",
             "createOption": "FromImage",
-            "vhd": {
-              "uri": "[concat('https://', parameters('storAcctName'), '.blob.core.windows.net/vhds/', parameters('vmNamePrefix'), padLeft(copyIndex(parameters('vmIndexOffset')),3,'0'), '-os.vhd')]"
-            },
-            "caching": "ReadWrite"
+            "caching": "ReadWrite",
+            "managedDisk": {"storageAccountType": "[parameters('managedDiskType')]"}
           },
           "dataDisks": [
             {
-              "name": "DataDisk0",
+              "name": "[concat(parameters('vmNamePrefix'), padLeft(copyIndex(parameters('vmIndexOffset')),3,'0'), '-Data0')]",
               "diskSizeGB": "[parameters('dataDiskSizeInGB')]",
-              "lun": 0,
-              "vhd": {
-                "uri": "[concat('https://', parameters('storAcctName'), '.blob.core.windows.net/vhds/', parameters('vmNamePrefix'), padLeft(copyIndex(parameters('vmIndexOffset')),3,'0'), '-data-0.vhd')]"
-              },
+              "lun": 1,
               "createOption": "Empty",
-              "caching": "None"
+              "caching": "None",
+              "managedDisk": {"storageAccountType": "[parameters('managedDiskType')]"}
             }
           ]
         },

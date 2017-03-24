@@ -14,7 +14,7 @@ function Get-ExistingVmNames( [string]$ResourceGroupName, [string]$Location )
     $ResourceGroup = Get-AzureRmResourceGroup -Name $ResourceGroupName -Location $Location -ErrorAction Ignore
     if ($ResourceGroup -ne $null)
     {
-        $ExistingVms = Get-AzureRmVM -ResourceGroupName $TargetResourceGroup
+        $ExistingVms = Get-AzureRmVM -ResourceGroupName $ResourceGroupName
         ForEach( $ExistingVm in $ExistingVms )
         {
             $ExistingVmNames = $ExistingVmNames + $ExistingVm.Name

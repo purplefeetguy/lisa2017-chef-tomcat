@@ -9,24 +9,6 @@
         "description": "Deployment location"
       }
     },
-    "tagAppNameValue": {
-      "type": "string",
-      "metadata": {
-        "description": "Tag for application name (ex. PCC)"
-      }
-    },
-    "tagAppEnvValue": {
-      "type": "string",
-      "metadata": {
-        "description": "Tag for application environment (ex. Dev, QA, Prodfix, Perf, Prod)"
-      }
-    },
-    "tagSecZoneValue": {
-      "type": "string",
-      "metadata": {
-        "description": "Tag for security zone (ex. Internal Non-Sensitive Dev-Test)"
-      }
-    },
     "storAcctName": {
       "type": "string",
       "metadata": {
@@ -48,10 +30,7 @@
     }
   },
   "variables": {
-    "storageApiVersion": "2016-01-01",
-    "tagAppName": "AppName",
-    "tagAppEnv": "AppEnv",
-    "tagSecZone": "SecZone"
+    "storageApiVersion": "2016-01-01"
   },
   "resources": [
     {
@@ -59,17 +38,11 @@
       "type": "Microsoft.Storage/storageAccounts",
       "name": "[parameters('storAcctName')]",
       "location": "[parameters('location')]",
-      "tags": {
-          "[variables('tagAppName')]": "[parameters('tagAppNameValue')]",
-          "[variables('tagAppEnv')]": "[parameters('tagAppEnvValue')]",
-          "[variables('tagSecZone')]": "[parameters('tagSecZoneValue')]"
-      },
       "sku": {
           "name": "[parameters('storAcctType')]"
       },
       "kind": "Storage", 
-      "properties": {
-      }
+      "properties": { }
     }
   ]
 }

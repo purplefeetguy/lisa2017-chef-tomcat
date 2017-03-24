@@ -9,6 +9,18 @@
         "description": "Deployment location (ex. West US)"
       }
     },
+    /* WIP
+     * It should have all of the same tags that we would put in chef
+     * but azure tags are key, value pairs so they need names
+     * which requires some context about the values that is not currently
+     * available
+    "tags": {
+      "type": "array",
+      "metadata": {
+        "description": ""
+      }
+    },
+    */
     "tagAppNameValue": {
       "type": "string",
       "metadata": {
@@ -41,6 +53,26 @@
         "description": "Size of the VM (ex. Standard_DS2)"
       }
     },
+    "dataDiskSizeInGB": {
+      "type": "int",
+      "defaultValue": 128,
+      "metadata": {
+        "description": "Size in GB for the data disk attached to the VM (ex. 128)"
+      }
+    },
+    "managedDiskType": {
+      "type": "string",
+      "defaultValue": "Premium_LRS",
+      "allowedValues": [
+        "Standard_LRS",
+        "Standard_GRS",
+        "Standard_ZRS",
+        "Premium_LRS"
+      ],
+      "metadata": {
+        "description": "Storage Account type"
+      }
+    },
     "imagePublisher": {
       "type": "string",
       "defaultValue": "RedHat",
@@ -55,21 +87,30 @@
         "description": "Offer for the VM gallery image (ex. RHEL)"
       }
     },
-    "osVersion": {
+    "imageVersion": {
       "type": "string",
-      "defaultValue": "7.2",
+      "defaultValue": "7.3",
       "metadata": {
-        "description": "The Linux version for the VM. This will pick the latest available image of this given Linux version. (ex. 7.2)"
+        "description": "The Linux version for the VM.(ex. 7.2)"
+      }
+    },
+    "imageRelease": {
+      "type": "string",
+      "defaultValue": "latest",
+      "metadata": {
+        "description": "The release version of the image (ex. 7.3.20161104, latest)"
       }
     },
     "adminUserName": {
       "type": "string",
+      "defaultValue": "wagsadmin",
       "metadata": {
         "description": "Local admin user for the VM (ex. wagsadmin)"
       }
     },
     "adminPassword": {
       "type": "string",
+      "defaultValue": "Welcome123!",
       "metadata": {
         "description": "Local admin password for the VM"
       }
@@ -92,29 +133,10 @@
         "description": "Name of the subnet where the VM is being deployed (ex. WEB, APP, DB, INF)"
       }
     },
-    /*"ipAddress": {
+    "ipAddress": {
       "type": "string",
       "metadata": {
         "description": "Private IP Address for the VM (ex. 172.17.45.9)"
-      }
-    },*/
-    "nicName": {
-      "type": "string",
-      "metadata": {
-        "description": "Name of the NIC for the VM (ex. udynic-azpcc01)"
-      }
-    },
-    "storAcctName": {
-      "type": "string",
-      "metadata": {
-        "description": "Storage account for the OS and Data disks (ex. ussacazpcc01)"
-      }
-    },
-    "dataDiskSizeInGB": {
-      "type": "int",
-      "defaultValue": 128,
-      "metadata": {
-        "description": "Size in GB for the data disk attached to the VM (ex. 128)"
       }
     },
     "diagStorAcctName": {
@@ -125,7 +147,7 @@
     }
   },
   "variables": {
-    "computeApiVersion": "2016-03-30",
+    "computeApiVersion": "2016-04-30-preview",
     "networkApiVersion": "2016-03-30",
     "tagAppName": "AppName",
     "tagAppEnv": "AppEnv",
@@ -137,7 +159,7 @@
     {
       "apiVersion": "[variables('networkApiVersion')]",
       "type": "Microsoft.Network/networkInterfaces",
-      "name": "[parameters('nicName')]",
+      "name": "[concat(parameters('vmName'), 'nic01')]",
       "location": "[parameters('location')]",
       "tags": {
         "[variables('tagAppName')]": "[parameters('tagAppNameValue')]",
@@ -149,8 +171,8 @@
           {
             "name": "ipConfig",
             "properties": {
-              "privateIPAllocationMethod": "Dynamic",
-              /*"privateIPAddress": "[parameters('ipAddress')]",*/
+              "privateIPAllocationMethod": "Static",
+              "privateIPAddress": "[parameters('ipAddress')]",
               "subnet": {
                 "id": "[variables('subnetId')]"
               }
@@ -170,7 +192,7 @@
         "[variables('tagSecZone')]": "[parameters('tagSecZoneValue')]"
       },
       "dependsOn": [
-        "[concat('Microsoft.Network/networkInterfaces/', concat(parameters('nicName')))]"
+        "[concat('Microsoft.Network/networkInterfaces/', parameters('vmName'), 'nic01')]"
       ],
       "properties": {
         "hardwareProfile": {
@@ -180,27 +202,23 @@
           "imageReference": {
             "publisher": "[parameters('imagePublisher')]",
             "offer": "[parameters('imageOffer')]",
-            "sku": "[parameters('osVersion')]",
-            "version": "latest"
+            "sku": "[parameters('imageVersion')]",
+            "version": "[parameters('imageRelease')]"
           },
           "osDisk": {
-            "name": "OSDisk",
+            "name": "[concat(parameters('vmName'), '-OS')]",
             "createOption": "FromImage",
-            "vhd": {
-              "uri": "[concat('https://', parameters('storAcctName'), '.blob.core.windows.net/vhds/', parameters('vmName'), '-os.vhd')]"
-            },
-            "caching": "ReadWrite"
+            "caching": "ReadWrite",
+            "managedDisk": {"storageAccountType": "[parameters('managedDiskType')]"}
           },
           "dataDisks": [
             {
-              "name": "DataDisk0",
+              "name": "[concat(parameters('vmName'), '-Data0')]",
               "diskSizeGB": "[parameters('dataDiskSizeInGB')]",
-              "lun": 0,
-              "vhd": {
-                "uri": "[concat('https://', parameters('storAcctName'), '.blob.core.windows.net/vhds/', parameters('vmName'), '-data-0.vhd')]"
-              },
+              "lun": 1,
               "createOption": "Empty",
-              "caching": "None"
+              "caching": "None",
+              "managedDisk": {"storageAccountType": "[parameters('managedDiskType')]"}
             }
           ]
         },
@@ -212,7 +230,7 @@
         "networkProfile": {
           "networkInterfaces": [
             {
-              "id": "[resourceId('Microsoft.Network/networkInterfaces', concat(parameters('nicName')))]"
+              "id": "[resourceId('Microsoft.Network/networkInterfaces/', concat(parameters('vmName'), 'nic01'))]"
             }
           ]
         },

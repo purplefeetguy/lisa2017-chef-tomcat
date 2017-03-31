@@ -4,12 +4,15 @@ This repository provides scripts and ARM templates to create VMs in an Azure Sub
 
 #### Scripts
 
-    Deploy-All.ps1
-        This deploys one VM and bootstraps it
+    Azure-Deploy.ps1
+        Dynamic system provisioning tool that takes menu driven inputs for standardized configurations
+        and deploys systems based on it, creating concrete definitions of the systems deployed for later
+        re-deployments and reference
 
-    Multi-Deploy.ps1
-        This prompts to deploy a VM in a ResourceGroup. It requires the script Multi-Bootstrap which takes the output of VMs and IP addresses
+    Quick-Deploy.ps1
+        Parameter file driven deployment tool that will read information related to the deployment and
+        template file from the provided parameter file and perform the necessary actions including
+        creation of the resource group, and diagnostic storage account if necessary.
 
-    HvMulti-Deploy.ps1
-        This script supports faster high volume VM creation by creating the underlying resource groups with storage accounts in parallel.
-    
+        This relies on additional information being provided in the parameter file, see the script
+        documentation for details on the additional information that must be present in the parameter file.

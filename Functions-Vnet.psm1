@@ -31,7 +31,13 @@ function Get-VnetInfo( $SubscriptionName, $Location )
     'Sensitive Dev-Test 2'      { $VnetGroup = $null }
     'WBA - (NSEN)'              { $VnetGroup = $null }
     'Store Technology Frontier' { $VnetGroup = $null }
-    'WBA-DTN'                   { $VnetGroup = $null }
+    'WBA-DTN'                   
+    {
+      switch( $Location )
+      {
+        'West US' { $VnetGroup = 'wbadtn-network'; $VnetName = 'WBA-DTN' }
+      }
+    }
     'Sensitive Prod'            
     {
       switch( $Location )

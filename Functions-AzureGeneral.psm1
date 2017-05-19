@@ -176,6 +176,8 @@ function Get-MappedTshirtSize( $TshirtSize )
     "large"  { $AzureSize = "Standard_F8S" }
     # 16 Core, 32GB Memory
     "xlarge" { $AzureSize = "Standard_F16S" }
+
+    'rx'     { $AzureSize = 'Standard_DS12_v2' }
   }
 
   return $AzureSize
@@ -197,6 +199,7 @@ function Get-MappedDataSize( $TshirtSize )
     "medium" { $DataSize = 256  }
     "large"  { $DataSize = 512  }
     "xlarge" { $DataSize = 1024 }
+    'rx'     { $DataSize = 512 }
   }
 
   return $DataSize

@@ -9,60 +9,42 @@
         "description": "Deployment location (ex. West US)"
       }
     },
-    /* WIP
-     * It should have all of the same tags that we would put in chef
-     * but azure tags are key, value pairs so they need names
-     * which requires some context about the values that is not currently
-     * available
-    "tags": {
-      "type": "array",
-      "metadata": {
-        "description": ""
-      }
-    },
-    */
-    "tagAppNameValue": {
+    "AppNameTag": {
       "type": "string",
       "metadata": {
         "description": "Tag for application name (ex. PCC)"
       }
     },
-    "tagAppEnvValue": {
+    "AppEnvTag": {
       "type": "string",
       "metadata": {
         "description": "Tag for application environment (ex. Dev, QA, Prodfix, Perf, Prod)"
       }
     },
-    "tagSecZoneValue": {
+    "SecZoneTag": {
       "type": "string",
-      "defaultValue": "West US",
       "metadata": {
         "description": "Tag for security zone (ex. Internal Non-Sensitive Dev-Test)"
       }
     },
-    "vmNamePrefix": {
+    "vmName": {
       "type": "string",
       "metadata": {
-        "description": "Name of the VM (ex. uldyvm-azpcc)"
-      }
-    },
-    "vmIndexOffset": {
-      "type": "int",
-      "metadata": {
-        "description": "the beginning index for the set of VMs being created (ex. 20 -> uldyvm-azpcc20,21,22,23,etc)"
-      }
-    },
-    "vmCount": {
-      "type": "int",
-      "metadata": {
-        "description": "number of VMs to create for this set"
+        "description": "Name of the VM (ex. uldyvm-azpcc01)"
       }
     },
     "vmSize": {
       "type": "string",
-      "defaultValue": "Standard_DS2",
+      "defaultValue": "Standard_F1S",
       "metadata": {
-        "description": "Size of the VM (ex. Standard_DS2)"
+        "description": "Size of the VM (ex. Standard_F1S)"
+      }
+    },
+    "osDiskSizeInGB": {
+      "type": "int",
+      "defaultValue": 128,
+      "metadata": {
+        "description": "Size in GB for the OS disk attached to the VM (ex. 128)"
       }
     },
     "dataDiskSizeInGB": {
@@ -85,48 +67,6 @@
         "description": "Storage Account type"
       }
     },
-    "imagePublisher": {
-      "type": "string",
-      "defaultValue": "RedHat",
-      "metadata": {
-        "description": "Publisher for the VM gallery image (ex. RedHat)"
-      }
-    },
-    "imageOffer": {
-      "type": "string",
-      "defaultValue": "RHEL",
-      "metadata": {
-        "description": "Offer for the VM gallery image (ex. RHEL)"
-      }
-    },
-    "imageVersion": {
-      "type": "string",
-      "defaultValue": "7.3",
-      "metadata": {
-        "description": "The Linux version for the VM. (ex. 7.2)"
-      }
-    },
-    "imageRelease": {
-      "type": "string",
-      "defaultValue": "latest",
-      "metadata": {
-        "description": "The release version of the image (ex. 7.3.20161104, latest)"
-      }
-    },
-    "adminUserName": {
-      "type": "string",
-      "defaultValue": "wagsadmin",
-      "metadata": {
-        "description": "Local admin user for the VM (ex. wagsadmin)"
-      }
-    },
-    "adminPassword": {
-      "type": "string",
-      "defaultValue": "Welcome123!",
-      "metadata": {
-        "description": "Local admin password for the VM"
-      }
-    },
     "vnetResGrp": {
       "type": "string",
       "metadata": {
@@ -145,6 +85,12 @@
         "description": "Name of the subnet where the VM is being deployed (ex. WEB, APP, DB, INF)"
       }
     },
+    "ipAddress": {
+      "type": "string",
+      "metadata": {
+        "description": "The IP Address to set for the private network adapter on the system"
+      }
+    },
     "diagStorAcctName": {
       "type": "string",
       "metadata": {
@@ -155,9 +101,12 @@
   "variables": {
     "computeApiVersion": "2016-04-30-preview",
     "networkApiVersion": "2016-03-30",
-    "tagAppName": "AppName",
-    "tagAppEnv": "AppEnv",
-    "tagSecZone": "SecZone",
+    "imagePublisher": "RedHat",
+    "imageOffer": "RHEL",
+    "imageVersion": "7.3",
+    "imageRelease": "7.3.2017042521",
+    "adminUsername": "wagsadmin",
+    "adminPassword": "Welcome123!",
     "vnetId": "[resourceId(parameters('vnetResGrp'), 'Microsoft.Network/virtualNetworks', parameters('vnetName'))]",
     "subnetId": "[concat(variables('vnetId'),'/subnets/', parameters('subnetName'))]"
   },
@@ -165,24 +114,20 @@
     {
       "apiVersion": "[variables('networkApiVersion')]",
       "type": "Microsoft.Network/networkInterfaces",
-      "name": "[concat(parameters('vmNamePrefix'), padLeft(copyIndex(parameters('vmIndexOffset')),2,'0'), 'nic01')]",
+      "name": "[concat(parameters('vmName'), '-nic01')]",
       "location": "[parameters('location')]",
       "tags": {
-        "[variables('tagAppName')]": "[parameters('tagAppNameValue')]",
-        "[variables('tagAppEnv')]": "[parameters('tagAppEnvValue')]",
-        "[variables('tagSecZone')]": "[parameters('tagSecZoneValue')]"
-      },
-      "copy":{
-        "name": "niccopy",
-        "count" : "[parameters('vmCount')]"
+        "AppName": "[parameters('AppNameTag')]",
+        "AppEnv": "[parameters('AppEnvTag')]",
+        "SecZone": "[parameters('SecZoneTag')]"
       },
       "properties": {
         "ipConfigurations": [
           {
             "name": "ipConfig",
             "properties": {
-              "privateIPAllocationMethod": "Dynamic",
-              /*"privateIPAddress": "[parameters('ipAddress')]",*/
+              "privateIPAllocationMethod": "Static",
+              "privateIPAddress": "[parameters('ipAddress')]",
               "subnet": {
                 "id": "[variables('subnetId')]"
               }
@@ -194,19 +139,15 @@
     {
       "apiVersion": "[variables('computeApiVersion')]",
       "type": "Microsoft.Compute/virtualMachines",
-      "name": "[concat(parameters('vmNamePrefix'), padLeft(copyIndex(parameters('vmIndexOffset')),2,'0'))]",
+      "name": "[parameters('vmName')]",
       "location": "[parameters('location')]",
       "tags": {
-        "[variables('tagAppName')]": "[parameters('tagAppNameValue')]",
-        "[variables('tagAppEnv')]": "[parameters('tagAppEnvValue')]",
-        "[variables('tagSecZone')]": "[parameters('tagSecZoneValue')]"
-      },
-      "copy":{
-        "name": "vmcopy",
-        "count": "[parameters('vmCount')]"
+        "AppName": "[parameters('AppNameTag')]",
+        "AppEnv": "[parameters('AppEnvTag')]",
+        "SecZone": "[parameters('SecZoneTag')]"
       },
       "dependsOn": [
-        "[concat('Microsoft.Network/networkInterfaces/', parameters('vmNamePrefix'), padLeft(copyIndex(parameters('vmIndexOffset')),2,'0'), 'nic01')]"
+        "[concat('Microsoft.Network/networkInterfaces/', parameters('vmName'), '-nic01')]"
       ],
       "properties": {
         "hardwareProfile": {
@@ -214,22 +155,31 @@
         },
         "storageProfile": {
           "imageReference": {
-            "publisher": "[parameters('imagePublisher')]",
-            "offer": "[parameters('imageOffer')]",
-            "sku": "[parameters('imageVersion')]",
-            "version": "[parameters('imageRelease')]"
+            "publisher": "[variables('imagePublisher')]",
+            "offer": "[variables('imageOffer')]",
+            "sku": "[variables('imageVersion')]",
+            "version": "[variables('imageRelease')]"
           },
           "osDisk": {
-            "name": "[concat(parameters('vmNamePrefix'), padLeft(copyIndex(parameters('vmIndexOffset')),2,'0'), '-OS')]",
+            "name": "[concat(parameters('vmName'), '-os')]",
             "createOption": "FromImage",
+            "diskSizeGB": "[parameters('osDiskSizeInGB')]",
             "caching": "ReadWrite",
             "managedDisk": {"storageAccountType": "[parameters('managedDiskType')]"}
           },
           "dataDisks": [
             {
-              "name": "[concat(parameters('vmNamePrefix'), padLeft(copyIndex(parameters('vmIndexOffset')),2,'0'), '-Data0')]",
+              "name": "[concat(parameters('vmName'), '-data1')]",
               "diskSizeGB": "[parameters('dataDiskSizeInGB')]",
               "lun": 1,
+              "createOption": "Empty",
+              "caching": "None",
+              "managedDisk": {"storageAccountType": "[parameters('managedDiskType')]"}
+            },
+            {
+              "name": "[concat(parameters('vmName'), '-data2')]",
+              "diskSizeGB": "[parameters('dataDiskSizeInGB')]",
+              "lun": 2,
               "createOption": "Empty",
               "caching": "None",
               "managedDisk": {"storageAccountType": "[parameters('managedDiskType')]"}
@@ -237,14 +187,14 @@
           ]
         },
         "osProfile": {
-          "computerName": "[concat(parameters('vmNamePrefix'), padLeft(copyIndex(parameters('vmIndexOffset')),2,'0'))]",
-          "adminUsername": "[parameters('adminUserName')]",
-          "adminPassword": "[parameters('adminPassword')]"
+          "computerName": "[parameters('vmName')]",
+          "adminUsername": "[variables('adminUsername')]",
+          "adminPassword": "[variables('adminPassword')]"
         },
         "networkProfile": {
           "networkInterfaces": [
             {
-              "id": "[resourceId('Microsoft.Network/networkInterfaces/', concat(parameters('vmNamePrefix'), padLeft(copyIndex(parameters('vmIndexOffset')),2,'0'), 'nic01'))]"
+              "id": "[resourceId('Microsoft.Network/networkInterfaces/', concat(parameters('vmName'), '-nic01'))]"
             }
           ]
         },

@@ -1,0 +1,53 @@
+{
+  "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "location": {
+      "value": "West US"
+    },
+    "AppNameTag": {
+      "value": "SBX-Datastax-Cassandra"
+    },
+    "AppEnvTag": {
+      "value": "db"
+    },
+    "SecZoneTag": {
+      "value": "sbx"
+    },
+    "avName": {
+      "value": "sbx-datastax-cassandra"
+    },
+    "vmName": {
+      "value": "sld-awucass01"
+    },
+    "vmSize": {
+      "value": "Standard_DS14_v2"
+    },
+    "osDiskSizeInGB": {
+      "value": 128
+    },
+    "dataDiskSizeInGB": {
+      "value": 1023
+    },
+    "managedDiskType": {
+      "value": "Premium_LRS"
+    },
+    "vnetResGrp": {
+      "value": "WBA-sandbox-Migrated"
+    },
+    "vnetName": {
+      "value": "WBA-sandbox"
+    },
+    "subnetName": {
+      "value": "wba-sandbox-db"
+    },
+    "diagStorAcctName": {
+      "value": "datastaxcassandradiag"
+    }
+  },
+  "deploymentDetails": {
+    "subscriptionName": "WAGS Sandbox",
+    "resourceGroupName": "datastax-cassandra",
+    "templateFile": ".\\vm.datastax.opscenter.single.dynamic.1.1.json"
+  }
+}

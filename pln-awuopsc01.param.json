@@ -45,6 +45,6 @@
   "deploymentDetails": {
     "subscriptionName": "INFRASTRUCTURE",
     "resourceGroupName": "datastax-opscenter",
-    "templateFile": ".\\vm.datastax.opscenter.single.dynamic.1.1.json"
+    "templateFile": ".\\vm.single.dynamic.av.1.0.json"
   }
 }

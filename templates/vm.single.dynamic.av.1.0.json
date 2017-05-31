@@ -237,21 +237,6 @@
         "platformUpdateDomainCount": "[parameters('avUpdateDomainCount')]",
         "platformFaultDomainCount": "[parameters('avFaultDomainCount')]"
       }
-    },
-    {
-      "name": "[concat(parameters('vmName'), '-mbb')]",
-      "type": "Microsoft.Network/publicIPAddresses",
-      "location": "[parameters('location')]",
-      "apiVersion": "2016-03-30",
-      "dependsOn": [],
-      "tags": {
-        "AppName": "[parameters('AppNameTag')]",
-        "AppEnv": "[parameters('AppEnvTag')]",
-        "SecZone": "[parameters('SecZoneTag')]"
-      },
-      "properties": {
-        "publicIPAllocationMethod": "Dynamic"
-      }
     }
   ]
 }

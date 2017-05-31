@@ -1,0 +1,62 @@
+{
+  "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "location": {
+      "value": "West US"
+    },
+    "AppNameTag": {
+      "value": "SBX-Datastax-OpsCenter"
+    },
+    "AppEnvTag": {
+      "value": "db"
+    },
+    "SecZoneTag": {
+      "value": "sbx"
+    },
+    "avName": {
+      "value": "sbx-datastax-opscenter"
+    },
+    "avUpdateDomainCount": {
+      "value": 3
+    },
+    "avFaultDomainCount": {
+      "value": 3
+    },
+    "vmName": {
+      "value": "sld-awuopsc02"
+    },
+    "ipAddress": {
+      "value": ""
+    },
+    "vmSize": {
+      "value": "Standard_DS14_v2"
+    },
+    "osDiskSizeInGB": {
+      "value": 128
+    },
+    "dataDiskSizeInGB": {
+      "value": 1023
+    },
+    "managedDiskType": {
+      "value": "Premium_LRS"
+    },
+    "vnetResGrp": {
+      "value": "WBA-sandbox-Migrated"
+    },
+    "vnetName": {
+      "value": "WBA-sandbox"
+    },
+    "subnetName": {
+      "value": "wba-sandbox-db"
+    },
+    "diagStorAcctName": {
+      "value": "datastaxopsdiag"
+    }
+  },
+  "deploymentDetails": {
+    "subscriptionName": "WAGS Sandbox",
+    "resourceGroupName": "datastax-ops",
+    "templateFile": ".\\vm.av.1.0.json"
+  }
+}

@@ -140,17 +140,11 @@
               "privateIPAddress": "[parameters('ipAddress')]",
               "subnet": {
                 "id": "[variables('subnetId')]"
-              },
-              "publicIPAddress": {
-                "id": "[resourceId('Microsoft.Network/publicIPAddresses', concat(parameters('vmName'), '-mbb'))]"
               }
             }
           }
         ]
-      },
-      "dependsOn": [
-        "[resourceId('Microsoft.Network/publicIPAddresses', concat(parameters('vmName'), '-mbb'))]"
-      ]
+      }
     },
     {
       "apiVersion": "[variables('computeApiVersion')]",

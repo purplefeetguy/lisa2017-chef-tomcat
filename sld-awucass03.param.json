@@ -17,8 +17,17 @@
     "avName": {
       "value": "sbx-datastax-cassandra"
     },
+    "avUpdateDomainCount": {
+      "value": 3
+    },
+    "avFaultDomainCount": {
+      "value": 3
+    },
     "vmName": {
-      "value": "sld-awucass01"
+      "value": "sld-awucass03"
+    },
+    "ipAddress": {
+      "value": ""
     },
     "vmSize": {
       "value": "Standard_DS14_v2"
@@ -48,6 +57,6 @@
   "deploymentDetails": {
     "subscriptionName": "WAGS Sandbox",
     "resourceGroupName": "datastax-cassandra",
-    "templateFile": ".\\vm.datastax.opscenter.single.dynamic.1.1.json"
+    "templateFile": ".\\vm.single.av.1.0.json"
   }
 }

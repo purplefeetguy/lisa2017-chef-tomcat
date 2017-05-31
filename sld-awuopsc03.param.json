@@ -6,7 +6,7 @@
       "value": "West US"
     },
     "AppNameTag": {
-      "value": "SBX-Datastax-Cassandra"
+      "value": "SBX-Datastax-OpsCenter"
     },
     "AppEnvTag": {
       "value": "db"
@@ -15,7 +15,7 @@
       "value": "sbx"
     },
     "avName": {
-      "value": "sbx-datastax-cassandra"
+      "value": "sbx-datastax-opscenter"
     },
     "avUpdateDomainCount": {
       "value": 3
@@ -24,7 +24,7 @@
       "value": 3
     },
     "vmName": {
-      "value": "sld-awucass01"
+      "value": "sld-awuopsc03"
     },
     "ipAddress": {
       "value": ""
@@ -51,12 +51,12 @@
       "value": "wba-sandbox-db"
     },
     "diagStorAcctName": {
-      "value": "datastaxcassandradiag"
+      "value": "datastaxopsdiag"
     }
   },
   "deploymentDetails": {
     "subscriptionName": "WAGS Sandbox",
-    "resourceGroupName": "datastax-cassandra",
+    "resourceGroupName": "datastax-ops",
     "templateFile": ".\\vm.single.av.1.0.json"
   }
 }

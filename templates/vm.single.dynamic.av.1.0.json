@@ -85,11 +85,27 @@
         "description": "Name of the subnet where the VM is being deployed (ex. WEB, APP, DB, INF)"
       }
     },
+    "ipAddress": {
+      "type": "string",
+      "metadata": {
+        "description": "The IP Address to set for the private network adapter on the system"
+      }
+    },
     "diagStorAcctName": {
       "type": "string",
       "metadata": {
         "description": "The storage account to use for boot diagnostics data (ex. ussacazpcc03)"
       }
+    },
+    "avName": {
+      "type": "string",
+      "minLength": 1
+    },
+    "avUpdateDomainCount": {
+      "type": "int"
+    },
+    "avFaultDomainCount": {
+      "type":  "int"
     }
   },
   "variables": {
@@ -121,13 +137,20 @@
             "name": "ipConfig",
             "properties": {
               "privateIPAllocationMethod": "Dynamic",
+              "privateIPAddress": "[parameters('ipAddress')]",
               "subnet": {
                 "id": "[variables('subnetId')]"
+              },
+              "publicIPAddress": {
+                "id": "[resourceId('Microsoft.Network/publicIPAddresses', concat(parameters('vmName'), '-mbb'))]"
               }
             }
           }
         ]
-      }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/publicIPAddresses', concat(parameters('vmName'), '-mbb'))]"
+      ]
     },
     {
       "apiVersion": "[variables('computeApiVersion')]",
@@ -197,6 +220,37 @@
             "storageUri": "[concat('https://', parameters('diagStorAcctName'), '.blob.core.windows.net/')]"
           }
         }
+      }
+    },
+    {
+      "name": "[parameters('avName')]",
+      "type": "Microsoft.Compute/availabilitySets",
+      "location": "[resourceGroup().location]",
+      "apiVersion": "2015-06-15",
+      "dependsOn": [ ],
+      "tags": {
+        "AppName": "[parameters('AppNameTag')]",
+        "AppEnv": "[parameters('AppEnvTag')]",
+        "SecZone": "[parameters('SecZoneTag')]"
+      },
+      "properties": {
+        "platformUpdateDomainCount": "[parameters('avUpdateDomainCount')]",
+        "platformFaultDomainCount": "[parameters('avFaultDomainCount')]"
+      }
+    },
+    {
+      "name": "[concat(parameters('vmName'), '-mbb')]",
+      "type": "Microsoft.Network/publicIPAddresses",
+      "location": "[parameters('location')]",
+      "apiVersion": "2016-03-30",
+      "dependsOn": [],
+      "tags": {
+        "AppName": "[parameters('AppNameTag')]",
+        "AppEnv": "[parameters('AppEnvTag')]",
+        "SecZone": "[parameters('SecZoneTag')]"
+      },
+      "properties": {
+        "publicIPAllocationMethod": "Dynamic"
       }
     }
   ]

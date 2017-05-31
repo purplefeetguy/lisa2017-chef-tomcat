@@ -85,17 +85,32 @@
         "description": "Name of the subnet where the VM is being deployed (ex. WEB, APP, DB, INF)"
       }
     },
+    "ipAddress": {
+      "type": "string",
+      "metadata": {
+        "description": "The IP Address to set for the private network adapter on the system"
+      }
+    },
     "diagStorAcctName": {
       "type": "string",
       "metadata": {
         "description": "The storage account to use for boot diagnostics data (ex. ussacazpcc03)"
       }
+    },
+    "avName": {
+      "type": "string",
+      "minLength": 1
+    },
+    "avUpdateDomainCount": {
+      "type": "int"
+    },
+    "avFaultDomainCount": {
+      "type":  "int"
     }
   },
   "variables": {
     "computeApiVersion": "2016-04-30-preview",
     "networkApiVersion": "2016-03-30",
-    "availabilitySetName": "AvalibilitySet",
     "imagePublisher": "RedHat",
     "imageOffer": "RHEL",
     "imageVersion": "7.3",
@@ -106,16 +121,6 @@
     "subnetId": "[concat(variables('vnetId'),'/subnets/', parameters('subnetName'))]"
   },
   "resources": [
-    {
-      "apiVersion": "2015-06-15",
-      "type": "Microsoft.Compute/availabilitySets",
-      "name": "[variables('availabilitySetName')]",
-      "location": "[resourceGroup().location]",
-      "tags": {
-        "displayName": "availability-set"
-      },
-      "properties": {}
-    },
     {
       "apiVersion": "[variables('networkApiVersion')]",
       "type": "Microsoft.Network/networkInterfaces",
@@ -131,14 +136,21 @@
           {
             "name": "ipConfig",
             "properties": {
-              "privateIPAllocationMethod": "Dynamic",
+              "privateIPAllocationMethod": "Static",
+              "privateIPAddress": "[parameters('ipAddress')]",
               "subnet": {
                 "id": "[variables('subnetId')]"
+              },
+              "publicIPAddress": {
+                "id": "[resourceId('Microsoft.Network/publicIPAddresses', concat(parameters('vmName'), '-mbb'))]"
               }
             }
           }
         ]
-      }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/publicIPAddresses', concat(parameters('vmName'), '-mbb'))]"
+      ]
     },
     {
       "apiVersion": "[variables('computeApiVersion')]",
@@ -151,13 +163,9 @@
         "SecZone": "[parameters('SecZoneTag')]"
       },
       "dependsOn": [
-        "[concat('Microsoft.Network/networkInterfaces/', parameters('vmName'), '-nic01')]",
-        "[concat('Microsoft.Compute/availabilitySets/', variables('availabilitySetName'))]"
+        "[concat('Microsoft.Network/networkInterfaces/', parameters('vmName'), '-nic01')]"
       ],
       "properties": {
-        "availabilitySet": {
-          "id": "[resourceId('Microsoft.Compute/availabilitySets', variables('availabilitySetName'))]"
-        },
         "hardwareProfile": {
           "vmSize": "[parameters('vmSize')]"
         },
@@ -173,9 +181,7 @@
             "createOption": "FromImage",
             "diskSizeGB": "[parameters('osDiskSizeInGB')]",
             "caching": "ReadWrite",
-            "managedDisk": {
-              "storageAccountType": "[parameters('managedDiskType')]"
-            }
+            "managedDisk": {"storageAccountType": "[parameters('managedDiskType')]"}
           },
           "dataDisks": [
             {
@@ -184,9 +190,7 @@
               "lun": 1,
               "createOption": "Empty",
               "caching": "None",
-              "managedDisk": {
-                "storageAccountType": "[parameters('managedDiskType')]"
-              }
+              "managedDisk": {"storageAccountType": "[parameters('managedDiskType')]"}
             },
             {
               "name": "[concat(parameters('vmName'), '-data2')]",
@@ -194,9 +198,7 @@
               "lun": 2,
               "createOption": "Empty",
               "caching": "None",
-              "managedDisk": {
-                "storageAccountType": "[parameters('managedDiskType')]"
-              }
+              "managedDisk": {"storageAccountType": "[parameters('managedDiskType')]"}
             }
           ]
         },
@@ -218,6 +220,37 @@
             "storageUri": "[concat('https://', parameters('diagStorAcctName'), '.blob.core.windows.net/')]"
           }
         }
+      }
+    },
+    {
+      "name": "[parameters('avName')]",
+      "type": "Microsoft.Compute/availabilitySets",
+      "location": "[resourceGroup().location]",
+      "apiVersion": "2015-06-15",
+      "dependsOn": [ ],
+      "tags": {
+        "AppName": "[parameters('AppNameTag')]",
+        "AppEnv": "[parameters('AppEnvTag')]",
+        "SecZone": "[parameters('SecZoneTag')]"
+      },
+      "properties": {
+        "platformUpdateDomainCount": "[parameters('avUpdateDomainCount')]",
+        "platformFaultDomainCount": "[parameters('avFaultDomainCount')]"
+      }
+    },
+    {
+      "name": "[concat(parameters('vmName'), '-mbb')]",
+      "type": "Microsoft.Network/publicIPAddresses",
+      "location": "[parameters('location')]",
+      "apiVersion": "2016-03-30",
+      "dependsOn": [],
+      "tags": {
+        "AppName": "[parameters('AppNameTag')]",
+        "AppEnv": "[parameters('AppEnvTag')]",
+        "SecZone": "[parameters('SecZoneTag')]"
+      },
+      "properties": {
+        "publicIPAllocationMethod": "Dynamic"
       }
     }
   ]

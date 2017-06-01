@@ -23,6 +23,9 @@
     "avFaultDomainCount": {
       "value": 3
     },
+    "ipAddress": {
+      "value": ""
+    },
     "vmName": {
       "value": "pln-awuopsc03"
     },

@@ -77,18 +77,18 @@
       "type": "string",
       "metadata": {
         "description": "Name of the VNet where the VM is being deployed (ex. dvnetw-azshr01)"
-      },
-      "avUpdateDomainCount": {
-        "type": "int"
-      },
-      "avFaultDomainCount": {
-        "type": "int"
       }
     },
     "subnetName": {
       "type": "string",
       "metadata": {
         "description": "Name of the subnet where the VM is being deployed (ex. WEB, APP, DB, INF)"
+      }
+    },
+    "ipAddress": {
+      "type": "string",
+      "metadata": {
+        "description": "The IP Address to set for the private network adapter on the system"
       }
     },
     "diagStorAcctName": {
@@ -136,7 +136,7 @@
           {
             "name": "ipConfig",
             "properties": {
-              "privateIPAllocationMethod": "Static",
+              "privateIPAllocationMethod": "Dynamic",
               "subnet": {
                 "id": "[variables('subnetId')]"
               }
@@ -174,7 +174,7 @@
             "createOption": "FromImage",
             "diskSizeGB": "[parameters('osDiskSizeInGB')]",
             "caching": "ReadWrite",
-            "managedDisk": {"storageAccountType": "[parameters('managedDiskType')]"}
+            "managedDisk": { "storageAccountType": "[parameters('managedDiskType')]" }
           },
           "dataDisks": [
             {
@@ -183,7 +183,7 @@
               "lun": 1,
               "createOption": "Empty",
               "caching": "None",
-              "managedDisk": {"storageAccountType": "[parameters('managedDiskType')]"}
+              "managedDisk": { "storageAccountType": "[parameters('managedDiskType')]" }
             },
             {
               "name": "[concat(parameters('vmName'), '-data2')]",
@@ -191,7 +191,7 @@
               "lun": 2,
               "createOption": "Empty",
               "caching": "None",
-              "managedDisk": {"storageAccountType": "[parameters('managedDiskType')]"}
+              "managedDisk": { "storageAccountType": "[parameters('managedDiskType')]" }
             }
           ]
         },
@@ -220,7 +220,7 @@
       "type": "Microsoft.Compute/availabilitySets",
       "location": "[resourceGroup().location]",
       "apiVersion": "2015-06-15",
-      "dependsOn": [ ],
+      "dependsOn": [],
       "tags": {
         "AppName": "[parameters('AppNameTag')]",
         "AppEnv": "[parameters('AppEnvTag')]",

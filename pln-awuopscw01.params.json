@@ -23,6 +23,9 @@
     "avFaultDomainCount": {
       "value": 2
     },
+    "ipAddress": {
+      "value": ""
+    },
     "vmName": {
       "value": "pln-awuopscw01"
     },
@@ -51,6 +54,6 @@
   "deploymentDetails": {
     "subscriptionName": "INFRASTRUCTURE",
     "resourceGroupName": "datastax-opscenter-web",
-    "templateFile": ".\\vm.datastax.opscenter.web.single.dynamic.1.0.json"
+    "templateFile": ".\\vm.single.dynamic.av.1.0.json"
   }
 }

@@ -6,57 +6,51 @@
       "value": "West US"
     },
     "AppNameTag": {
-      "value": "datastax-cassandra"
+      "value": "Datastax-OpsCenter-Web"
     },
     "AppEnvTag": {
-      "value": "db"
+      "value": "Infrastructure"
     },
     "SecZoneTag": {
-      "value": "dtn"
+      "value": "Infrastructure"
     },
     "avName": {
-      "value": "datastax-cassandra"
+      "value": "datastax-opscenter-web"
     },
     "avUpdateDomainCount": {
-      "value": 3
+      "value": 2
     },
     "avFaultDomainCount": {
-      "value": 3
+      "value": 2
     },
     "vmName": {
-      "value": "pln-awucass03"
-    },
-    "ipAddress": {
-      "value": ""
+      "value": "pln-awuopscw01"
     },
     "vmSize": {
-      "value": "Standard_DS14_v2"
+      "value": "Standard_A8_v2"
     },
     "osDiskSizeInGB": {
       "value": 128
     },
-    "dataDiskSizeInGB": {
-      "value": 1023
-    },
     "managedDiskType": {
-      "value": "Premium_LRS"
+      "value": "Standard_LRS"
     },
     "vnetResGrp": {
-      "value": "wbadtn-network"
+      "value": "InfrastructureVNetRG"
     },
     "vnetName": {
-      "value": "WBA-DTN"
+      "value": "InfrastructureVNet"
     },
     "subnetName": {
-      "value": "RXR-CASD-DB-WU"
+      "value": "Infra"
     },
     "diagStorAcctName": {
-      "value": "datastaxcassdiag"
+      "value": "datastaxopscenterwebdiag"
     }
   },
   "deploymentDetails": {
-    "subscriptionName": "WBA-DTN",
-    "resourceGroupName": "datastax-cassandra",
-    "templateFile": ".\\vm.single.dynamic.av.1.0.json"
+    "subscriptionName": "INFRASTRUCTURE",
+    "resourceGroupName": "datastax-opscenter-web",
+    "templateFile": ".\\vm.datastax.opscenter.web.single.dynamic.1.0.json"
   }
 }

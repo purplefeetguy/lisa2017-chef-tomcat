@@ -106,10 +106,6 @@
     },
     "avFaultDomainCount": {
       "type": "int"
-    },
-    "avNameName": {
-      "type": "string",
-      "minLength": 1
     }
   },
   "variables": {
@@ -226,7 +222,10 @@
       "name": "[parameters('avName')]",
       "type": "Microsoft.Compute/availabilitySets",
       "location": "[resourceGroup().location]",
-      "apiVersion": "2015-06-15",
+      "apiVersion": "2016-04-30-preview",
+      "sku": {
+        "name": "Aligned"
+      },
       "dependsOn": [],
       "tags": {
         "AppName": "[parameters('AppNameTag')]",

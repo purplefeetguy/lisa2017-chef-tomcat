@@ -223,8 +223,11 @@
       "name": "[parameters('avName')]",
       "type": "Microsoft.Compute/availabilitySets",
       "location": "[resourceGroup().location]",
-      "apiVersion": "2015-06-15",
-      "dependsOn": [ ],
+      "apiVersion": "2016-04-30-preview",
+      "dependsOn": [],
+      "sku": {
+        "name": "Aligned"
+      },
       "tags": {
         "AppName": "[parameters('AppNameTag')]",
         "AppEnv": "[parameters('AppEnvTag')]",

@@ -105,7 +105,7 @@
       "type": "int"
     },
     "avFaultDomainCount": {
-      "type":  "int"
+      "type": "int"
     }
   },
   "variables": {
@@ -136,7 +136,7 @@
           {
             "name": "ipConfig",
             "properties": {
-              "privateIPAllocationMethod": "Dynamic",
+              "privateIPAllocationMethod": "Static",
               "privateIPAddress": "[parameters('ipAddress')]",
               "subnet": {
                 "id": "[variables('subnetId')]"
@@ -160,6 +160,9 @@
         "[concat('Microsoft.Network/networkInterfaces/', parameters('vmName'), '-nic01')]"
       ],
       "properties": {
+        "availabilitySet": {
+          "id": "[resourceId('Microsoft.Compute/availabilitySets', parameters('avName'))]"
+        },
         "hardwareProfile": {
           "vmSize": "[parameters('vmSize')]"
         },
@@ -175,7 +178,7 @@
             "createOption": "FromImage",
             "diskSizeGB": "[parameters('osDiskSizeInGB')]",
             "caching": "ReadWrite",
-            "managedDisk": {"storageAccountType": "[parameters('managedDiskType')]"}
+            "managedDisk": { "storageAccountType": "[parameters('managedDiskType')]" }
           },
           "dataDisks": [
             {
@@ -184,7 +187,7 @@
               "lun": 1,
               "createOption": "Empty",
               "caching": "None",
-              "managedDisk": {"storageAccountType": "[parameters('managedDiskType')]"}
+              "managedDisk": { "storageAccountType": "[parameters('managedDiskType')]" }
             },
             {
               "name": "[concat(parameters('vmName'), '-data2')]",
@@ -192,7 +195,7 @@
               "lun": 2,
               "createOption": "Empty",
               "caching": "None",
-              "managedDisk": {"storageAccountType": "[parameters('managedDiskType')]"}
+              "managedDisk": { "storageAccountType": "[parameters('managedDiskType')]" }
             }
           ]
         },
@@ -228,8 +231,8 @@
         "SecZone": "[parameters('SecZoneTag')]"
       },
       "properties": {
-        "platformUpdateDomainCount": "[parameters('avUpdateDomainCount')]",
-        "platformFaultDomainCount": "[parameters('avFaultDomainCount')]"
+        "platformUpdateDomainCount": 1,
+        "platformFaultDomainCount": 1
       }
     }
   ]

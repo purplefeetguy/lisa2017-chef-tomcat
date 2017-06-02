@@ -85,6 +85,12 @@
         "description": "Name of the subnet where the VM is being deployed (ex. WEB, APP, DB, INF)"
       }
     },
+    "ipAddress": {
+      "type": "string",
+      "metadata": {
+        "description": "The IP Address to set for the private network adapter on the system"
+      }
+    },
     "diagStorAcctName": {
       "type": "string",
       "metadata": {
@@ -121,6 +127,7 @@
             "name": "ipConfig",
             "properties": {
               "privateIPAllocationMethod": "Dynamic",
+              "privateIPAddress": "[parameters('ipAddress')]",
               "subnet": {
                 "id": "[variables('subnetId')]"
               }

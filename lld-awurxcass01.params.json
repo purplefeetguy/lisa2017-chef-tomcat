@@ -35,6 +35,9 @@
     "osDiskSizeInGB": {
       "value": 128
     },
+    "dataDiskSizeInGB": {
+      "value": 1023
+    },
     "managedDiskType": {
       "value": "Standard_LRS"
     },

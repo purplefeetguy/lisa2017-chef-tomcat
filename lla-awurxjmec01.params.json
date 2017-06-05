@@ -1,0 +1,62 @@
+{
+  "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "location": {
+      "value": "West US"
+    },
+    "AppNameTag": {
+      "value": "Datastax-Cassandra-App"
+    },
+    "AppEnvTag": {
+      "value": "app"
+    },
+    "SecZoneTag": {
+      "value": "dtn"
+    },
+    "avName": {
+      "value": "datastax-cassandra-app"
+    },
+    "avUpdateDomainCount": {
+      "value": 3
+    },
+    "avFaultDomainCount": {
+      "value": 3
+    },
+    "ipAddress": {
+      "value": ""
+    },
+    "vmName": {
+      "value": "lla-awurxjmec01"
+    },
+    "vmSize": {
+      "value": "Standard_DS12_v2"
+    },
+    "osDiskSizeInGB": {
+      "value": 128
+    },
+    "dataDiskSizeInGB": {
+      "value": 128
+    },
+    "managedDiskType": {
+      "value": "Standard_LRS"
+    },
+    "vnetResGrp": {
+      "value": "wbadtn-network"
+    },
+    "vnetName": {
+      "value": "WBA-DTN"
+    },
+    "subnetName": {
+      "value": "RXR-PERF-APP"
+    },
+    "diagStorAcctName": {
+      "value": "datastaxcassandraappdiag"
+    }
+  },
+  "deploymentDetails": {
+    "subscriptionName": "WBA-DTN",
+    "resourceGroupName": "datastax-cassandra-app",
+    "templateFile": ".\\vm.single.dynamic.av.1.0.json"
+  }
+}

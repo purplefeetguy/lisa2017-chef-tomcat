@@ -27,7 +27,7 @@
       "value": ""
     },
     "vmName": {
-      "value": "pln-awuopsc02"
+      "value": "pln-awuopsc01"
     },
     "vmSize": {
       "value": "Standard_DS14_v2"
@@ -57,6 +57,6 @@
   "deploymentDetails": {
     "subscriptionName": "INFRASTRUCTURE",
     "resourceGroupName": "datastax-opscenter",
-    "templateFile": ".\\vm.datastax.opscenter.single.dynamic.av.1.0.json"
+    "templateFile": ".\\vm.datastax.opscenter.single.av.1.0.json"
   }
 }

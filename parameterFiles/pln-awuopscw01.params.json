@@ -18,10 +18,10 @@
       "value": "datastax-opscenter-web"
     },
     "avUpdateDomainCount": {
-      "value": 2
+      "value": 3
     },
     "avFaultDomainCount": {
-      "value": 2
+      "value": 3
     },
     "ipAddress": {
       "value": ""
@@ -54,6 +54,6 @@
   "deploymentDetails": {
     "subscriptionName": "INFRASTRUCTURE",
     "resourceGroupName": "datastax-opscenter-web",
-    "templateFile": ".\\vm.single.dynamic.av.1.0.json"
+    "templateFile": ".\\vm.single.av.1.0.json"
   }
 }

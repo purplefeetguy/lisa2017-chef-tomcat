@@ -27,7 +27,7 @@
       "value": ""
     },
     "vmName": {
-      "value": "lld-awurxcass05"
+      "value": "lld-awurxcass01"
     },
     "vmSize": {
       "value": "Standard_DS14_v2"
@@ -57,6 +57,6 @@
   "deploymentDetails": {
     "subscriptionName": "WBA-DTN",
     "resourceGroupName": "datastax-cassandra",
-    "templateFile": ".\\vm.datastax.opscenter.single.dynamic.av.1.0.json"
+    "templateFile": ".\\vm.datastax.opscenter.single.av.1.0.json"
   }
 }

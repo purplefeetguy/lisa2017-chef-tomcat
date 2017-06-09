@@ -6,7 +6,7 @@
       "value": "West US"
     },
     "AppNameTag": {
-      "value": "Datastax-Cassandra"
+      "value": "Datastax-Cassandra-Solr"
     },
     "AppEnvTag": {
       "value": "db"
@@ -15,7 +15,7 @@
       "value": "dtn"
     },
     "avName": {
-      "value": "datastax-cassandra"
+      "value": "datastax-cassandra-solr"
     },
     "avUpdateDomainCount": {
       "value": 3
@@ -27,7 +27,7 @@
       "value": ""
     },
     "vmName": {
-      "value": "lld-awurxcass06"
+      "value": "lld-awurxsolr02"
     },
     "vmSize": {
       "value": "Standard_DS14_v2"
@@ -51,12 +51,12 @@
       "value": "RXR-CASD-DB-WU"
     },
     "diagStorAcctName": {
-      "value": "datastaxopscassdiag"
+      "value": "datastacasssolrdiag"
     }
   },
   "deploymentDetails": {
     "subscriptionName": "WBA-DTN",
     "resourceGroupName": "datastax-cassandra",
-    "templateFile": ".\\vm.datastax.opscenter.single.dynamic.av.1.0.json"
+    "templateFile": ".\\vm.datastax.opscenter.single.av.1.0.json"
   }
 }

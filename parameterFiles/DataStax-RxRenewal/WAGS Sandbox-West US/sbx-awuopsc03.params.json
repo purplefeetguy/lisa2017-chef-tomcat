@@ -6,16 +6,16 @@
       "value": "West US"
     },
     "AppNameTag": {
-      "value": "SBX-Datastax-Solr"
+      "value": "Datastax-OpsCenter"
     },
     "AppEnvTag": {
-      "value": "db"
+      "value": "Infrastructure"
     },
     "SecZoneTag": {
-      "value": "sbx"
+      "value": "Infrastructure"
     },
     "avName": {
-      "value": "sbx-datastax-solr"
+      "value": "datastax-opscenter"
     },
     "avUpdateDomainCount": {
       "value": 3
@@ -23,11 +23,11 @@
     "avFaultDomainCount": {
       "value": 3
     },
-    "vmName": {
-      "value": "sld-awusolr01"
-    },
     "ipAddress": {
       "value": ""
+    },
+    "vmName": {
+      "value": "pln-awuopsc03"
     },
     "vmSize": {
       "value": "Standard_DS14_v2"
@@ -39,24 +39,24 @@
       "value": 1023
     },
     "managedDiskType": {
-      "value": "Premium_LRS"
+      "value": "Standard_LRS"
     },
     "vnetResGrp": {
-      "value": "WBA-sandbox-Migrated"
+      "value": "InfrastructureVNetRG"
     },
     "vnetName": {
-      "value": "WBA-sandbox"
+      "value": "InfrastructureVNet"
     },
     "subnetName": {
-      "value": "wba-sandbox-db"
+      "value": "Infra"
     },
     "diagStorAcctName": {
-      "value": "datastaxsolrdiag"
+      "value": "datastaxopscenterdiag"
     }
   },
   "deploymentDetails": {
-    "subscriptionName": "WAGS Sandbox",
-    "resourceGroupName": "datastax-solr",
-    "templateFile": ".\\vm.single.av.1.0.json"
+    "subscriptionName": "INFRASTRUCTURE",
+    "resourceGroupName": "datastax-opscenter",
+    "templateFile": ".\\vm.datastax.opscenter.single.av.1.0.json"
   }
 }

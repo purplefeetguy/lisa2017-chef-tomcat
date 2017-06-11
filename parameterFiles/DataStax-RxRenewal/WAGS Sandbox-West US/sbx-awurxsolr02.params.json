@@ -6,16 +6,16 @@
       "value": "West US"
     },
     "AppNameTag": {
-      "value": "SBX-Datastax-Solr"
+      "value": "Datastax-Cassandra-Solr"
     },
     "AppEnvTag": {
       "value": "db"
     },
     "SecZoneTag": {
-      "value": "sbx"
+      "value": "dtn"
     },
     "avName": {
-      "value": "sbx-datastax-solr"
+      "value": "datastax-cassandra-solr"
     },
     "avUpdateDomainCount": {
       "value": 3
@@ -23,11 +23,11 @@
     "avFaultDomainCount": {
       "value": 3
     },
-    "vmName": {
-      "value": "sld-awusolr02"
-    },
     "ipAddress": {
       "value": ""
+    },
+    "vmName": {
+      "value": "lld-awurxsolr02"
     },
     "vmSize": {
       "value": "Standard_DS14_v2"
@@ -39,24 +39,24 @@
       "value": 1023
     },
     "managedDiskType": {
-      "value": "Premium_LRS"
+      "value": "Standard_LRS"
     },
     "vnetResGrp": {
-      "value": "WBA-sandbox-Migrated"
+      "value": "wbadtn-network"
     },
     "vnetName": {
-      "value": "WBA-sandbox"
+      "value": "WBA-DTN"
     },
     "subnetName": {
-      "value": "wba-sandbox-db"
+      "value": "RXR-CASD-DB-WU"
     },
     "diagStorAcctName": {
-      "value": "datastaxsolrdiag"
+      "value": "datastacasssolrdiag"
     }
   },
   "deploymentDetails": {
-    "subscriptionName": "WAGS Sandbox",
-    "resourceGroupName": "datastax-solr",
-    "templateFile": ".\\vm.single.av.1.0.json"
+    "subscriptionName": "WBA-DTN",
+    "resourceGroupName": "datastax-cassandra",
+    "templateFile": ".\\vm.datastax.opscenter.single.av.1.0.json"
   }
 }

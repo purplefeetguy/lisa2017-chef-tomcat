@@ -6,57 +6,54 @@
       "value": "West US"
     },
     "AppNameTag": {
-      "value": "SBX-Datastax-Cassandra"
+      "value": "Datastax-OpsCenter-Web"
     },
     "AppEnvTag": {
-      "value": "db"
+      "value": "Infrastructure"
     },
     "SecZoneTag": {
-      "value": "sbx"
+      "value": "Infrastructure"
     },
     "avName": {
-      "value": "sbx-datastax-cassandra"
+      "value": "datastax-opscenter-web"
     },
     "avUpdateDomainCount": {
-      "value": 3
+      "value": 2
     },
     "avFaultDomainCount": {
-      "value": 3
+      "value": 2
     },
     "vmName": {
-      "value": "sld-awucass02"
+      "value": "pln-awuopscw02"
     },
     "ipAddress": {
       "value": ""
     },
     "vmSize": {
-      "value": "Standard_DS14_v2"
+      "value": "Standard_A8_v2"
     },
     "osDiskSizeInGB": {
       "value": 128
     },
-    "dataDiskSizeInGB": {
-      "value": 1023
-    },
     "managedDiskType": {
-      "value": "Premium_LRS"
+      "value": "Standard_LRS"
     },
     "vnetResGrp": {
-      "value": "WBA-sandbox-Migrated"
+      "value": "InfrastructureVNetRG"
     },
     "vnetName": {
-      "value": "WBA-sandbox"
+      "value": "InfrastructureVNet"
     },
     "subnetName": {
-      "value": "wba-sandbox-db"
+      "value": "Infra"
     },
     "diagStorAcctName": {
-      "value": "datastaxcassandradiag"
+      "value": "datastaxopscenterwebdiag"
     }
   },
   "deploymentDetails": {
-    "subscriptionName": "WAGS Sandbox",
-    "resourceGroupName": "datastax-cassandra",
+    "subscriptionName": "INFRASTRUCTURE",
+    "resourceGroupName": "datastax-opscenter-web",
     "templateFile": ".\\vm.single.av.1.0.json"
   }
 }

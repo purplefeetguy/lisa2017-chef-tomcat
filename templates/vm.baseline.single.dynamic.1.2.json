@@ -92,6 +92,12 @@
         "description": "Name of the subnet where the VM is being deployed (ex. WEB, APP, DB, INF)"
       }
     },
+    "ipAddress": {
+      "type": "string",
+      "metadata": {
+        "description": "This parameter is not used on this template. It is present for parameter file consistency"
+      }
+    },
     "diagStorAcctName": {
       "type": "string",
       "metadata": {

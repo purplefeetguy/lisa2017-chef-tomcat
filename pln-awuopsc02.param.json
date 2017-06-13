@@ -1,0 +1,50 @@
+{
+  "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "location": {
+      "value": "West US"
+    },
+    "AppNameTag": {
+      "value": "Datastax-OpsCenter"
+    },
+    "AppEnvTag": {
+      "value": "Infrastructure"
+    },
+    "SecZoneTag": {
+      "value": "Infrastructure"
+    },
+    "vmName": {
+      "value": "pln-awuopsc02"
+    },
+    "vmSize": {
+      "value": "Standard_DS14_v2"
+    },
+    "osDiskSizeInGB": {
+      "value": 128
+    },
+    "dataDiskSizeInGB": {
+      "value": 1023
+    },
+    "managedDiskType": {
+      "value": "Premium_LRS"
+    },
+    "vnetResGrp": {
+      "value": "InfrastructureVNetRG"
+    },
+    "vnetName": {
+      "value": "InfrastructureVNet"
+    },
+    "subnetName": {
+      "value": "Infra"
+    },
+    "diagStorAcctName": {
+      "value": "datastaxopscenterdiag"
+    }
+  },
+  "deploymentDetails": {
+    "subscriptionName": "INFRASTRUCTURE",
+    "resourceGroupName": "datastax-opscenter",
+    "templateFile": ".\\vm.datastax.opscenter.single.dynamic.1.1.json"
+  }
+}

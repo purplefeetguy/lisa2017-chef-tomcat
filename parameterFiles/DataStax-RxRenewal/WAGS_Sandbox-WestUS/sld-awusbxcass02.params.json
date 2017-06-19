@@ -6,16 +6,16 @@
       "value": "West US"
     },
     "AppNameTag": {
-      "value": "Datastax-OpsCenter"
+      "value": "SBX-Datastax-Cassandra"
     },
     "AppEnvTag": {
-      "value": "Infrastructure"
+      "value": "db"
     },
     "SecZoneTag": {
-      "value": "Infrastructure"
+      "value": "sbx"
     },
     "avName": {
-      "value": "datastax-opscenter"
+      "value": "sbx-datastax-cassandra"
     },
     "avUpdateDomainCount": {
       "value": 3
@@ -27,7 +27,7 @@
       "value": ""
     },
     "vmName": {
-      "value": "pln-awuopsc01"
+      "value": "sld-awusbxcass02"
     },
     "vmSize": {
       "value": "Standard_DS14_v2"
@@ -42,21 +42,21 @@
       "value": "Standard_LRS"
     },
     "vnetResGrp": {
-      "value": "InfrastructureVNetRG"
+      "value": "WBA-sandbox-Migrated"
     },
     "vnetName": {
-      "value": "InfrastructureVNet"
+      "value": "WBA-sandbox"
     },
     "subnetName": {
-      "value": "Infra"
+      "value": "wba-sandbox-db"
     },
     "diagStorAcctName": {
-      "value": "datastaxopscenterdiag"
+      "value": "datastaxcassdiag"
     }
   },
   "deploymentDetails": {
-    "subscriptionName": "INFRASTRUCTURE",
-    "resourceGroupName": "datastax-opscenter",
-    "templateFile": ".\\vm.datastax.opscenter.single.av.1.0.json"
+    "subscriptionName": "WAGS Sandbox",
+    "resourceGroupName": "sbx-datastax-cassandra",
+    "templateFile": ".\\vm.datastax.opscenter.single.dynamic.av.1.0.json"
   }
 }

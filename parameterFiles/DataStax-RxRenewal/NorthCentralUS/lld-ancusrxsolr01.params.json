@@ -3,10 +3,10 @@
   "contentVersion": "1.0.0.0",
   "parameters": {
     "location": {
-      "value": "West US"
+      "value": "North Central US"
     },
     "AppNameTag": {
-      "value": "Datastax-Cassandra"
+      "value": "Datastax-Solr-NCUS"
     },
     "AppEnvTag": {
       "value": "db"
@@ -15,7 +15,7 @@
       "value": "dtn"
     },
     "avName": {
-      "value": "datastax-cassandra"
+      "value": "datastax-cassandra-solr-ncus"
     },
     "avUpdateDomainCount": {
       "value": 3
@@ -27,7 +27,7 @@
       "value": ""
     },
     "vmName": {
-      "value": "lld-awurxcass03"
+      "value": "lld-ancusrxsolr01"
     },
     "vmSize": {
       "value": "Standard_DS14_v2"
@@ -42,21 +42,21 @@
       "value": "Standard_LRS"
     },
     "vnetResGrp": {
-      "value": "wbadtn-network"
+      "value": "dtn-ncus-network"
     },
     "vnetName": {
-      "value": "WBA-DTN"
+      "value": "dtn-ncus"
     },
     "subnetName": {
-      "value": "RXR-CASD-DB-WU"
+      "value": "db01"
     },
     "diagStorAcctName": {
-      "value": "datastaxopscassdiag"
+      "value": "dstxsolrdiagncus"
     }
   },
   "deploymentDetails": {
     "subscriptionName": "WBA-DTN",
-    "resourceGroupName": "datastax-cassandra",
-    "templateFile": ".\\vm.datastax.opscenter.single.av.1.0.json"
+    "resourceGroupName": "datastax-cassandra-ncus",
+    "templateFile": ".\\vm.datastax.opscenter.single.dynamic.av.1.0.json"
   }
 }

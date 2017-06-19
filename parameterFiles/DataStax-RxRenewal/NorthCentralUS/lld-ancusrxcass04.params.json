@@ -3,19 +3,19 @@
   "contentVersion": "1.0.0.0",
   "parameters": {
     "location": {
-      "value": "West US"
+      "value": "North Central US"
     },
     "AppNameTag": {
-      "value": "Datastax-Cassandra-App"
+      "value": "Datastax-Cassandra-NCUS"
     },
     "AppEnvTag": {
-      "value": "app"
+      "value": "db"
     },
     "SecZoneTag": {
       "value": "dtn"
     },
     "avName": {
-      "value": "datastax-cassandra-app"
+      "value": "datastax-cassandra-ncus"
     },
     "avUpdateDomainCount": {
       "value": 3
@@ -27,36 +27,36 @@
       "value": ""
     },
     "vmName": {
-      "value": "lla-awurxmsc02"
+      "value": "lld-ancusrxcass04"
     },
     "vmSize": {
-      "value": "Standard_DS12_v2"
+      "value": "Standard_DS14_v2"
     },
     "osDiskSizeInGB": {
       "value": 128
     },
     "dataDiskSizeInGB": {
-      "value": 128
+      "value": 1023
     },
     "managedDiskType": {
       "value": "Standard_LRS"
     },
     "vnetResGrp": {
-      "value": "wbadtn-network"
+      "value": "dtn-ncus-network"
     },
     "vnetName": {
-      "value": "WBA-DTN"
+      "value": "dtn-ncus"
     },
     "subnetName": {
-      "value": "RXR-PERF-APP"
+      "value": "db01"
     },
     "diagStorAcctName": {
-      "value": "datastaxcassandraappdiag"
+      "value": "dstxcassdiagncus"
     }
   },
   "deploymentDetails": {
     "subscriptionName": "WBA-DTN",
-    "resourceGroupName": "datastax-cassandra-app",
-    "templateFile": ".\\vm.single.dynamic.av.1.0.json"
+    "resourceGroupName": "datastax-cassandra-ncus",
+    "templateFile": ".\\vm.datastax.opscenter.single.dynamic.av.1.0.json"
   }
 }

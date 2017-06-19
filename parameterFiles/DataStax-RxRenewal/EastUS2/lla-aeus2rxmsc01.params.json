@@ -3,10 +3,10 @@
   "contentVersion": "1.0.0.0",
   "parameters": {
     "location": {
-      "value": "West US"
+      "value": "East US 2"
     },
     "AppNameTag": {
-      "value": "Datastax-Cassandra-App"
+      "value": "Datastax-Cassandra-App-RX-EUS2"
     },
     "AppEnvTag": {
       "value": "app"
@@ -15,7 +15,7 @@
       "value": "dtn"
     },
     "avName": {
-      "value": "datastax-cassandra-app"
+      "value": "datastax-app-rx-eus2"
     },
     "avUpdateDomainCount": {
       "value": 3
@@ -27,7 +27,7 @@
       "value": ""
     },
     "vmName": {
-      "value": "lla-awurxmsc01"
+      "value": "lla-aeus2rxmsc01"
     },
     "vmSize": {
       "value": "Standard_DS12_v2"
@@ -42,21 +42,21 @@
       "value": "Standard_LRS"
     },
     "vnetResGrp": {
-      "value": "wbadtn-network"
+      "value": "dtn-eastus2-network"
     },
     "vnetName": {
-      "value": "WBA-DTN"
+      "value": "dtn-eastus2"
     },
     "subnetName": {
-      "value": "RXR-PERF-APP"
+      "value": "app01"
     },
     "diagStorAcctName": {
-      "value": "datastaxcassandraappdiag"
+      "value": "dstxrxappdiageus2"
     }
   },
   "deploymentDetails": {
     "subscriptionName": "WBA-DTN",
-    "resourceGroupName": "datastax-cassandra-app",
+    "resourceGroupName": "datastax-cassandra-eus2",
     "templateFile": ".\\vm.single.dynamic.av.1.0.json"
   }
 }

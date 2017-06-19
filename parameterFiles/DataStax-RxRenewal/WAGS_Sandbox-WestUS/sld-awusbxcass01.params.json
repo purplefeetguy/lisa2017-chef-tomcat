@@ -6,16 +6,16 @@
       "value": "West US"
     },
     "AppNameTag": {
-      "value": "Datastax-Cassandra-App"
+      "value": "SBX-Datastax-Cassandra"
     },
     "AppEnvTag": {
-      "value": "app"
+      "value": "db"
     },
     "SecZoneTag": {
-      "value": "dtn"
+      "value": "sbx"
     },
     "avName": {
-      "value": "datastax-cassandra-app"
+      "value": "sbx-datastax-cassandra"
     },
     "avUpdateDomainCount": {
       "value": 3
@@ -27,36 +27,36 @@
       "value": ""
     },
     "vmName": {
-      "value": "lla-awurxmsc03"
+      "value": "sld-awusbxcass01"
     },
     "vmSize": {
-      "value": "Standard_DS12_v2"
+      "value": "Standard_DS14_v2"
     },
     "osDiskSizeInGB": {
       "value": 128
     },
     "dataDiskSizeInGB": {
-      "value": 128
+      "value": 1023
     },
     "managedDiskType": {
       "value": "Standard_LRS"
     },
     "vnetResGrp": {
-      "value": "wbadtn-network"
+      "value": "WBA-sandbox-Migrated"
     },
     "vnetName": {
-      "value": "WBA-DTN"
+      "value": "WBA-sandbox"
     },
     "subnetName": {
-      "value": "RXR-PERF-APP"
+      "value": "wba-sandbox-db"
     },
     "diagStorAcctName": {
-      "value": "datastaxcassandraappdiag"
+      "value": "datastaxcassdiag"
     }
   },
   "deploymentDetails": {
-    "subscriptionName": "WBA-DTN",
-    "resourceGroupName": "datastax-cassandra-app",
-    "templateFile": ".\\vm.single.dynamic.av.1.0.json"
+    "subscriptionName": "WAGS Sandbox",
+    "resourceGroupName": "sbx-datastax-cassandra",
+    "templateFile": ".\\vm.datastax.opscenter.single.dynamic.av.1.0.json"
   }
 }

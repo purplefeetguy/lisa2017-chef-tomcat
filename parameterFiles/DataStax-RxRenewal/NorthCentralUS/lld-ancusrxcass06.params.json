@@ -1,0 +1,62 @@
+{
+  "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "location": {
+      "value": "North Central US"
+    },
+    "AppNameTag": {
+      "value": "Datastax-Cassandra-NCUS"
+    },
+    "AppEnvTag": {
+      "value": "db"
+    },
+    "SecZoneTag": {
+      "value": "dtn"
+    },
+    "avName": {
+      "value": "datastax-cassandra-ncus"
+    },
+    "avUpdateDomainCount": {
+      "value": 3
+    },
+    "avFaultDomainCount": {
+      "value": 3
+    },
+    "ipAddress": {
+      "value": ""
+    },
+    "vmName": {
+      "value": "lld-ancusrxcass06"
+    },
+    "vmSize": {
+      "value": "Standard_DS14_v2"
+    },
+    "osDiskSizeInGB": {
+      "value": 128
+    },
+    "dataDiskSizeInGB": {
+      "value": 1023
+    },
+    "managedDiskType": {
+      "value": "Standard_LRS"
+    },
+    "vnetResGrp": {
+      "value": "dtn-ncus-network"
+    },
+    "vnetName": {
+      "value": "dtn-ncus"
+    },
+    "subnetName": {
+      "value": "db01"
+    },
+    "diagStorAcctName": {
+      "value": "dstxcassdiagncus"
+    }
+  },
+  "deploymentDetails": {
+    "subscriptionName": "WBA-DTN",
+    "resourceGroupName": "datastax-cassandra-ncus",
+    "templateFile": ".\\vm.datastax.opscenter.single.dynamic.av.1.0.json"
+  }
+}

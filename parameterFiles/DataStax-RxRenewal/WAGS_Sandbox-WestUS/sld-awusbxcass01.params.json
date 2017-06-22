@@ -42,7 +42,7 @@
       "value": 1023
     },
     "managedDiskType": {
-      "value": "Standard_LRS"
+      "value": "Premium_LRS"
     },
     "managedBackupDiskType": {
       "value": "Standard_LRS"
@@ -63,6 +63,6 @@
   "deploymentDetails": {
     "subscriptionName": "WAGS Sandbox",
     "resourceGroupName": "sbx-datastax-cassandra",
-    "templateFile": ".\\vm.datastax.cassandra.single.dynamic.av.1.0.json"
+    "templateFile": ".\\vm.datastax.cassandra.single.dynamic.av.Testing.1.1.json"
   }
 }

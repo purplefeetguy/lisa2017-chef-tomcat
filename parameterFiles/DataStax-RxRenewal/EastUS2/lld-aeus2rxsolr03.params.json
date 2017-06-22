@@ -57,6 +57,6 @@
   "deploymentDetails": {
     "subscriptionName": "WBA-DTN",
     "resourceGroupName": "datastax-cassandra-eus2",
-    "templateFile": ".\\vm.single.dynamic.av.1.0.json"
+    "templateFile": ".\\vm.datastax.cassandra.single.dynamic.av.1.0.json"
   }
 }

@@ -57,6 +57,6 @@
   "deploymentDetails": {
     "subscriptionName": "INFRASTRUCTURE",
     "resourceGroupName": "datastax-opscenter",
-    "templateFile": ".\\vm.datastax.opscenter.single.av.1.0.json"
+    "templateFile": ".\\vm.datastax.cassandra.single.av.1.0.json"
   }
 }

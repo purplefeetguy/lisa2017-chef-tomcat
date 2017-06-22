@@ -38,7 +38,13 @@
     "dataDiskSizeInGB": {
       "value": 1023
     },
+    "backupDiskSizeInGB": {
+      "value": 1023
+    },
     "managedDiskType": {
+      "value": "Standard_LRS"
+    },
+    "managedBackupDiskType": {
       "value": "Standard_LRS"
     },
     "vnetResGrp": {

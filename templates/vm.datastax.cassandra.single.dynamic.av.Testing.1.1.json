@@ -222,13 +222,11 @@
               "createOption": "Empty",
               "caching": "None",
               "managedDisk": { "storageAccountType": "[parameters('managedDiskType')]" }
-            }
-          ],
-          "backupDisks": [
+            },
             {
               "name": "[concat(parameters('vmName'), '-backup1')]",
               "diskSizeGB": "[parameters('dataDiskSizeInGB')]",
-              "lun": 2,
+              "lun": 3,
               "createOption": "Empty",
               "caching": "None",
               "managedDisk": { "storageAccountType": "[parameters('managedBackupDiskType')]" }
@@ -236,7 +234,7 @@
             {
               "name": "[concat(parameters('vmName'), '-backup2')]",
               "diskSizeGB": "[parameters('dataDiskSizeInGB')]",
-              "lun": 3,
+              "lun": 4,
               "createOption": "Empty",
               "caching": "None",
               "managedDisk": { "storageAccountType": "[parameters('managedBackupDiskType')]" }

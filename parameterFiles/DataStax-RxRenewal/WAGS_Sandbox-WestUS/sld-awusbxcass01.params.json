@@ -63,6 +63,6 @@
   "deploymentDetails": {
     "subscriptionName": "WAGS Sandbox",
     "resourceGroupName": "sbx-datastax-cassandra",
-    "templateFile": ".\\vm.datastax.cassandra.single.dynamic.av.Testing.1.1.json"
+    "templateFile": ".\\vm.datastax.cassandra.single.dynamic.av.backup.1.0.json"
   }
 }

@@ -38,7 +38,13 @@
     "dataDiskSizeInGB": {
       "value": 1023
     },
+    "backupDiskSizeInGB": {
+      "value": 1023
+    },
     "managedDiskType": {
+      "value": "Standard_LRS"
+    },
+    "managedBackupDiskType": {
       "value": "Standard_LRS"
     },
     "vnetResGrp": {
@@ -57,6 +63,6 @@
   "deploymentDetails": {
     "subscriptionName": "WBA-DTN",
     "resourceGroupName": "datastax-cassandra-ncus",
-    "templateFile": ".\\vm.datastax.cassandra.single.dynamic.av.1.0.json"
+    "templateFile": ".\\vm.datastax.cassandra.single.dynamic.av.backup.1.0.json"
   }
 }

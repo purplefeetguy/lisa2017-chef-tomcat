@@ -1,0 +1,334 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "location": {
+      "type": "string",
+      "defaultValue": "West US",
+      "metadata": {
+        "description": "Deployment location (ex. West US)"
+      }
+    },
+    "AppNameTag": {
+      "type": "string",
+      "metadata": {
+        "description": "Tag for application name (ex. PCC)"
+      }
+    },
+    "AppEnvTag": {
+      "type": "string",
+      "metadata": {
+        "description": "Tag for application environment (ex. Dev, QA, Prodfix, Perf, Prod)"
+      }
+    },
+    "SecZoneTag": {
+      "type": "string",
+      "metadata": {
+        "description": "Tag for security zone (ex. Internal Non-Sensitive Dev-Test)"
+      }
+    },
+    "vmName": {
+      "type": "string",
+      "metadata": {
+        "description": "Name of the VM (ex. uldyvm-azpcc01)"
+      }
+    },
+    "vmSize": {
+      "type": "string",
+      "defaultValue": "Standard_F1S",
+      "metadata": {
+        "description": "Size of the VM (ex. Standard_F1S)"
+      }
+    },
+    "osDiskSizeInGB": {
+      "type": "int",
+      "defaultValue": 128,
+      "metadata": {
+        "description": "Size in GB for the OS disk attached to the VM (ex. 128)"
+      }
+    },
+    "dataDiskSizeInGB": {
+      "type": "int",
+      "defaultValue": 128,
+      "metadata": {
+        "description": "Size in GB for the data disk attached to the VM (ex. 128)"
+      }
+    },
+    "dataDiskCount": {
+      "type": "int",
+      "defaultValue": 1,
+      "metadata": {
+        "description": "Number of data disks to add to the system of the dataDiskSizeInGB (you cannot vary sizes)"
+      }
+    },
+    "managedDiskType": {
+      "type": "string",
+      "defaultValue": "Premium_LRS",
+      "allowedValues": [
+        "Standard_LRS",
+        "Standard_GRS",
+        "Standard_ZRS",
+        "Premium_LRS"
+      ],
+      "metadata": {
+        "description": "Storage Account type"
+      }
+    },
+    "vnetResGrp": {
+      "type": "string",
+      "metadata": {
+        "description": "Resource group for the VNet where the VM is being deployed (ex. drsgrp-azshr01)"
+      }
+    },
+    "vnetName": {
+      "type": "string",
+      "metadata": {
+        "description": "Name of the VNet where the VM is being deployed (ex. dvnetw-azshr01)"
+      }
+    },
+    "subnetName": {
+      "type": "string",
+      "metadata": {
+        "description": "Name of the subnet where the VM is being deployed (ex. WEB, APP, DB, INF)"
+      }
+    },
+    "ipAddress": {
+      "type": "string",
+      "metadata": {
+        "description": "Static IP Address of the VM"
+      }
+    },
+    "diagStorAcctName": {
+      "type": "string",
+      "metadata": {
+        "description": "The storage account to use for boot diagnostics data (ex. ussacazpcc03)"
+      }
+    },
+    "chefRunList": {
+      "type": "string",
+      "metadata":{
+        "description": "The ordered list of recipes or roles to assign the new machine"
+      }
+    },
+    "chefTags": {
+      "type": "array",
+      "metadata":{
+       "description": "A list of tags to be applied to the node in chef" 
+      }
+    },
+    "chefEnvironment": {
+      "type": "string",
+      "metadata":{
+       "description": "The environment to assign the new machine to in chef" 
+      }
+    }
+  },
+  "variables": {
+    "computeApiVersion": "2016-04-30-preview",
+    "networkApiVersion": "2016-03-30",
+    "imagePublisher": "RedHat",
+    "imageOffer": "RHEL",
+    "imageVersion": "7.3",
+    "imageRelease": "7.3.2017042521",
+    "adminUsername": "wagsadmin",
+    "adminPassword": "Welcome123!",
+    "vnetId": "[resourceId(parameters('vnetResGrp'), 'Microsoft.Network/virtualNetworks', parameters('vnetName'))]",
+    "subnetId": "[concat(variables('vnetId'),'/subnets/', parameters('subnetName'))]",
+    "dataDiskArray": [
+      {
+        "name": "[concat(parameters('vmName'), '-Data01')]",
+        "diskSizeGB": "[parameters('dataDiskSizeInGB')]",
+        "lun": 1,
+        "createOption": "Empty",
+        "caching": "None",
+        "managedDisk": {"storageAccountType": "[parameters('managedDiskType')]"}
+      },
+      {
+        "name": "[concat(parameters('vmName'), '-Data02')]",
+        "diskSizeGB": "[parameters('dataDiskSizeInGB')]",
+        "lun": 2,
+        "createOption": "Empty",
+        "caching": "None",
+        "managedDisk": {"storageAccountType": "[parameters('managedDiskType')]"}
+      },
+      {
+        "name": "[concat(parameters('vmName'), '-Data03')]",
+        "diskSizeGB": "[parameters('dataDiskSizeInGB')]",
+        "lun": 3,
+        "createOption": "Empty",
+        "caching": "None",
+        "managedDisk": {"storageAccountType": "[parameters('managedDiskType')]"}
+      },
+      {
+        "name": "[concat(parameters('vmName'), '-Data04')]",
+        "diskSizeGB": "[parameters('dataDiskSizeInGB')]",
+        "lun": 4,
+        "createOption": "Empty",
+        "caching": "None",
+        "managedDisk": {"storageAccountType": "[parameters('managedDiskType')]"}
+      },
+      {
+        "name": "[concat(parameters('vmName'), '-Data05')]",
+        "diskSizeGB": "[parameters('dataDiskSizeInGB')]",
+        "lun": 5,
+        "createOption": "Empty",
+        "caching": "None",
+        "managedDisk": {"storageAccountType": "[parameters('managedDiskType')]"}
+      },
+      {
+        "name": "[concat(parameters('vmName'), '-Data06')]",
+        "diskSizeGB": "[parameters('dataDiskSizeInGB')]",
+        "lun": 6,
+        "createOption": "Empty",
+        "caching": "None",
+        "managedDisk": {"storageAccountType": "[parameters('managedDiskType')]"}
+      },
+      {
+        "name": "[concat(parameters('vmName'), '-Data07')]",
+        "diskSizeGB": "[parameters('dataDiskSizeInGB')]",
+        "lun": 7,
+        "createOption": "Empty",
+        "caching": "None",
+        "managedDisk": {"storageAccountType": "[parameters('managedDiskType')]"}
+      },
+      {
+        "name": "[concat(parameters('vmName'), '-Data08')]",
+        "diskSizeGB": "[parameters('dataDiskSizeInGB')]",
+        "lun": 8,
+        "createOption": "Empty",
+        "caching": "None",
+        "managedDisk": {"storageAccountType": "[parameters('managedDiskType')]"}
+      },
+      {
+        "name": "[concat(parameters('vmName'), '-Data09')]",
+        "diskSizeGB": "[parameters('dataDiskSizeInGB')]",
+        "lun": 9,
+        "createOption": "Empty",
+        "caching": "None",
+        "managedDisk": {"storageAccountType": "[parameters('managedDiskType')]"}
+      },
+      {
+        "name": "[concat(parameters('vmName'), '-Data10')]",
+        "diskSizeGB": "[parameters('dataDiskSizeInGB')]",
+        "lun": 10,
+        "createOption": "Empty",
+        "caching": "None",
+        "managedDisk": {"storageAccountType": "[parameters('managedDiskType')]"}
+      }
+    ]
+  },
+  "resources": [
+    {
+      "apiVersion": "[variables('networkApiVersion')]",
+      "type": "Microsoft.Network/networkInterfaces",
+      "name": "[concat(parameters('vmName'), '-nic')]",
+      "location": "[parameters('location')]",
+      "tags": {
+        "AppName": "[parameters('AppNameTag')]",
+        "AppEnv": "[parameters('AppEnvTag')]",
+        "SecZone": "[parameters('SecZoneTag')]"
+      },
+      "properties": {
+        "ipConfigurations": [
+          {
+            "name": "ipConfig",
+            "properties": {
+              "privateIPAllocationMethod": "Static",
+             "privateIPAddress": "[parameters('ipAddress')]",
+              "subnet": {
+                "id": "[variables('subnetId')]"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "[variables('computeApiVersion')]",
+      "type": "Microsoft.Compute/virtualMachines",
+      "name": "[parameters('vmName')]",
+      "location": "[parameters('location')]",
+      "tags": {
+        "AppName": "[parameters('AppNameTag')]",
+        "AppEnv": "[parameters('AppEnvTag')]",
+        "SecZone": "[parameters('SecZoneTag')]"
+      },
+      "dependsOn": [
+        "[concat('Microsoft.Network/networkInterfaces/', parameters('vmName'), '-nic')]"
+      ],
+      "properties": {
+        "hardwareProfile": {
+          "vmSize": "[parameters('vmSize')]"
+        },
+        "storageProfile": {
+          "imageReference": {
+            "publisher": "[variables('imagePublisher')]",
+            "offer": "[variables('imageOffer')]",
+            "sku": "[variables('imageVersion')]",
+            "version": "[variables('imageRelease')]"
+          },
+          "osDisk": {
+            "name": "[concat(parameters('vmName'), '-OS')]",
+            "createOption": "FromImage",
+            "diskSizeGB": "[parameters('osDiskSizeInGB')]",
+            "caching": "ReadWrite",
+            "managedDisk": {"storageAccountType": "[parameters('managedDiskType')]"}
+          },
+          "dataDisks": "[take(variables('dataDiskArray'),parameters('dataDiskCount'))]"
+        },
+        "osProfile": {
+          "computerName": "[parameters('vmName')]",
+          "adminUsername": "[variables('adminUsername')]",
+          "adminPassword": "[variables('adminPassword')]"
+        },
+        "networkProfile": {
+          "networkInterfaces": [
+            {
+              "id": "[resourceId('Microsoft.Network/networkInterfaces/', concat(parameters('vmName'), '-nic'))]"
+            }
+          ]
+        },
+        "diagnosticsProfile": {
+          "bootDiagnostics": {
+            "enabled": true,
+            "storageUri": "[concat('https://', parameters('diagStorAcctName'), '.blob.core.windows.net/')]"
+          }
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Compute/virtualMachines/extensions",
+      "name": "[concat(parameters('vmName'), '/LinuxChefExtension')]",
+      "apiVersion": "[variables('computeApiVersion')]",
+      "location": "[resourceGroup().location]",
+      "dependsOn": [
+        "[concat('Microsoft.Compute/virtualMachines/', parameters('vmName'))]"
+      ],
+      "properties": {
+        "publisher": "Chef.Bootstrap.WindowsAzure",
+        "type": "LinuxChefClient",
+        "typeHandlerVersion": "1210.12",
+        "settings": {
+          "bootstrap_options": {
+            "chef_node_name": "[parameters('vmName')]",
+            "chef_server_url": "https://172.31.207.210/organizations/walgreenco",
+            "validation_client_name": "walgreenco-validator",
+            "environment": "[parameters('chefEnvironment')]"
+          },
+          "runlist": "[parameters('chefRunList')]",
+          "validation_key_format": "base64encoded",
+          "bootstrap_version": "12.13.37",
+          "daemon": "none",
+          "chef_daemon_interval": "0",
+          "custom_json_attr": {
+            "tags": "[parameters('chefTags')]"
+          }
+        },
+        "protectedSettings": {
+          "validation_key": "LQAtAC0ALQAtAEIARQBHAEkATgAgAFIAUwBBACAAUABSAEkAVgBBAFQARQAgAEsARQBZAC0ALQAtAC0ALQAKAE0ASQBJAEUAcABBAEkAQgBBAEEASwBDAEEAUQBFAEEAcgBNAHIAdwBzAEUAVAB1AEgAWgBYAEsAVwBQAGMAbQBxADkAcwBiAG4AMABUAGcATgB6AFQAUwAwAEkAUABUAFAAaABjAG8ARwBYAGwAdAAvAHIAVQBXAE4AcABZAFYACgBoADEAVgBnADkAdQBiAGoAdQA4AHIAdgBhAHgANQBPADEARgAwADQASQBkAEEAcAAzAFQAMwB5ADgASQAwAFoAaABRAC8ARwA0AE0AcQB1AFMAOQBrACsAOQBsAFMAVQBhAFcAZwBKAG8AcABiADAAdwA1AHgASgB2AHcATwB2AAoAawB5AEEAcwB2AG8AMABDAHoATgBOAGkAWABxAEwAbQBBADUAYwBlAE4AeAB4AGsAVgBpAGIARgBhAEkAWABXAEMATABuAEEAOABrAG4ATABSAGIAWgBRAFcAQgBRAGYAZgB1AEQAYQBLAG0AVAB5AFEAWAAyAFIANQBVAG0AcwAKAHMAMgAvAEQAWgBTAHIAdwBWADkAUwBaAE8ATgBoAG4AZABmAGsARgBYAEIASgBhADgAOQAyAEIAbgA0AFUAeABRAE4ATgBtAE0AdgBJADQAYQBBAGsAUQBzAGgAUgBFAGYAcwBaAEMASAB4AFQAVQBMAFkAcQBkAGgAVgBFAGYACgBiAFYAeAArAGYAdABYAEgARABSAC8AVwBBAGIAcwBvAFAAZABCAEkAVQBMAFAAdABoAGkATgBqAFcANwBoAFEAdgBsAHoANQBDACsAcAA5AHoAcwBLAGoAMwBQAFkAWgBqAFQAZgBMADkAUwBiADkANgB0AFAAdQBzAG4ARgA5AAoAZgBqAHcAYwA2AGcAVwBiAHUAaABiAGcAUgBHAHoAYgArAE0AegA1AE0AWAB4AC8AdwBjAEEASQBNAFoAagBOAG8ANABVAHIAUwBRAEkARABBAFEAQQBCAEEAbwBJAEIAQQBEAGUAYQBRAG0ATgBtAGUAdgAwADQATQAxAG4AMwAKAGgAaABFAHQATwA3AEUALwB0ADYAcgBzAEsANQA1AC8AbgBSADEAUQAxAEUAMgBHAFAAcgBnAEUAeQA3AFkAYgBDADYAaAAxADkALwBMAGIAagA1AEwAaABsAGIATgB4AG0ARQBwAE0AQwBRAEUAUQBmAEQAZwArAGQAQQB1AG0ACgBTAC8AegArAGUANgAvAGcAYQBMAC8AdABrADQANAB1ADMAMgBjAGYAMwBHAEgAZQBrADcAcgBTAGMAdwBTAHQAaQBmAFUAZABHAEcAagBrADkAVwA2ADEANAB1AFMAegBKAEwATQBwAEUATQBjAEoATQB0AHgAcQBNADQASQBUAAoAOQB6AEQAdABuAFUASQBhAEwAdgBnAHEAMQA2AFgAUQBLACsAWgBuAE0AcQAwAEwAdQBNADAATAB0AEkAaQBIADEAZwBiAE0ASgBlAGYAdwBwAC8AYQBYAFEAWgBZAEkAaQBuAG0ASABDAEUAUgA3AEEATQBqAHgAWABHAC8AaAAKAHIARQArADQATwBuADcAVwBUAEEAUgBkAHoAYgAvAFoATQBnAEwAZgBWADYASQBxAG8ANwBHAGoAYgB4AGwAeABPADEARABLAHkATABZAFAAZAByAGMAVwA0AHAATQA3AGgAcwBUAEQAWQBVAGIAVQBJAFkAcwB5AG4AOABuADAACgBFAHEASgBJAGgAcwBmAEwAYQBHAEsAVQB4AEsAQQBrADcANgBYADgARgBRAG8ARgBjADUAQwBPADYAUQBuAGQAcQAyAEwAZwA5ADkAVwBSAGUAOAAyAFgAbgBPADIAVgBIAHQAcwA5AE0AaAAyAGsAMABlADIALwBLAEsAegA5AAoAdABaAEQASgBWADQARQBDAGcAWQBFAEEANABvAFcAcgBVAE8AWABxAFkAawBKAFQATQB4ADMAdABrADUARgBaAGQAOABRADQAcgBEAGUAdgB4AGMAZgA0AEUATwAyAC8AKwBYAFoAZgBwADgAUgBBAEUAQwAxAGgAcQA2AGEAbwAKAEEALwBuADcAVABVAFkASgBTAHMAKwBvAFIATABJADUASwBZAHQAOQByAGQAcgBXAEYAUQArADQAagBmAEMAcgBOAEcAUQBjAFkATwA2ADgAQQB6ADEATQAyAFYAUQBuADEAVQBVAE0AYwBkAE8AMQA1AGwAUgA2AGIAdABBAEoACgBSAEQAdABSADMASwBiAEcAcwBqAFAAbQAwAFgAQgBQAHgAYQAwAFoAUwByAFoAQwBYAGIANwA0AE4AZQBjAHgASQB6AE4AVgBuAE0AbABaAGYATQB0AC8ARwA3ADMASwB3AGMASABPAHkARABrAEMAZwBZAEUAQQB3ADAAZABXAAoAQgB3AHAAWQArAG4AegBHAEkANABUAFAAUwBjAE4ASwA3AFQARgBmAC8AYgBlAEUAMwBDADkANQB1AGQAcAA0AG8AVwBWAEgAWgBiAHQAUgA2ADcASQBqACsAZQBYAEsANAA3ADEAQwBYADgATQBoAGYARgBOADMAbwBzADAAawAKAE4AagBIAFIARwBwAHMASgB2ADgAWABvAG4AVwBQADEAWQBWAFEAcgA3AHgALwAyAHIAQwBjAHAAagB1AFAAcAA2AG0ASgBGADAAaQBBAG4AMwBpAG4AUwBuAFMAcwBDAHoAcgBTAEIAdgBTAHUAegBmAFYATwBmAGkAZQBTAHEACgBLADMAaQBRAHUAegBxAEkAUwBsAHkAZwBwAC8ASQAzAEMAdgB3AFIASgBXAEgAcwBIADgATABPAHIAWgBnADYAdQA0AGMARgAyADUARQBDAGcAWQBFAEEAdwBZAHQAcwBnAFUAYQB4AEsAUgB0ADYAYwB5AGEAVABJADQAOABCAAoAWABxACsAdAByAEoAZwAzACsAMABtAE0AegB3AG8AVgBDAFYAVAAzAEQAaQBWAEUAaAA0ADMAKwA4AGUAYwBIAGoANwA0ADcAMQBoADYATgBPAGYAcQBMAHoANABaAG8AQwBQAE4AQwBnAHgAVwBEADcAYQBMAHQARQBYAG8AZAAKAEQAagBxAHIAZABMAGMARwB0AGMAMwBlAHAANgBLAGMARgBrAEYAVgBEAEwAegBUAG8AdQBWAHoAWgB0AE0AaAAxADgAYgBIAGYAegB5AFEAYwBSAHEAZgBrAFQAdgBoAEwAUQBsAGwAbgBzAHgAegBrAEIAMwBuAGYAawBiADMACgBXAFIAZwAzAGcAaQBzAFgANQB1AFUASQB5AGUAOAAwAEcAcgBFADUAdQBTAEUAQwBnAFkAQQB5AGYAOQB3AHIAYgBlADIAYwB1AFcAKwB6ADkAOABCAHoAWAB1AEcAZABmAFUAdABKAG4AWQAvAHEATQBRAHoAVgBsAHoAMwBpAAoAMwB3AEkAYgB1AE4AbAB5AGoAbAByAG4AWQBSAG0AYQAwADMASwA2AHUAUQBlAEwAMAB6AG4ANQBDAC8AdgAxAFYAKwBTAHYAYwBMAEMAUQB1ADIAbAB3AGEAawAwAG0AbwBsAEgASwBRAFEAWABWAGQAegBzADAARABKAFMATgAKAFgARwBTAFoAOQBsADcAWgBBAFEALwBLAFAAVABrADQAbwAwADEANQAwAGoAZABVAGoAYQArAFEAUgBXAFkATQBYADkAMQB0AHoAYgBFADUASwBjAE0AUwBLADMAMAA0AGgAZgA4AFoASAA3ADIAawBhAFEAaAB4AHQAQgBCAGMACgBOAG8AcQA1AFEAUQBLAEIAZwBRAEMAcgBHAFcANAA4AFAAKwBvAGkAcwBRAFkAWQA2ADUAZgBOAHYASQBmADQARwBhAEgAQwBTAEsAVwBZAHEARwBhAGIAWQBzAC8ANQBDAE0AWgBGAHAAVABoAHIAeABuAEcAeQB0AE0ATwBkAAoAdQB4AFEAZgBsAEQARwB5AEQAUQBLADIAdgBhAEEAcwBDAGgAZwArADIAdAAvADgAQwBDAG0AcQA1AFEAdQB6ADgAaABWAEUAOABTAG0AeQBkAHIAaQBQAE8ASwBTAFYAVABFADMAOQBSAGUAZwBzAEkAWgBEAG0ASQBnAFoAVwAKAHoAYQBzAGkAZwB1AHEARABnAHUALwBoAGMAMgAwAHcAMwB3ADMATABRAGkAcwBpAFMAaABqAFoAWgBaAGQAbQAvADAAUQBLAGwAbgBOAEcAQwBOADMAdQBLAEoAcgB1AEcAUQBEADAAawBnAD0APQAKAC0ALQAtAC0ALQBFAE4ARAAgAFIAUwBBACAAUABSAEkAVgBBAFQARQAgAEsARQBZAC0ALQAtAC0ALQA=",
+          "chef_server_crt": "-----BEGIN CERTIFICATE-----\nMIIFjDCCA3SgAwIBAgIQIFGbp0Y7EaZL/kl6veZ1oTANBgkqhkiG9w0BAQUFADBX\nMQswCQYDVQQGEwJVUzEVMBMGA1UEChMMV2FsZ3JlZW4gQ28uMQwwCgYDVQQLEwNQ\nS0kxIzAhBgNVBAMTGldhbGdyZWVucyBJbnRlcm5hbCBSb290IENBMB4XDTExMTIx\nMjIxMTIwMVoXDTMxMTIxMjIxMTgyMFowVzELMAkGA1UEBhMCVVMxFTATBgNVBAoT\nDFdhbGdyZWVuIENvLjEMMAoGA1UECxMDUEtJMSMwIQYDVQQDExpXYWxncmVlbnMg\nSW50ZXJuYWwgUm9vdCBDQTCCAiIwDQYJKoZIhvcNAQEBBQADggIPADCCAgoCggIB\nALrY8q4z7Ta5lL+32tQ1qglQxZV6wZ7Kj5iE1LMD0jFujJhounS4L5NS3lvjfPX9\n2Fk/Zdtg1qGDeZWymsBUciADoYlzmOHJ095HsExYP30RObBqRNlC7OGFEt34bjYI\npKb1AXXLur4SG+imbYLD5QUzRuXpaCpTaI6UBjbECVQwCUnDhWu/k1qPMCjUuWKO\nLoNucnDd36nFX0srY7DBiFC4ZTES01ppg3uEitmjQ6Twe+BqJTIanEUTphtIFidT\nRQHE0Ipo20MWrvxTn952xhACguw9bzrmpusf29ZsNnJYoKHrSUEDRHe57e+VnM15\nkJ2Jxwmd0/sv6dSKmNony2n+RLidpR17Dblbs20GA1MHXnrTdhPREPj7xbzOBlrT\ni96ijF5m7K91Au8BcSUQe0WhWBnx5OpzRNlVtBTRX/BpjJ2ohwVEytGs7isS1lkn\nnkhOhcX/gPq4k45cD6SnOvoJ0Z6P2I/WJhVAjKue64c4K6ItNY5EJLkBVyhXrT2E\nFAEv/mEI/VPfIPnRxEOrfAum5v3LGGFk2nngDoemG3dLeVUZqY6ZJrlDoyCAfoNb\nfiSrd7yP01kPYxrvMvqKQk5nKdXn39B0qOmemKskavSFZhbkmifwWMdatCsdBs1B\nSp/4m/wTuiOLS/AZRWCtls1PkgwRzL/A44Nku1DcXTmlAgMBAAGjVDBSMA4GA1Ud\nDwEB/wQEAwIBhjAPBgNVHRMBAf8EBTADAQH/MB0GA1UdDgQWBBTdSlJgDBwb7pPJ\n+kK1zedkixGSbTAQBgkrBgEEAYI3FQEEAwIBADANBgkqhkiG9w0BAQUFAAOCAgEA\nkj3NMQQGzxH+JuglsXO8pl0GKRXuvS16TgQMsFTIooK5SrVYftvzse9hBEgcrDxE\nHE3nCr7Ps84j+mPc0DsD0901bIun9Z52FopcipCkPsAyR4ravaiQ57+qEQWkp6fe\nedQ1qsXSlrBxQg5AvatMNbiH0ASXxAb5EraJ5udD+P2WVKRhGp8aPKDm7RxGnLcl\nwRdwz0O11WaAETeiuh8mLHi8cs5bmCc9V6gQxIdhPuICfMx2IcidNAqH5kyjM+ie\naksijlrTjPYacj71rlvhttd+yOey85tDcuCHitUxdH/vPv/wPRxLemprHU7WbGIa\nwEkGQfaSA6Ai2yM0RJlcft5mMxlVhzL5C+DtyDfkEvo0ffskZ/oFXb1x4UJ8yaZo\n5XLO0/GInp3dK6foN+glRs3JbAp1yboloMVpzbs0kzYYw3K8TtYC5iOld2ebpWlu\n5wOSmppqAwPiFlwtTDmuU6ib0Ect+VTkf9c4KW0lts3BgEnkwgrHEUQIN7gEa0GR\nyAhfc6LhvME+GhSWXRXvn1UGa5lVnDN6WVT/AEWI2PeqfZeQ7U54MKVe0e1QZMWF\n/z7UV5KwviT3S71TRSTMROmcYUp7QQ55Sx4Rkv2uY05GJ/3bTj/2XVXBSzszVZA6\n5hffp7Wk1KStIHMroW8728/97sdLgabJdscOkvqTq28=\n-----END CERTIFICATE-----\n-----BEGIN CERTIFICATE-----\nMIIF1TCCA72gAwIBAgIKH9WG4gAAAAAAAjANBgkqhkiG9w0BAQUFADBXMQswCQYD\nVQQGEwJVUzEVMBMGA1UEChMMV2FsZ3JlZW4gQ28uMQwwCgYDVQQLEwNQS0kxIzAh\nBgNVBAMTGldhbGdyZWVucyBJbnRlcm5hbCBSb290IENBMB4XDTExMTIxMjIxNTgx\nMVoXDTIxMTIxMjIyMDgxMVowXDELMAkGA1UEBhMCVVMxFTATBgNVBAoTDFdhbGdy\nZWVuIENvLjEMMAoGA1UECxMDUEtJMSgwJgYDVQQDEx9XYWxncmVlbnMgSW50ZXJu\nYWwgSXNzdWluZyBDQSAxMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA\nr0op98w0aFmPHrt/FPtAnyzSYWTm9x9A9tj395o1TH7gtpiNpD1TcPUkwZJ0vW5n\nNP6GfNKu0+20iJdJieKHFnS7LJzWHXfrIXrHf+b1rIzrENPUC4RUQXakl9Y+aDH6\nIh+bX9S1x3apixtnh+uuGIJVA2dWcXMJr98cJWxQSmdGaCtTqK+6Z6oMdPqDv9sD\nZ8D0yITkWHTEKp96gilFJ/Qsm8fmMP3k76zG4lRDKlp8ZFUV9soh/7V720NSnlSF\nEpZozLZ/OrckXNaZGN8GWlkG8JPPD4f9p38f4UtnQCJs2NZPDp+qpn6KhChM6mtJ\n/EZ7L1VkJdC7r9fBE3eojwIDAQABo4IBnDCCAZgwCwYDVR0PBAQDAgGGMBAGCSsG\nAQQBgjcVAQQDAgEAMB0GA1UdDgQWBBRSqTRxhruzLGs8yjAVYqPqwL3WxzBKBgNV\nHSAEQzBBMA4GDCsGAQQBhgGDfQEBAjAOBgwrBgEEAYYBg30BAQMwDwYNKwYBBAGG\nAYN9AQEDATAOBgwrBgEEAYYBg30BAQQwGQYJKwYBBAGCNxQCBAweCgBTAHUAYgBD\nAEEwDwYDVR0TAQH/BAUwAwEB/zAfBgNVHSMEGDAWgBTdSlJgDBwb7pPJ+kK1zedk\nixGSbTBSBgNVHR8ESzBJMEegRaBDhkFodHRwOi8vcGtpLndhbGdyZWVucy5jb20v\ncGtpL1dhbGdyZWVucyUyMEludGVybmFsJTIwUm9vdCUyMENBLmNybDBrBggrBgEF\nBQcBAQRfMF0wWwYIKwYBBQUHMAKGT2h0dHA6Ly9wa2kud2FsZ3JlZW5zLmNvbS9w\na2kvUEtJLVNXTVAtUk9PVF9XYWxncmVlbnMlMjBJbnRlcm5hbCUyMFJvb3QlMjBD\nQS5jcnQwDQYJKoZIhvcNAQEFBQADggIBAFqLnzsYRnfvYBjIHM9cnhJTYS9VgMlh\nNgBfHRAhVmX6Suuoq9L/B05ol/q0UD63hWy77T64/92ByO8honkMC8CND7AAY/8t\nDAsfzScb2V8HmLlNXKgKa4tQmXwljeBzFZDewA61nnBm6Opv1hnA55KpU286MEQp\nFsher5SHa5EKVOZUSAvdn44/L73GIgUe1PQ2k+KRR7a91LuAE1DiBneWnQLKlRoi\nTh8wh371gOWdAicjFP2FrAwvKWpWYvuO52LBEYhTFz2imtI979idnuOxMrNcRXXJ\nwIv2+ObtOnfbH4shlyLU3X4p9CZW+o+8F6X5yk7nQ52yRrXATBOb/JnCN36oRrrq\nPQjeeFFYkXeaP2eEgzjdRjqNvfqRq9JQllKehtonIGfLbz+fsWVVJr1iOqoud+nx\n1b1U68FdgE5DDWbYe691hKseWUX8odu96ILP6UhMFx5b1Gwd1UYeKUFRX3tfkNgV\ngvKEWhW4fwV20nGEQ0Ni6te6FSCZVzfDSB1v/HJAjv5lc3OYNkB1PN4PYifb8QbS\nb9NC83QIcvAZHBbmGMn919Vw/bZpljfAXvCyqS8xTTnPtHJWBcAoB+QDV0acWFAN\nMcdTFVW8t6HCPXys2f+tDyQkOmBc0wVuMzd7OCs1CdyoXgCHwgh75UY11UJuUorV\n3ePk8Z31gmbn\n-----END CERTIFICATE-----\n-----BEGIN CERTIFICATE-----\nMIIF1TCCA72gAwIBAgIKH9fQ7AAAAAAAAzANBgkqhkiG9w0BAQUFADBXMQswCQYD\nVQQGEwJVUzEVMBMGA1UEChMMV2FsZ3JlZW4gQ28uMQwwCgYDVQQLEwNQS0kxIzAh\nBgNVBAMTGldhbGdyZWVucyBJbnRlcm5hbCBSb290IENBMB4XDTExMTIxMjIyMDA0\nMVoXDTIxMTIxMjIyMTA0MVowXDELMAkGA1UEBhMCVVMxFTATBgNVBAoTDFdhbGdy\nZWVuIENvLjEMMAoGA1UECxMDUEtJMSgwJgYDVQQDEx9XYWxncmVlbnMgSW50ZXJu\nYWwgSXNzdWluZyBDQSAyMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA\npsKwYiuAJrY4NdIoK6+4bT9QbCNRfEoXTQpQ8HOobbprd1KBdCQUVowsuz3oWgOd\niLg9QkLGPtSlum+ZjgoN927VEb/BcWDGwajTfzxLcVHdGOUYJY13B9mYDXxXtTXW\njMFmne/WJaBcEGnt2cF5EsAEAir7JNv7u5hjb5e9+leceIeVd1gPaKvtsUPyfu2d\nABlCUoxk7cOFSHTTLKg7GowC4YnxcxQFAY6CpWrhQo5LZxzKIZHZMWOzLZlHxs4F\nvf1O4KNW0Jje6yoHLtdD2sePbIivZN7WgZ9BLpUbLABDFo90eNVv2EaGZE4kAjQm\ndnfrcUjnNHE5y73BXk5+7QIDAQABo4IBnDCCAZgwCwYDVR0PBAQDAgGGMBAGCSsG\nAQQBgjcVAQQDAgEAMB0GA1UdDgQWBBRh5G5fNUQJImP6MXiqUiO2iU+SSzBKBgNV\nHSAEQzBBMA4GDCsGAQQBhgGDfQEBAjAOBgwrBgEEAYYBg30BAQMwDwYNKwYBBAGG\nAYN9AQEDATAOBgwrBgEEAYYBg30BAQQwGQYJKwYBBAGCNxQCBAweCgBTAHUAYgBD\nAEEwDwYDVR0TAQH/BAUwAwEB/zAfBgNVHSMEGDAWgBTdSlJgDBwb7pPJ+kK1zedk\nixGSbTBSBgNVHR8ESzBJMEegRaBDhkFodHRwOi8vcGtpLndhbGdyZWVucy5jb20v\ncGtpL1dhbGdyZWVucyUyMEludGVybmFsJTIwUm9vdCUyMENBLmNybDBrBggrBgEF\nBQcBAQRfMF0wWwYIKwYBBQUHMAKGT2h0dHA6Ly9wa2kud2FsZ3JlZW5zLmNvbS9w\na2kvUEtJLVNXTVAtUk9PVF9XYWxncmVlbnMlMjBJbnRlcm5hbCUyMFJvb3QlMjBD\nQS5jcnQwDQYJKoZIhvcNAQEFBQADggIBAHzffluwnZ0OWiegNewHd8hhPqS3xyyu\nYV0WCCPk7u5O4oXt92FuanqYENfFvwvZrEqIOQ8sTnvoYxSgOR889fsCpsAV9flA\npEfToXWBAPKsiFWd/MtXpWd0WebXWOrlDmwg5M0b4LkkVQpIANiWMTAFFBonAKPQ\nGqhK8B8pNi2vrMFAEcIOUWuShlVGGamca2X2yrYrU99TIf5S/TPMrn5PvrT1bDn5\nIPu/dnGTZpqE+YrKkyKdZEj2beCcGGmI5WSLviI2wjZc2i0gkGXpipHhqEkGMp5X\nu0vuOTIJ43L30fSUkeEY6MwbTowdZeRiFZJVuPPk/TaTD1m/i4Z+ifSz5jBs1txs\nFZGhQCaAFpMDDp965m/LV84Q7FxC3OBT1Oa9Y3l+dHpEfMUQRa0IGBLbeIwlFSlX\nWSZsY2fZiiKCeilqtqbNelcrvkRJv9ICaDn1tXk0Gc7HLRr4hgYdrrtES7u+xdJu\nHB1tbchVGQeF44vsbdlcGST1ujSyyt/XpOuj7umGQZR68VnF2Nsoz5nrQ97l2WDp\nyUaI7YHDjVOmPXXbE1BObcPktdQSzZuR4Fid493ZPXrWBP9ACOQlOuybmNSaN/Qf\nCLOhf8J0hqQudifAmygqTJMNxJ/lo5G4WnUkn9EIqOQq2I7IOy+SDVocqKgSCXQu\nEBgtMZCevoNU\n-----END CERTIFICATE-----\n"
+        }
+      }
+    }
+  ]
+}

@@ -55,7 +55,7 @@ param(
     [Parameter(Mandatory=$false)]
     [int] $VmIndex = 1,
     [Parameter(Mandatory=$false)]
-    [ValidateSet("xsmall","small","medium","large","xlarge")]
+    [ValidateSet("xsmall","small","medium","large","xlarge","rx")]
     [string] $VmSize = 'small',
     [Parameter(Mandatory=$false)]
     [int] $VmCount = 1,
@@ -236,7 +236,7 @@ New-AzureRMResourceGroupDeployment -Name "$($VmPrefix)-vm-$(Get-Date -Format yyy
 $Results = @()
 for( $i = $VmParameters.vmIndexOffset; $i -lt ( $VmParameters.vmIndexOffset + $VmParameters.vmCount ); $i++ )
 {
-  $ThisVmName = "$($VmParameters.vmNamePrefix)$($i.ToString().PadLeft( 3, '0' ))"
+  $ThisVmName = "$($VmParameters.vmNamePrefix)$($i.ToString().PadLeft( 2, '0' ))"
   $NicName    = "$($ThisVmName)nic01"
   $Nic        = Get-AzureRmNetworkInterface -Name $NicName -ResourceGroupName $ResourceGroupName
   $Results   += "$($ThisVmName) $($Nic.IpConfigurations[0].PrivateIpAddress)"

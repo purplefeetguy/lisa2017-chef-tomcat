@@ -9,18 +9,6 @@
         "description": "Deployment location (ex. West US)"
       }
     },
-    /* WIP
-     * It should have all of the same tags that we would put in chef
-     * but azure tags are key, value pairs so they need names
-     * which requires some context about the values that is not currently
-     * available
-    "tags": {
-      "type": "array",
-      "metadata": {
-        "description": ""
-      }
-    },
-    */
     "tagAppNameValue": {
       "type": "string",
       "metadata": {
@@ -40,27 +28,15 @@
         "description": "Tag for security zone (ex. Internal Non-Sensitive Dev-Test)"
       }
     },
-    "vmNamePrefix": {
+    "vmName": {
       "type": "string",
       "metadata": {
-        "description": "Name of the VM (ex. uldyvm-azpcc)"
-      }
-    },
-    "vmIndexOffset": {
-      "type": "int",
-      "metadata": {
-        "description": "the beginning index for the set of VMs being created (ex. 20 -> uldyvm-azpcc20,21,22,23,etc)"
-      }
-    },
-    "vmCount": {
-      "type": "int",
-      "metadata": {
-        "description": "number of VMs to create for this set"
+        "description": "Name of the VM (ex. uldyvm-azpcc01)"
       }
     },
     "vmSize": {
       "type": "string",
-      "defaultValue": "Standard_DS2",
+      "defaultValue": "West US",
       "metadata": {
         "description": "Size of the VM (ex. Standard_DS2)"
       }
@@ -103,7 +79,7 @@
       "type": "string",
       "defaultValue": "7.3",
       "metadata": {
-        "description": "The Linux version for the VM. (ex. 7.2)"
+        "description": "The Linux version for the VM.(ex. 7.2)"
       }
     },
     "imageRelease": {
@@ -145,6 +121,12 @@
         "description": "Name of the subnet where the VM is being deployed (ex. WEB, APP, DB, INF)"
       }
     },
+    "ipAddress": {
+      "type": "string",
+      "metadata": {
+        "description": "Private IP Address for the VM (ex. 172.17.45.9)"
+      }
+    },
     "diagStorAcctName": {
       "type": "string",
       "metadata": {
@@ -165,16 +147,12 @@
     {
       "apiVersion": "[variables('networkApiVersion')]",
       "type": "Microsoft.Network/networkInterfaces",
-      "name": "[concat(parameters('vmNamePrefix'), padLeft(copyIndex(parameters('vmIndexOffset')),2,'0'), 'nic01')]",
+      "name": "[concat(parameters('vmName'), 'nic01')]",
       "location": "[parameters('location')]",
       "tags": {
         "[variables('tagAppName')]": "[parameters('tagAppNameValue')]",
         "[variables('tagAppEnv')]": "[parameters('tagAppEnvValue')]",
         "[variables('tagSecZone')]": "[parameters('tagSecZoneValue')]"
-      },
-      "copy":{
-        "name": "niccopy",
-        "count" : "[parameters('vmCount')]"
       },
       "properties": {
         "ipConfigurations": [
@@ -194,19 +172,15 @@
     {
       "apiVersion": "[variables('computeApiVersion')]",
       "type": "Microsoft.Compute/virtualMachines",
-      "name": "[concat(parameters('vmNamePrefix'), padLeft(copyIndex(parameters('vmIndexOffset')),2,'0'))]",
+      "name": "[parameters('vmName')]",
       "location": "[parameters('location')]",
       "tags": {
         "[variables('tagAppName')]": "[parameters('tagAppNameValue')]",
         "[variables('tagAppEnv')]": "[parameters('tagAppEnvValue')]",
         "[variables('tagSecZone')]": "[parameters('tagSecZoneValue')]"
       },
-      "copy":{
-        "name": "vmcopy",
-        "count": "[parameters('vmCount')]"
-      },
       "dependsOn": [
-        "[concat('Microsoft.Network/networkInterfaces/', parameters('vmNamePrefix'), padLeft(copyIndex(parameters('vmIndexOffset')),2,'0'), 'nic01')]"
+        "[concat('Microsoft.Network/networkInterfaces/', parameters('vmName'), 'nic01')]"
       ],
       "properties": {
         "hardwareProfile": {
@@ -220,14 +194,14 @@
             "version": "[parameters('imageRelease')]"
           },
           "osDisk": {
-            "name": "[concat(parameters('vmNamePrefix'), padLeft(copyIndex(parameters('vmIndexOffset')),2,'0'), '-OS')]",
+            "name": "[concat(parameters('vmName'), '-OS')]",
             "createOption": "FromImage",
             "caching": "ReadWrite",
             "managedDisk": {"storageAccountType": "[parameters('managedDiskType')]"}
           },
           "dataDisks": [
             {
-              "name": "[concat(parameters('vmNamePrefix'), padLeft(copyIndex(parameters('vmIndexOffset')),2,'0'), '-Data0')]",
+              "name": "[concat(parameters('vmName'), '-Data0')]",
               "diskSizeGB": "[parameters('dataDiskSizeInGB')]",
               "lun": 1,
               "createOption": "Empty",
@@ -237,14 +211,31 @@
           ]
         },
         "osProfile": {
-          "computerName": "[concat(parameters('vmNamePrefix'), padLeft(copyIndex(parameters('vmIndexOffset')),2,'0'))]",
+          "computerName": "[parameters('vmName')]",
           "adminUsername": "[parameters('adminUserName')]",
-          "adminPassword": "[parameters('adminPassword')]"
+          "adminPassword": "[parameters('adminPassword')]",
+          "customData": "JGNlcnQgPSBOZXctU2VsZlNpZ25lZENlcnRpZmljYXRlIC1EbnNOYW1lICRlbnY6Q09NUFVURVJOQU1FIC1DZXJ0U3RvcmVMb2NhdGlvbiBDZXJ0OlxMb2NhbE1hY2hpbmVcTXkKJGNvbmZpZyA9ICdAe0NlcnRpZmljYXRlVGh1bWJwcmludD0iJyArICRjZXJ0LlRodW1icHJpbnQgKyAnIn0nCndpbnJtIGNyZWF0ZSB3aW5ybS9jb25maWcvbGlzdGVuZXI/QWRkcmVzcz0qK1RyYW5zcG9ydD1IVFRQUyAkY29uZmlnCndpbnJtIHNldCB3aW5ybS9jb25maWcvc2VydmljZS9hdXRoICdAe0Jhc2ljPSJ0cnVlIjtLZXJiZXJvcz0iZmFsc2UiO05lZ290aWF0ZT0idHJ1ZSI7Q2VydGlmaWNhdGU9ImZhbHNlIjtDcmVkU1NQPSJ0cnVlIn0nCk5ldy1OZXRGaXJld2FsbFJ1bGUgLURpc3BsYXlOYW1lICJXaW5kb3dzIFJlbW90ZSBNYW5hZ2VtZW50IChIVFRQUy1JbikiIC1OYW1lICJXaW5kb3dzIFJlbW90ZSBNYW5hZ2VtZW50IChIVFRQUy1JbikiIC1Qcm9maWxlIEFueSAtTG9jYWxQb3J0IDU5ODYgLVByb3RvY29sIFRDUAp3aW5ybSBzZXQgd2lucm0vY29uZmlnL3NlcnZpY2UgJ0B7QWxsb3dVbmVuY3J5cHRlZD0idHJ1ZSJ9JwpOZXctTmV0RmlyZXdhbGxSdWxlIC1EaXNwbGF5TmFtZSAiV2luZG93cyBSZW1vdGUgTWFuYWdlbWVudCAoSFRUUC1JbikiIC1OYW1lICJXaW5kb3dzIFJlbW90ZSBNYW5hZ2VtZW50IChIVFRQLUluKSIgLVByb2ZpbGUgQW55IC1Mb2NhbFBvcnQgNTk4NSAtUHJvdG9jb2wgVENQCg==",
+          "windowsConfiguration": {
+            "additionalUnattendContent": [
+              {
+                "passName": "oobeSystem",
+                "componentName": "Microsoft-Windows-Shell-Setup",
+                "settingName": "FirstLogonCommands",
+                "content": "<FirstLogonCommands><SynchronousCommand><CommandLine>cmd /c \"copy C:\\AzureData\\CustomData.bin C:\\Config.ps1\"</CommandLine><Description>copy</Description><Order>1</Order></SynchronousCommand><SynchronousCommand><CommandLine>%windir%\\System32\\WindowsPowerShell\\v1.0\\powershell.exe -NoProfile -ExecutionPolicy Bypass -file C:\\Config.ps1</CommandLine><Description>script</Description><Order>2</Order></SynchronousCommand></FirstLogonCommands>"
+              },
+              {
+                "passName": "oobeSystem",
+                "componentName": "Microsoft-Windows-Shell-Setup",
+                "settingName": "AutoLogon",
+                "content": "[concat('<AutoLogon><Password><Value>', parameters('adminPassword'), '</Value></Password><Enabled>true</Enabled><LogonCount>1</LogonCount><Username>', parameters('adminUserName'), '</Username></AutoLogon>')]"
+              }
+            ]
+          }
         },
         "networkProfile": {
           "networkInterfaces": [
             {
-              "id": "[resourceId('Microsoft.Network/networkInterfaces/', concat(parameters('vmNamePrefix'), padLeft(copyIndex(parameters('vmIndexOffset')),2,'0'), 'nic01'))]"
+              "id": "[resourceId('Microsoft.Network/networkInterfaces/', concat(parameters('vmName'), 'nic01'))]"
             }
           ]
         },

@@ -177,3 +177,10 @@ New-AzureRMResourceGroupDeployment  -Name "$($ResourceGroupName)-deployment-$(ge
                                     -TemplateFile $TemplateFile `
                                     -TemplateParameterFile $ParameterFile `
                                     -Mode Incremental
+
+#
+# This needs to collect the IP address value and return it just like the other one so that
+# it can be used in the same way.
+# we have to find a way to keep this working with what information is present in the parameters
+# which is much more variable here.
+#

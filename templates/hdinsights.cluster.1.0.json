@@ -110,7 +110,7 @@
     },
     "zookeeperSize": {
       "type": "string",
-      "defaultValue": "Standard_D3_V2",
+      "defaultValue": "Large",
       "metadata": {
         "description": "Machine size for zookeeper nodes"
       }

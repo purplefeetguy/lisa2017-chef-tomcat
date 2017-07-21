@@ -108,27 +108,6 @@
         "description": "Target number of worker nodes that should be running"
       }
     },
-    "zookeeperSize": {
-      "type": "string",
-      "defaultValue": "Large",
-      "metadata": {
-        "description": "Machine size for zookeeper nodes"
-      }
-    },
-    "zookeeperMin": {
-      "type": "int",
-      "defaultValue": 1,
-      "metadata": {
-        "description": "Minimum number of zookeeper nodes that can be running"
-      }
-    },
-    "zookeeperTarget": {
-      "type": "int",
-      "defaultValue": 3,
-      "metadata": {
-        "description": "Target number of zookeeper nodes that should be running"
-      }
-    },
     "vnetResGrp": {
       "type": "string",
       "defaultValue": "srsgrp-azshr01",
@@ -242,25 +221,6 @@
               "targetInstanceCount": "[parameters('workerTarget')]",
               "hardwareProfile": {
                 "vmSize": "[parameters('workerSize')]"
-              },
-              "osProfile": {
-                "linuxOperatingSystemProfile": {
-                  "username": "[variables('adminUsername')]",
-                  "password": "[variables('adminPassword')]"
-                }
-              },
-              "virtualNetworkProfile": {
-                "id": "[variables('vnetId')]",
-                "subnet": "[variables('subnetId')]"
-              },
-              "scriptActions": []
-            },
-            {
-              "name": "zookeepernode",
-              "minInstanceCount": "[parameters('zookeeperMin')]",
-              "targetInstanceCount": "[parameters('zookeeperTarget')]",
-              "hardwareProfile": {
-                "vmSize": "[parameters('zookeeperSize')]"
               },
               "osProfile": {
                 "linuxOperatingSystemProfile": {

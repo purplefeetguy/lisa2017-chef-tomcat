@@ -1,0 +1,38 @@
+{
+  "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "location": {
+      "value": "West US"
+    },
+    "appNameTag": {
+      "value": "InfraHDInsightsPOC"
+    },
+    "appEnvTag": {
+      "value": "Sandbox"
+    },
+    "secZoneTag": {
+      "value": "Internal Non-Sensitive Dev-Test"
+    },
+    "clusterName": {
+      "value": "hbase-rxr-hdi-poc"
+    },
+    "clusterKind": {
+      "value": "hbase"
+    },
+    "clusterUsername": {
+      "value": "wagsadmin"
+    },
+    "clusterPassword": {
+      "value": "Iamareallylongthing1!"
+    },
+    "subnetName": {
+      "value": "APP"
+    }
+  },
+  "deploymentDetails": {
+    "subscriptionName": "WAGS Sandbox",
+    "resourceGroupName": "rxr-hdi-poc",
+    "templateFile": "hdinsights.cluster.1.0.json"
+  }
+}

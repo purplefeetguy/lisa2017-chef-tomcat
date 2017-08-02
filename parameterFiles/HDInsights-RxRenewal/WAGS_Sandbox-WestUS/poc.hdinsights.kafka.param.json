@@ -33,6 +33,6 @@
   "deploymentDetails": {
     "subscriptionName": "WAGS Sandbox",
     "resourceGroupName": "rxr-hdi-poc",
-    "templateFile": "hdinsights.cluster.1.0.json"
+    "templateFile": "hdinsights.kafka.cluster.1.0.json"
   }
 }

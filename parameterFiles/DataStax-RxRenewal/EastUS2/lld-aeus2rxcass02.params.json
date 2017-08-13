@@ -24,7 +24,7 @@
       "value": 1
     },
     "ipAddress": {
-      "value": ""
+      "value": "10.217.24.101"
     },
     "vmName": {
       "value": "lld-aeus2rxcass02"
@@ -57,7 +57,7 @@
       "value": "db01"
     },
     "diagStorAcctName": {
-      "value": "dstxcassdiageus2"
+      "value": "cassdiageus2"
     }
   },
   "deploymentDetails": {

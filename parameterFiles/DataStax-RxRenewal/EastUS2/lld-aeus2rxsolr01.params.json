@@ -24,7 +24,7 @@
       "value": 3
     },
     "ipAddress": {
-      "value": ""
+      "value": "10.217.24.103"
     },
     "vmName": {
       "value": "lld-aeus2rxsolr01"
@@ -51,12 +51,12 @@
       "value": "db01"
     },
     "diagStorAcctName": {
-      "value": "dstxsolrdiageus2"
+      "value": "solrdiageus2"
     }
   },
   "deploymentDetails": {
     "subscriptionName": "WBA-DTN",
     "resourceGroupName": "datastax-cassandra-eus2",
-    "templateFile": ".\\vm.datastax.cassandra.single.dynamic.av.1.0.json"
+    "templateFile": ".\\vm.datastax.cassandra.single.dynamic.av.backup.1.0.json"
   }
 }

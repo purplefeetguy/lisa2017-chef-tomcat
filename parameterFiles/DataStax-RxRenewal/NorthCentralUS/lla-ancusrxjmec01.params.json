@@ -15,7 +15,7 @@
       "value": "dtn"
     },
     "ipAddress": {
-      "value": ""
+      "value": "10.217.26.135"
     },
     "vmName": {
       "value": "lla-ancusrxjmec01"
@@ -48,6 +48,6 @@
   "deploymentDetails": {
     "subscriptionName": "WBA-DTN",
     "resourceGroupName": "datastax-cassandra-ncus",
-    "templateFile": ".\\vm.single.dynamic.1.0.json"
+    "templateFile": ".\\vm.single.1.0.json"
   }
 }

@@ -24,7 +24,7 @@
       "value": 3
     },
     "ipAddress": {
-      "value": ""
+      "value": "10.217.34.106"
     },
     "vmName": {
       "value": "lld-awurxsolr01"
@@ -57,6 +57,6 @@
   "deploymentDetails": {
     "subscriptionName": "WBA-DTN",
     "resourceGroupName": "datastax-cassandra",
-    "templateFile": ".\\vm.datastax.cassandra.single.av.1.0.json"
+    "templateFile": ".\\vm.datastax.cassandra.single.dynamic.av.backup.1.0.json"
   }
 }

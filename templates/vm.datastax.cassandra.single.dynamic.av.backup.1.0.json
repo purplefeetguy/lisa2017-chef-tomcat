@@ -54,13 +54,6 @@
         "description": "Size in GB for the data disk attached to the VM (ex. 128)"
       }
     },
-    "diskSizeInGB": {
-      "type": "int",
-      "defaultValue": 128,
-      "metadata": {
-        "description": "Size in GB for the data disk attached to the VM (ex. 128)"
-      }
-    },
     "backupDiskSizeInGB": {
       "type": "int",
       "defaultValue": 128,
@@ -204,7 +197,9 @@
             "createOption": "FromImage",
             "diskSizeGB": "[parameters('osDiskSizeInGB')]",
             "caching": "ReadWrite",
-            "managedDisk": { "storageAccountType": "[parameters('managedDiskType')]" }
+            "managedDisk": {
+              "storageAccountType": "[parameters('managedDiskType')]"
+            }
           },
           "dataDisks": [
             {
@@ -213,7 +208,9 @@
               "lun": 1,
               "createOption": "Empty",
               "caching": "None",
-              "managedDisk": { "storageAccountType": "[parameters('managedDiskType')]" }
+              "managedDisk": {
+                "storageAccountType": "[parameters('managedDiskType')]"
+              }
             },
             {
               "name": "[concat(parameters('vmName'), '-data2')]",
@@ -221,7 +218,9 @@
               "lun": 2,
               "createOption": "Empty",
               "caching": "None",
-              "managedDisk": { "storageAccountType": "[parameters('managedDiskType')]" }
+              "managedDisk": {
+                "storageAccountType": "[parameters('managedDiskType')]"
+              }
             },
             {
               "name": "[concat(parameters('vmName'), '-backup1')]",
@@ -229,7 +228,9 @@
               "lun": 3,
               "createOption": "Empty",
               "caching": "None",
-              "managedDisk": { "storageAccountType": "[parameters('managedBackupDiskType')]" }
+              "managedDisk": {
+                "storageAccountType": "[parameters('managedBackupDiskType')]"
+              }
             },
             {
               "name": "[concat(parameters('vmName'), '-backup2')]",
@@ -237,7 +238,9 @@
               "lun": 4,
               "createOption": "Empty",
               "caching": "None",
-              "managedDisk": { "storageAccountType": "[parameters('managedBackupDiskType')]" }
+              "managedDisk": {
+                "storageAccountType": "[parameters('managedBackupDiskType')]"
+              }
             }
           ]
         },

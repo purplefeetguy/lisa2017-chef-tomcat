@@ -49,7 +49,7 @@
     },
     "clusterVersion": {
       "type": "string",
-      "defaultValue": "3.5",
+      "defaultValue": "3.6",
       "metadata": {
         "description": "HDInsight cluster version."
       }
@@ -129,115 +129,127 @@
       "metadata": {
         "description": "Name of the subnet where the resource is being deployed (default: DB)"
       }
-    }
-  },
-  "variables": {
-    "clusterStorageAccountName": "[concat(replace(parameters('clusterName'),'-',''),'store')]",
-    "adminUsername": "wagsadmin",
-    "adminPassword": "Welcome123!",
-    "storageApiVersionLatest": "[providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]]",
-    "storageApiVersion": "2015-05-01-preview",
-    "hdinsightsApiVersionLatest": "[providers('Microsoft.HDInsight', 'clusters').apiVersions[0]]",
-    "hdinsightsApiVersion": "2015-03-01-preview",
-    "vnetId": "[resourceId(parameters('vnetResGrp'), 'Microsoft.Network/virtualNetworks', parameters('vnetName'))]",
-    "subnetId": "[concat(variables('vnetId'),'/subnets/', parameters('subnetName'))]"
-  },
-  "resources": [
-    {
-      "name": "[variables('clusterStorageAccountName')]",
-      "type": "Microsoft.Storage/storageAccounts",
-      "location": "[parameters('location')]",
-      "apiVersion": "[variables('storageApiVersion')]",
-      "dependsOn": [],
-      "tags": {
-        "AppName": "[parameters('appNameTag')]",
-        "AppEnv": "[parameters('appEnvTag')]",
-        "SecZone": "[parameters('secZoneTag')]"
-      },
-      "properties": {
-        "accountType": "Standard_LRS"
+    },
+    "linkedStorageAccountName": {
+      "type": "string",
+      "metadata": {
+        "description": "The short name of the default Azure storage account name. This account needs to be secure transfer enabled."
       }
     },
-    {
-      "apiVersion": "[variables('hdinsightsApiVersion')]",
-      "name": "[parameters('clusterName')]",
-      "type": "Microsoft.HDInsight/clusters",
-      "location": "[parameters('location')]",
-      "tags": {
-        "AppName": "[parameters('appNameTag')]",
-        "AppEnv": "[parameters('appEnvTag')]",
-        "SecZone": "[parameters('secZoneTag')]"
-      },
-      "dependsOn": [
-        "[concat('Microsoft.Storage/storageAccounts/',variables('clusterStorageAccountName'))]"
-      ],
-      "properties": {
-        "clusterVersion": "[parameters('clusterVersion')]",
-        "osType": "Linux",
-        "tier": "standard",
-        "clusterDefinition": {
-          "kind": "[parameters('clusterKind')]",
-          "configurations": {
-            "gateway": {
-              "restAuthCredential.isEnabled": true,
-              "restAuthCredential.username": "[parameters('clusterUsername')]",
-              "restAuthCredential.password": "[parameters('clusterPassword')]"
-            }
-          }
-        },
-        "storageProfile": {
-          "storageaccounts": [
-            {
-              "name": "[concat(variables('clusterStorageAccountName'),'.blob.core.windows.net')]",
-              "isDefault": true,
-              "container": "[replace(parameters('clusterName'),'-','')]",
-              "key": "[listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('clusterStorageAccountName')), variables('storageApiVersion')).key1]"
-            }
-          ]
-        },
-        "computeProfile": {
-          "roles": [
-            {
-              "name": "headnode",
-              "minInstanceCount": "[parameters('headMin')]",
-              "targetInstanceCount": "[parameters('headTarget')]",
-              "hardwareProfile": {
-                "vmSize": "[parameters('headSize')]"
-              },
-              "osProfile": {
-                "linuxOperatingSystemProfile": {
-                  "username": "[variables('adminUsername')]",
-                  "password": "[variables('adminPassword')]"
-                }
-              },
-              "virtualNetworkProfile": {
-                "id": "[variables('vnetId')]",
-                "subnet": "[variables('subnetId')]"
-              },
-              "scriptActions": []
-            },
-            {
-              "name": "workernode",
-              "minInstanceCount": "[parameters('workerMin')]",
-              "targetInstanceCount": "[parameters('workerTarget')]",
-              "hardwareProfile": {
-                "vmSize": "[parameters('workerSize')]"
-              },
-              "osProfile": {
-                "linuxOperatingSystemProfile": {
-                  "username": "[variables('adminUsername')]",
-                  "password": "[variables('adminPassword')]"
-                }
-              },
-              "virtualNetworkProfile": {
-                "id": "[variables('vnetId')]",
-                "subnet": "[variables('subnetId')]"
-              },
-              "scriptActions": []
-            }
-          ]
-        }
+    "linkedStorageAccountKey": {
+      "type": "string",
+      "metadata": {
+        "description": "The key of the default storage account."
       }
     }
-  ]
-}
+  },
+    "variables": {
+      "clusterStorageAccountName": "[concat(replace(parameters('clusterName'),'-',''),'store')]",
+      "adminUsername": "wagsadmin",
+      "adminPassword": "Welcome123!",
+      "storageApiVersionLatest": "[providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]]",
+      "storageApiVersion": "2015-05-01-preview",
+      "hdinsightsApiVersionLatest": "[providers('Microsoft.HDInsight', 'clusters').apiVersions[0]]",
+      "hdinsightsApiVersion": "2015-03-01-preview",
+      "vnetId": "[resourceId(parameters('vnetResGrp'), 'Microsoft.Network/virtualNetworks', parameters('vnetName'))]",
+      "subnetId": "[concat(variables('vnetId'),'/subnets/', parameters('subnetName'))]"
+    },
+    "resources": [
+      {
+        "name": "[variables('clusterStorageAccountName')]",
+        "type": "Microsoft.Storage/storageAccounts",
+        "location": "[parameters('location')]",
+        "apiVersion": "[variables('storageApiVersion')]",
+        "dependsOn": [],
+        "tags": {
+          "AppName": "[parameters('appNameTag')]",
+          "AppEnv": "[parameters('appEnvTag')]",
+          "SecZone": "[parameters('secZoneTag')]"
+        },
+        "properties": {
+          "accountType": "Standard_LRS"
+        }
+      },
+      {
+        "apiVersion": "[variables('hdinsightsApiVersion')]",
+        "name": "[parameters('clusterName')]",
+        "type": "Microsoft.HDInsight/clusters",
+        "location": "[parameters('location')]",
+        "tags": {
+          "AppName": "[parameters('appNameTag')]",
+          "AppEnv": "[parameters('appEnvTag')]",
+          "SecZone": "[parameters('secZoneTag')]"
+        },
+        "dependsOn": [
+          "[concat('Microsoft.Storage/storageAccounts/',variables('clusterStorageAccountName'))]"
+        ],
+        "properties": {
+          "clusterVersion": "[parameters('clusterVersion')]",
+          "osType": "Linux",
+          "tier": "standard",
+          "clusterDefinition": {
+            "kind": "[parameters('clusterKind')]",
+            "configurations": {
+              "gateway": {
+                "restAuthCredential.isEnabled": true,
+                "restAuthCredential.username": "[parameters('clusterUsername')]",
+                "restAuthCredential.password": "[parameters('clusterPassword')]"
+              }
+            }
+          },
+          "storageProfile": {
+            "storageaccounts": [
+              {
+                "name": "[concat(variables('clusterStorageAccountName'),'.blob.core.windows.net')]",
+                "isDefault": true,
+                "container": "[replace(parameters('clusterName'),'-','')]",
+                "key": "[listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('clusterStorageAccountName')), variables('storageApiVersion')).key1]"
+              }
+            ]
+          },
+          "computeProfile": {
+            "roles": [
+              {
+                "name": "headnode",
+                "minInstanceCount": "[parameters('headMin')]",
+                "targetInstanceCount": "[parameters('headTarget')]",
+                "hardwareProfile": {
+                  "vmSize": "[parameters('headSize')]"
+                },
+                "osProfile": {
+                  "linuxOperatingSystemProfile": {
+                    "username": "[variables('adminUsername')]",
+                    "password": "[variables('adminPassword')]"
+                  }
+                },
+                "virtualNetworkProfile": {
+                  "id": "[variables('vnetId')]",
+                  "subnet": "[variables('subnetId')]"
+                },
+                "scriptActions": []
+              },
+              {
+                "name": "workernode",
+                "minInstanceCount": "[parameters('workerMin')]",
+                "targetInstanceCount": "[parameters('workerTarget')]",
+                "hardwareProfile": {
+                  "vmSize": "[parameters('workerSize')]"
+                },
+                "osProfile": {
+                  "linuxOperatingSystemProfile": {
+                    "username": "[variables('adminUsername')]",
+                    "password": "[variables('adminPassword')]"
+                  }
+                },
+                "virtualNetworkProfile": {
+                  "id": "[variables('vnetId')]",
+                  "subnet": "[variables('subnetId')]"
+                },
+                "scriptActions": []
+              }
+            ]
+          }
+        }
+      }
+    ]
+  }

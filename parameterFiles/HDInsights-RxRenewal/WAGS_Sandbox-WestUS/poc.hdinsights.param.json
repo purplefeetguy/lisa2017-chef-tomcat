@@ -28,6 +28,12 @@
     },
     "subnetName": {
       "value": "APP"
+    },
+    "linkedStorageAccountName": {
+      "value": "rxrhdipoccommon"
+    },
+    "linkedStorageAccountKey": {
+      "value": "OJiDB9Xg7tmMXrhqNK4NKkJ0lTTc2Gon1xTVgCIskVWgtJMpv79y4fOmIPMT3lsMbtoyk6fpSQ/88KxBj+5Gng=="
     }
   },
   "deploymentDetails": {

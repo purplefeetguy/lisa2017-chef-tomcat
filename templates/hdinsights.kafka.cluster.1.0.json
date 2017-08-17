@@ -49,7 +49,7 @@
     },
     "clusterVersion": {
       "type": "string",
-      "defaultValue": "3.5",
+      "defaultValue": "3.6",
       "metadata": {
         "description": "HDInsight cluster version."
       }
@@ -128,6 +128,18 @@
       "defaultValue": "DB",
       "metadata": {
         "description": "Name of the subnet where the resource is being deployed (default: DB)"
+      }
+    },
+    "linkedStorageAccountName": {
+      "type": "string",
+      "metadata": {
+        "description": "The short name of the default Azure storage account name. This account needs to be secure transfer enabled."
+      }
+    },
+    "linkedStorageAccountKey": {
+      "type": "string",
+      "metadata": {
+        "description": "The key of the default storage account."
       }
     }
   },

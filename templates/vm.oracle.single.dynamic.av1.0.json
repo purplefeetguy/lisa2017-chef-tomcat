@@ -1,0 +1,282 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "location": {
+            "type": "string",
+            "defaultValue": "West US",
+            "metadata": {
+                "description": "Deployment location (ex. West US)"
+            }
+        },
+        /* WIP
+     * It should have all of the same tags that we would put in chef
+     * but azure tags are key, value pairs so they need names
+     * which requires some context about the values that is not currently
+     * available
+    "tags": {
+      "type": "array",
+      "metadata": {
+        "description": ""
+      }
+    },
+    */
+        "AppNameTag": {
+            "type": "string",
+            "metadata": {
+                "description": "Tag for application name (ex. PCC)"
+            }
+        },
+        "AppEnvTag": {
+            "type": "string",
+            "metadata": {
+                "description": "Tag for application environment (ex. Dev, QA, Prodfix, Perf, Prod)"
+            }
+        },
+        "SecZoneTag": {
+            "type": "string",
+            "defaultValue": "West US",
+            "metadata": {
+                "description": "Tag for security zone (ex. Internal Non-Sensitive Dev-Test)"
+            }
+        },
+        "vmName": {
+            "type": "string",
+            "metadata": {
+                "description": "Name of the VM (ex. uldyvm-azpcc01)"
+            }
+        },
+        "vmSize": {
+            "type": "string",
+            "defaultValue": "West US",
+            "metadata": {
+                "description": "Size of the VM (ex. Standard_DS2)"
+            }
+        },
+        "asmDiskSizeInGB": {
+            "type": "int",
+            "defaultValue": 128,
+            "metadata": {
+                "description": "Size in GB for the data disk attached to the VM (ex. 128)"
+            }
+        },
+        "dataDiskSizeInGB": {
+            "type": "int",
+            "defaultValue": 256,
+            "metadata": {
+                "description": "Size in GB for the data disk attached to the VM (ex. 128)"
+            }
+        },
+        "managedDiskType": {
+            "type": "string",
+            "defaultValue": "Premium_LRS",
+            "allowedValues": [
+                "Standard_LRS",
+                "Standard_GRS",
+                "Standard_ZRS",
+                "Premium_LRS"
+            ],
+            "metadata": {
+                "description": "Storage Account type"
+            }
+        },
+        "adminUserName": {
+            "type": "string",
+            "defaultValue": "wagsadmin",
+            "metadata": {
+                "description": "Local admin user for the VM (ex. wagsadmin)"
+            }
+        },
+        "adminPassword": {
+            "type": "string",
+            "defaultValue": "Welcome123!",
+            "metadata": {
+                "description": "Local admin password for the VM"
+            }
+        },
+        "vnetResGrp": {
+            "type": "string",
+            "metadata": {
+                "description": "Resource group for the VNet where the VM is being deployed (ex. drsgrp-azshr01)"
+            }
+        },
+        "vnetName": {
+            "type": "string",
+            "metadata": {
+                "description": "Name of the VNet where the VM is being deployed (ex. dvnetw-azshr01)"
+            }
+        },
+        "subnetName": {
+            "type": "string",
+            "metadata": {
+                "description": "Name of the subnet where the VM is being deployed (ex. WEB, APP, DB, INF)"
+            }
+        },
+        "ipAddress": {
+            "type": "string",
+            "metadata": {
+                "description": "Private IP Address for the VM (ex. 172.17.45.9)"
+            }
+        },
+        "diagStorAcctName": {
+            "type": "string",
+            "metadata": {
+                "description": "The storage account to use for boot diagnostics data (ex. ussacazpcc03)"
+            }
+        },
+        "avName": {
+            "type": "string",
+            "minLength": 1
+        },
+        "avUpdateDomainCount": {
+            "type": "int"
+        },
+        "avFaultDomainCount": {
+            "type": "int"
+        }
+    },
+    "variables": {
+        "computeApiVersion": "2016-04-30-preview",
+        "networkApiVersion": "2016-03-30",
+        "imagePublisher": "RedHat",
+        "imageOffer": "RHEL",
+        "imageVersion": "7.3",
+        "imageRelease": "latest",
+        "vnetId": "[resourceId(parameters('vnetResGrp'), 'Microsoft.Network/virtualNetworks', parameters('vnetName'))]",
+        "subnetId": "[concat(variables('vnetId'),'/subnets/', parameters('subnetName'))]"
+    },
+    "resources": [
+        {
+            "apiVersion": "[variables('networkApiVersion')]",
+            "type": "Microsoft.Network/networkInterfaces",
+            "name": "[concat(parameters('vmName'), '-nic01')]",
+            "location": "[parameters('location')]",
+            "tags": {
+                "AppName": "[parameters('AppNameTag')]",
+                "AppEnv": "[parameters('AppEnvTag')]",
+                "SecZone": "[parameters('SecZoneTag')]"
+            },
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "ipConfig",
+                        "properties": {
+                            "privateIPAllocationMethod": "Dynamic",
+                            "privateIPAddress": "[parameters('ipAddress')]",
+                            "subnet": {
+                                "id": "[variables('subnetId')]"
+                            }
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "apiVersion": "[variables('computeApiVersion')]",
+            "type": "Microsoft.Compute/virtualMachines",
+            "name": "[parameters('vmName')]",
+            "location": "[parameters('location')]",
+            "tags": {
+                "AppName": "[parameters('AppNameTag')]",
+                "AppEnv": "[parameters('AppEnvTag')]",
+                "SecZone": "[parameters('SecZoneTag')]"
+            },
+            "dependsOn": [
+                "[concat('Microsoft.Network/networkInterfaces/', parameters('vmName'), '-nic01')]"
+            ],
+            "properties": {
+                "availabilitySet": {
+                    "id": "[resourceId('Microsoft.Compute/availabilitySets', parameters('avName'))]"
+                },
+                "hardwareProfile": {
+                    "vmSize": "[parameters('vmSize')]"
+                },
+                "storageProfile": {
+                    "imageReference": {
+                        "publisher": "[variables('imagePublisher')]",
+                        "offer": "[variables('imageOffer')]",
+                        "sku": "[variables('imageVersion')]",
+                        "version": "[variables('imageRelease')]"
+                    },
+                    "osDisk": {
+                        "name": "[concat(parameters('vmName'), '-OS')]",
+                        "createOption": "FromImage",
+                        "caching": "ReadWrite",
+                        "managedDisk": {
+                            "storageAccountType": "[parameters('managedDiskType')]"
+                        }
+                    },
+                    "dataDisks": [
+                        {
+                            "name": "[concat(parameters('vmName'), '-Data01')]",
+                            "diskSizeGB": "[parameters('asmDiskSizeInGB')]",
+                            "lun": 1,
+                            "createOption": "Empty",
+                            "caching": "None",
+                            "managedDisk": {
+                                "storageAccountType": "[parameters('managedDiskType')]"
+                            }
+                        },
+                        {
+                            "name": "[concat(parameters('vmName'), '-Data02')]",
+                            "diskSizeGB": "[parameters('asmDiskSizeInGB')]",
+                            "lun": 2,
+                            "createOption": "Empty",
+                            "caching": "None",
+                            "managedDisk": {
+                                "storageAccountType": "[parameters('managedDiskType')]"
+                            }
+                        },
+                        {
+                            "name": "[concat(parameters('vmName'), '-Data03')]",
+                            "diskSizeGB": "[parameters('dataDiskSizeInGB')]",
+                            "lun": 3,
+                            "createOption": "Empty",
+                            "caching": "None",
+                            "managedDisk": {
+                                "storageAccountType": "[parameters('managedDiskType')]"
+                            }
+                        }
+                    ]
+                },
+                "osProfile": {
+                    "computerName": "[parameters('vmName')]",
+                    "adminUsername": "[parameters('adminUserName')]",
+                    "adminPassword": "[parameters('adminPassword')]"
+                },
+                "networkProfile": {
+                    "networkInterfaces": [
+                        {
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces/', concat(parameters('vmName'), '-nic01'))]"
+                        }
+                    ]
+                },
+                "diagnosticsProfile": {
+                    "bootDiagnostics": {
+                        "enabled": true,
+                        "storageUri": "[concat('https://', parameters('diagStorAcctName'), '.blob.core.windows.net/')]"
+                    }
+                }
+            }
+        },
+        {
+            "name": "[parameters('avName')]",
+            "type": "Microsoft.Compute/availabilitySets",
+            "location": "[resourceGroup().location]",
+            "apiVersion": "2016-04-30-preview",
+            "dependsOn": [],
+            "sku": {
+              "name": "Aligned"
+            },
+            "tags": {
+              "AppName": "[parameters('AppNameTag')]",
+              "AppEnv": "[parameters('AppEnvTag')]",
+              "SecZone": "[parameters('SecZoneTag')]"
+            },
+            "properties": {
+              "platformUpdateDomainCount": 1,
+              "platformFaultDomainCount": 1
+            }
+          }
+    ]
+}

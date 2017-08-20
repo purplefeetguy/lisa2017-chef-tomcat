@@ -1,0 +1,62 @@
+{
+  "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "location": {
+      "value": "West US"
+    },
+    "AppNameTag": {
+      "value": "rxmb-sbx-wfdb"
+    },
+    "AppEnvTag": {
+      "value": "db"
+    },
+    "SecZoneTag": {
+      "value": "dtn"
+    },
+    "avName": {
+      "value": "rxwfdb-sbx-workflow"
+    },
+    "avUpdateDomainCount": {
+      "value": 6
+    },
+    "avFaultDomainCount": {
+      "value": 3
+    },
+    "ipAddress": {
+      "value": "10.217.10.133"
+    },
+    "vmName": {
+      "value": "sbx-awurxms03"
+    },
+    "vmSize": {
+      "value": "Standard_DS12_v2"
+    },
+    "asmDiskSizeInGB": {
+      "value": 512
+    },
+    "dataDiskSizeInGB": {
+      "value": 512
+    },
+    "managedDiskType": {
+      "value": "Premium_LRS"
+    },
+    "vnetResGrp": {
+      "value": "WBA-sandbox-Migrated"
+    },
+    "vnetName": {
+      "value": "WBA-sandbox"
+    },
+    "subnetName": {
+      "value": "wba-sandbox-db"
+    },
+    "diagStorAcctName": {
+      "value": "sbxrxrwfdbdiag"
+    }
+  },
+  "deploymentDetails": {
+    "subscriptionName": "WAGS Sandbox",
+    "resourceGroupName": "rxr-dtn-sbx-wus",
+    "templateFile": ".\\vm.oracle.single.av1.0.json"
+  }
+}

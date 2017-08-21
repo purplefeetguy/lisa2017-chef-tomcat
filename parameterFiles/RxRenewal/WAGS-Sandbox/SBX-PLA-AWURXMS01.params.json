@@ -6,16 +6,16 @@
       "value": "West US"
     },
     "AppNameTag": {
-      "value": "rxmb-sbx-wfdb"
+      "value": "RXR"
     },
     "AppEnvTag": {
-      "value": "db"
+      "value": "SBX"
     },
     "SecZoneTag": {
       "value": "dtn"
     },
     "avName": {
-      "value": "rxwfdb-sbx-workflow"
+      "value": "rxr-sbx-rxmsapp"
     },
     "avUpdateDomainCount": {
       "value": 6
@@ -24,22 +24,19 @@
       "value": 3
     },
     "ipAddress": {
-      "value": "10.217.10.133"
+      "value": ""
     },
     "vmName": {
-      "value": "sbx-awurxms03"
+      "value": "sbx-pla-awurxms01"
     },
     "vmSize": {
       "value": "Standard_DS12_v2"
     },
-    "asmDiskSizeInGB": {
-      "value": 512
-    },
     "dataDiskSizeInGB": {
-      "value": 512
+      "value": 128
     },
     "managedDiskType": {
-      "value": "Premium_LRS"
+      "value": "Standard_LRS"
     },
     "vnetResGrp": {
       "value": "WBA-sandbox-Migrated"
@@ -48,15 +45,15 @@
       "value": "WBA-sandbox"
     },
     "subnetName": {
-      "value": "wba-sandbox-db"
+      "value": "wba-sandbox-app"
     },
     "diagStorAcctName": {
-      "value": "sbxrxrwfdbdiag"
+      "value": "sbxrxmsappdiag"
     }
   },
   "deploymentDetails": {
     "subscriptionName": "WAGS Sandbox",
     "resourceGroupName": "rxr-dtn-sbx-wus",
-    "templateFile": ".\\vm.oracle.single.av1.0.json"
+    "templateFile": ".\\vm.single.dynamic.av.1.0.json"
   }
 }

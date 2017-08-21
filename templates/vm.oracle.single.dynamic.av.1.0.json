@@ -53,13 +53,6 @@
                 "description": "Size of the VM (ex. Standard_DS2)"
             }
         },
-        "asmDiskSizeInGB": {
-            "type": "int",
-            "defaultValue": 128,
-            "metadata": {
-                "description": "Size in GB for the data disk attached to the VM (ex. 128)"
-            }
-        },
         "dataDiskSizeInGB": {
             "type": "int",
             "defaultValue": 256,
@@ -209,7 +202,7 @@
                     "dataDisks": [
                         {
                             "name": "[concat(parameters('vmName'), '-Data01')]",
-                            "diskSizeGB": "[parameters('asmDiskSizeInGB')]",
+                            "diskSizeGB": "[parameters('dataDiskSizeInGB')]",
                             "lun": 1,
                             "createOption": "Empty",
                             "caching": "None",
@@ -219,7 +212,7 @@
                         },
                         {
                             "name": "[concat(parameters('vmName'), '-Data02')]",
-                            "diskSizeGB": "[parameters('asmDiskSizeInGB')]",
+                            "diskSizeGB": "[parameters('dataDiskSizeInGB')]",
                             "lun": 2,
                             "createOption": "Empty",
                             "caching": "None",
@@ -231,6 +224,26 @@
                             "name": "[concat(parameters('vmName'), '-Data03')]",
                             "diskSizeGB": "[parameters('dataDiskSizeInGB')]",
                             "lun": 3,
+                            "createOption": "Empty",
+                            "caching": "None",
+                            "managedDisk": {
+                                "storageAccountType": "[parameters('managedDiskType')]"
+                            }
+                        },
+                        {
+                            "name": "[concat(parameters('vmName'), '-Data04')]",
+                            "diskSizeGB": "[parameters('dataDiskSizeInGB')]",
+                            "lun": 4,
+                            "createOption": "Empty",
+                            "caching": "None",
+                            "managedDisk": {
+                                "storageAccountType": "[parameters('managedDiskType')]"
+                            }
+                        },
+                        {
+                            "name": "[concat(parameters('vmName'), '-Data05')]",
+                            "diskSizeGB": "[parameters('dataDiskSizeInGB')]",
+                            "lun": 5,
                             "createOption": "Empty",
                             "caching": "None",
                             "managedDisk": {
@@ -274,8 +287,8 @@
               "SecZone": "[parameters('SecZoneTag')]"
             },
             "properties": {
-              "platformUpdateDomainCount": 1,
-              "platformFaultDomainCount": 1
+              "platformUpdateDomainCount": "[parameters('avUpdateDomainCount')]",
+              "platformFaultDomainCount": "[parameters('avFaultDomainCount')]"
             }
           }
     ]

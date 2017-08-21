@@ -1,0 +1,59 @@
+{
+  "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "location": {
+      "value": "North Central US"
+    },
+    "AppNameTag": {
+      "value": "RXR"
+    },
+    "AppEnvTag": {
+      "value": "PROD"
+    },
+    "SecZoneTag": {
+      "value": "Internal Prod Sensitive"
+    },
+    "avName": {
+      "value": "PLD-AWURXMS"
+    },
+    "avUpdateDomainCount": {
+      "value": 6
+    },
+    "avFaultDomainCount": {
+      "value": 3
+    },
+    "ipAddress": {
+      "value": ""
+    },
+    "vmName": {
+      "value": "pld-awurxms03"
+    },
+    "vmSize": {
+      "value": "Standard_DS12_v2"
+    },
+    "dataDiskSizeInGB": {
+      "value": 512
+    },
+    "managedDiskType": {
+      "value": "Premium_LRS"
+    },
+    "vnetResGrp": {
+      "value": "rxr-sen-prod-network-ncus"
+    },
+    "vnetName": {
+      "value": "pharma-rxr-int-sen-prod"
+    },
+    "subnetName": {
+      "value": "rxr-senprod-db"
+    },
+    "diagStorAcctName": {
+      "value": "rxmsdiagstrgactdbncus01"
+    }
+  },
+  "deploymentDetails": {
+    "subscriptionName": "pharma-rxr-sen-prod",
+    "resourceGroupName": "rxr-sen-prod-db-ncus",
+    "templateFile": ".\\vm.oracle.single.dynamic.av.1.0.json"
+  }
+}

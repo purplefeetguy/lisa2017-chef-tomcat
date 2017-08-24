@@ -1,0 +1,56 @@
+{
+  "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "location": {
+      "value": "West US"
+    },
+    "AppNameTag": {
+      "value": "InfraHDInsightsPOC"
+    },
+    "AppEnvTag": {
+      "value": "app"
+    },
+    "SecZoneTag": {
+      "value": "sbx"
+    },
+    "vmName": {
+      "value": "poc-hdinsights-jbox01"
+    },
+    "vmSize": {
+      "value": "Standard_F1S"
+    },
+    "osDiskSizeInGB": {
+      "value": 128
+    },
+    "dataDiskSizeInGB": {
+      "value": 128
+    },
+    "managedDiskType": {
+      "value": "Standard_LRS"
+    },
+    "vnetResGrp": {
+      "value": "srsgrp-azshr01"
+    },
+    "vnetName": {
+      "value": "svnetw-azshr01"
+    },
+    "subnetName": {
+      "value": "APP"
+    },
+    "diagStorAcctName": {
+      "value": "pochdijbox01diag"
+    },
+    "linkedStorageAccountName": {
+      "value": "rxrhdipoccommon"
+    },
+    "linkedStorageAccountKey": {
+      "value": "OJiDB9Xg7tmMXrhqNK4NKkJ0lTTc2Gon1xTVgCIskVWgtJMpv79y4fOmIPMT3lsMbtoyk6fpSQ/88KxBj+5Gng=="
+    }
+  },
+  "deploymentDetails": {
+    "subscriptionName": "WAGS Sandbox",
+    "resourceGroupName": "rxr-hdi-poc",
+    "templateFile": "vm.baseline.single.dynamic.1.0.json"
+  }
+}

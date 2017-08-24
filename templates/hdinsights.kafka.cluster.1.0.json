@@ -1,0 +1,255 @@
+{
+  "$schema": "http://schema.management.azure.com/schemas/2014-04-01-preview/deploymentTemplate.json#",
+  "contentVersion": "0.9.0.0",
+  "parameters": {
+    "location": {
+      "type": "string",
+      "defaultValue": "West US",
+      "metadata": {
+        "description": "Deployment location (ex. West US)"
+      }
+    },
+    "appNameTag": {
+      "type": "string",
+      "metadata": {
+        "description": "Tag for application name (ex. PCC)"
+      }
+    },
+    "appEnvTag": {
+      "type": "string",
+      "metadata": {
+        "description": "Tag for application environment (ex. Dev, QA, Prodfix, Perf, Prod)"
+      }
+    },
+    "secZoneTag": {
+      "type": "string",
+      "metadata": {
+        "description": "Tag for security zone (ex. Internal Non-Sensitive Dev-Test)"
+      }
+    },
+    "clusterName": {
+      "type": "string",
+      "metadata": {
+        "description": "The name of the HDInsight cluster to create."
+      }
+    },
+    "clusterKind": {
+      "type": "string",
+      "defaultValue": "hbase",
+      "allowedValues": [
+        "hadoop",
+        "hbase",
+        "storm",
+        "spark",
+        "kafka"
+      ],
+      "metadata": {
+        "description": "The type of the HDInsight cluster to create."
+      }
+    },
+    "clusterVersion": {
+      "type": "string",
+      "defaultValue": "3.6",
+      "metadata": {
+        "description": "HDInsight cluster version."
+      }
+    },
+    "clusterUsername": {
+      "type": "string",
+      "defaultValue": "admin",
+      "metadata": {
+        "description": "These credentials can be used to submit jobs to the cluster and to log into cluster dashboards."
+      }
+    },
+    "clusterPassword": {
+      "type": "string",
+      "metadata": {
+        "description": "The password must be at least 10 characters in length and must contain at least one digit, one non-alphanumeric character, and one upper or lower case letter."
+      }
+    },
+    "headSize": {
+      "type": "string",
+      "defaultValue": "Standard_D12_V2",
+      "metadata": {
+        "description": "Machine size for head nodes"
+      }
+    },
+    "headMin": {
+      "type": "int",
+      "defaultValue": 2,
+      "metadata": {
+        "description": "Minimum number of head nodes that can be running"
+      }
+    },
+    "headTarget": {
+      "type": "int",
+      "defaultValue": 2,
+      "metadata": {
+        "description": "Target number of head nodes that should be running"
+      }
+    },
+    "workerSize": {
+      "type": "string",
+      "defaultValue": "Standard_D3_V2",
+      "metadata": {
+        "description": "Machine size for worker nodes"
+      }
+    },
+    "workerMin": {
+      "type": "int",
+      "defaultValue": 3,
+      "metadata": {
+        "description": "Minimum number of worker nodes that can be running"
+      }
+    },
+    "workerTarget": {
+      "type": "int",
+      "defaultValue": 3,
+      "metadata": {
+        "description": "Target number of worker nodes that should be running"
+      }
+    },
+    "vnetResGrp": {
+      "type": "string",
+      "defaultValue": "srsgrp-azshr01",
+      "metadata": {
+        "description": "Resource group for the express route (default: Sandbox VNet resource group)"
+      }
+    },
+    "vnetName": {
+      "type": "string",
+      "defaultValue": "svnetw-azshr01",
+      "metadata": {
+        "description": "Name of the express route VNet (default: Sandbox VNet)"
+      }
+    },
+    "subnetName": {
+      "type": "string",
+      "defaultValue": "DB",
+      "metadata": {
+        "description": "Name of the subnet where the resource is being deployed (default: DB)"
+      }
+    },
+    "linkedStorageAccountName": {
+      "type": "string",
+      "metadata": {
+        "description": "The short name of the default Azure storage account name. This account needs to be secure transfer enabled."
+      }
+    },
+    "linkedStorageAccountKey": {
+      "type": "string",
+      "metadata": {
+        "description": "The key of the default storage account."
+      }
+    }
+  },
+  "variables": {
+    "clusterStorageAccountName": "[concat(replace(parameters('clusterName'),'-',''),'store')]",
+    "adminUsername": "wagsadmin",
+    "adminPassword": "Welcome123!",
+    "storageApiVersionLatest": "[providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]]",
+    "storageApiVersion": "2015-05-01-preview",
+    "hdinsightsApiVersionLatest": "[providers('Microsoft.HDInsight', 'clusters').apiVersions[0]]",
+    "hdinsightsApiVersion": "2015-03-01-preview",
+    "vnetId": "[resourceId(parameters('vnetResGrp'), 'Microsoft.Network/virtualNetworks', parameters('vnetName'))]",
+    "subnetId": "[concat(variables('vnetId'),'/subnets/', parameters('subnetName'))]"
+  },
+  "resources": [
+    {
+      "name": "[variables('clusterStorageAccountName')]",
+      "type": "Microsoft.Storage/storageAccounts",
+      "location": "[parameters('location')]",
+      "apiVersion": "[variables('storageApiVersion')]",
+      "dependsOn": [],
+      "tags": {
+        "AppName": "[parameters('appNameTag')]",
+        "AppEnv": "[parameters('appEnvTag')]",
+        "SecZone": "[parameters('secZoneTag')]"
+      },
+      "properties": {
+        "accountType": "Standard_LRS"
+      }
+    },
+    {
+      "apiVersion": "[variables('hdinsightsApiVersion')]",
+      "name": "[parameters('clusterName')]",
+      "type": "Microsoft.HDInsight/clusters",
+      "location": "[parameters('location')]",
+      "tags": {
+        "AppName": "[parameters('appNameTag')]",
+        "AppEnv": "[parameters('appEnvTag')]",
+        "SecZone": "[parameters('secZoneTag')]"
+      },
+      "dependsOn": [
+        "[concat('Microsoft.Storage/storageAccounts/',variables('clusterStorageAccountName'))]"
+      ],
+      "properties": {
+        "clusterVersion": "[parameters('clusterVersion')]",
+        "osType": "Linux",
+        "tier": "standard",
+        "clusterDefinition": {
+          "kind": "[parameters('clusterKind')]",
+          "configurations": {
+            "gateway": {
+              "restAuthCredential.isEnabled": true,
+              "restAuthCredential.username": "[parameters('clusterUsername')]",
+              "restAuthCredential.password": "[parameters('clusterPassword')]"
+            }
+          }
+        },
+        "storageProfile": {
+          "storageaccounts": [
+            {
+              "name": "[concat(variables('clusterStorageAccountName'),'.blob.core.windows.net')]",
+              "isDefault": true,
+              "container": "[replace(parameters('clusterName'),'-','')]",
+              "key": "[listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('clusterStorageAccountName')), variables('storageApiVersion')).key1]"
+            }
+          ]
+        },
+        "computeProfile": {
+          "roles": [
+            {
+              "name": "headnode",
+              "minInstanceCount": "[parameters('headMin')]",
+              "targetInstanceCount": "[parameters('headTarget')]",
+              "hardwareProfile": {
+                "vmSize": "[parameters('headSize')]"
+              },
+              "osProfile": {
+                "linuxOperatingSystemProfile": {
+                  "username": "[variables('adminUsername')]",
+                  "password": "[variables('adminPassword')]"
+                }
+              },
+              "virtualNetworkProfile": {
+                "id": "[variables('vnetId')]",
+                "subnet": "[variables('subnetId')]"
+              },
+              "scriptActions": []
+            },
+            {
+              "name": "workernode",
+              "minInstanceCount": "[parameters('workerMin')]",
+              "targetInstanceCount": "[parameters('workerTarget')]",
+              "hardwareProfile": {
+                "vmSize": "[parameters('workerSize')]"
+              },
+              "osProfile": {
+                "linuxOperatingSystemProfile": {
+                  "username": "[variables('adminUsername')]",
+                  "password": "[variables('adminPassword')]"
+                }
+              },
+              "virtualNetworkProfile": {
+                "id": "[variables('vnetId')]",
+                "subnet": "[variables('subnetId')]"
+              },
+              "scriptActions": []
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,53 @@
+{
+  "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "location": {
+      "value": "East US 2"
+    },
+    "AppNameTag": {
+      "value": "Datastax-Cassandra-App-EUS2"
+    },
+    "AppEnvTag": {
+      "value": "app"
+    },
+    "SecZoneTag": {
+      "value": "dtn"
+    },
+    "ipAddress": {
+      "value": "10.217.24.135"
+    },
+    "vmName": {
+      "value": "lla-aeus2rxjmec01"
+    },
+    "vmSize": {
+      "value": "Standard_DS12_v2"
+    },
+    "osDiskSizeInGB": {
+      "value": 128
+    },
+    "dataDiskSizeInGB": {
+      "value": 128
+    },
+    "managedDiskType": {
+      "value": "Standard_LRS"
+    },
+    "vnetResGrp": {
+      "value": "dtn-eastus2-network"
+    },
+    "vnetName": {
+      "value": "dtn-eastus2"
+    },
+    "subnetName": {
+      "value": "app01"
+    },
+    "diagStorAcctName": {
+      "value": "dstxjmtrappdiageus2"
+    }
+  },
+  "deploymentDetails": {
+    "subscriptionName": "WBA-DTN",
+    "resourceGroupName": "datastax-cassandra-eus2",
+    "templateFile": ".\\vm.single.1.0.json"
+  }
+}

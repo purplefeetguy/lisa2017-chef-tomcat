@@ -1,0 +1,56 @@
+{
+  "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "location": {
+      "value": "West US"
+    },
+    "AppNameTag": {
+      "value": "RxR"
+    },
+    "AppEnvTag": {
+      "value": "DevTest"
+    },
+    "SecZoneTag": {
+      "value": "NonSen"
+    },
+    "ipAddress": {
+      "value": "10.217.8.46"
+    },
+    "vmName": {
+      "value": "fla-awurxos0101"
+    },
+    "vmSize": {
+      "value": "Standard_A2m_v2"
+    },
+    "osDiskSize": {
+      "value": 128
+    },
+    "diskCount": {
+      "value": 1
+    },
+    "disk01size": {
+      "value": 128
+    },
+    "managedDiskType": {
+      "value": "Standard_LRS"
+    },
+    "vnetResGrp": {
+      "value": "wbadtn-network"
+    },
+    "vnetName": {
+      "value": "WBA-DTN"
+    },
+    "subnetName": {
+      "value": "WBA-DTN-APP5"
+    },
+    "diagStorAcctName": {
+      "value": "rxrprodfixdiag"
+    }
+  },
+  "deploymentDetails": {
+    "subscriptionName": "WBA-DTN",
+    "resourceGroupName": "rxr-prodfix",
+    "templateFile": ".\\vm.baseline.single.1.3.json"
+  }
+}

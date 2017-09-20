@@ -1,0 +1,62 @@
+{
+  "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "location": {
+      "value": "North Central US"
+    },
+    "AppNameTag": {
+      "value": "rxsp-prod2-app"
+    },
+    "AppEnvTag": {
+      "value": "app"
+    },
+    "SecZoneTag": {
+      "value": "psen"
+    },
+    "avName": {
+      "value": "rxr-prod2-workflow"
+    },
+    "avUpdateDomainCount": {
+      "value": 6
+    },
+    "avFaultDomainCount": {
+      "value": 3
+    },
+    "ipAddress": {
+      "value": ""
+    },
+    "vmName": {
+      "value": "PLA-ANURXWF21"
+    },
+    "vmSize": {
+      "value": "Standard_DS12_v2"
+    },
+    "osDiskSizeInGB": {
+      "value": 128
+    },
+    "dataDiskSizeInGB": {
+      "value": 128
+    },
+    "managedDiskType": {
+      "value": "Premium_LRS"
+    },
+    "vnetResGrp": {
+      "value": "rxr-sen-prod-network-ncus"
+    },
+    "vnetName": {
+      "value": "pharma-rxr-int-sen-prod"
+    },
+    "subnetName": {
+      "value": "rxr-senprod-app"
+    },
+    "diagStorAcctName": {
+      "value": "rxmsprod2ncusssadiag01"
+    }
+  },
+  "deploymentDetails": {
+    "subscriptionName": "pharma-rxr-sen-prod",
+    "resourceGroupName": "rxr-sen-prod-2-ncus",
+    "templateFile": ".\\vm.single.dynamic.av.1.0.json"
+  }
+}

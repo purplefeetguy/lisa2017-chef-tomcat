@@ -1,0 +1,59 @@
+{
+  "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "location": {
+      "value": "West US"
+    },
+    "AppNameTag": {
+      "value": "RXR"
+    },
+    "AppEnvTag": {
+      "value": "SBX"
+    },
+    "SecZoneTag": {
+      "value": "dtn"
+    },
+    "avName": {
+      "value": "rxr-sbx-rxmsapp"
+    },
+    "avUpdateDomainCount": {
+      "value": 6
+    },
+    "avFaultDomainCount": {
+      "value": 3
+    },
+    "ipAddress": {
+      "value": ""
+    },
+    "vmName": {
+      "value": "sbx-pla-awurxms01"
+    },
+    "vmSize": {
+      "value": "Standard_DS12_v2"
+    },
+    "dataDiskSizeInGB": {
+      "value": 128
+    },
+    "managedDiskType": {
+      "value": "Standard_LRS"
+    },
+    "vnetResGrp": {
+      "value": "WBA-sandbox-Migrated"
+    },
+    "vnetName": {
+      "value": "WBA-sandbox"
+    },
+    "subnetName": {
+      "value": "wba-sandbox-app"
+    },
+    "diagStorAcctName": {
+      "value": "sbxrxmsappdiag"
+    }
+  },
+  "deploymentDetails": {
+    "subscriptionName": "WAGS Sandbox",
+    "resourceGroupName": "rxr-dtn-sbx-wus",
+    "templateFile": ".\\vm.single.dynamic.av.1.0.json"
+  }
+}

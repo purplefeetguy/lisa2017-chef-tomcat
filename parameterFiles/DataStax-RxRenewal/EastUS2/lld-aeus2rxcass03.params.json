@@ -1,0 +1,68 @@
+{
+  "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "location": {
+      "value": "East US 2"
+    },
+    "AppNameTag": {
+      "value": "Datastax-Cassandra"
+    },
+    "AppEnvTag": {
+      "value": "db"
+    },
+    "SecZoneTag": {
+      "value": "dtn"
+    },
+    "avName": {
+      "value": "datastax-cassandra-eus2"
+    },
+    "avUpdateDomainCount": {
+      "value": 1
+    },
+    "avFaultDomainCount": {
+      "value": 1
+    },
+    "ipAddress": {
+      "value": "10.217.24.102"
+    },
+    "vmName": {
+      "value": "lld-aeus2rxcass03"
+    },
+    "vmSize": {
+      "value": "Standard_L16s"
+    },
+    "osDiskSizeInGB": {
+      "value": 128
+    },
+    "dataDiskSizeInGB": {
+      "value": 1023
+    },
+    "backupDiskSizeInGB": {
+      "value": 1023
+    },
+    "managedDiskType": {
+      "value": "Standard_LRS"
+    },
+    "managedBackupDiskType": {
+      "value": "Standard_LRS"
+    },
+    "vnetResGrp": {
+      "value": "dtn-eastus2-network"
+    },
+    "vnetName": {
+      "value": "dtn-eastus2"
+    },
+    "subnetName": {
+      "value": "db01"
+    },
+    "diagStorAcctName": {
+      "value": "cassdiageus2"
+    }
+  },
+  "deploymentDetails": {
+    "subscriptionName": "WBA-DTN",
+    "resourceGroupName": "datastax-cassandra-eus2",
+    "templateFile": ".\\vm.datastax.cassandra.single.dynamic.av.backup.1.0.json"
+  }
+}

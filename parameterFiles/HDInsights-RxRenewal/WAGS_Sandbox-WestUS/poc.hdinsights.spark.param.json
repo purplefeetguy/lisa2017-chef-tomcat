@@ -1,0 +1,44 @@
+{
+  "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "location": {
+      "value": "West US"
+    },
+    "appNameTag": {
+      "value": "InfraHDInsightsPOC"
+    },
+    "appEnvTag": {
+      "value": "Sandbox"
+    },
+    "secZoneTag": {
+      "value": "Internal Non-Sensitive Dev-Test"
+    },
+    "clusterName": {
+      "value": "spark-rxr-hdi-poc"
+    },
+    "clusterKind": {
+      "value": "spark"
+    },
+    "clusterUsername": {
+      "value": "wagsadmin"
+    },
+    "clusterPassword": {
+      "value": "Iamareallylongthing1!"
+    },
+    "subnetName": {
+      "value": "APP"
+    },
+    "linkedStorageAccountName": {
+      "value": "rxrhdipoccommon"
+    },
+    "linkedStorageAccountKey": {
+      "value": "OJiDB9Xg7tmMXrhqNK4NKkJ0lTTc2Gon1xTVgCIskVWgtJMpv79y4fOmIPMT3lsMbtoyk6fpSQ/88KxBj+5Gng=="
+    }
+  },
+  "deploymentDetails": {
+    "subscriptionName": "WAGS Sandbox",
+    "resourceGroupName": "rxr-hdi-poc",
+    "templateFile": "hdinsights.cluster.1.0.json"
+  }
+}

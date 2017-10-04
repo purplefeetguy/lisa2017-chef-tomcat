@@ -1,0 +1,68 @@
+{
+  "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "location": {
+      "value": "West US"
+    },
+    "AppNameTag": {
+      "value": "SBX-Oracle"
+    },
+    "AppEnvTag": {
+      "value": "db"
+    },
+    "SecZoneTag": {
+      "value": "sbx"
+    },
+    "ipAddress": {
+      "value": "10.217.10.135"
+    },
+    "avName": {
+      "value": "sbx-oracle-db"
+    },
+    "avUpdateDomainCount": {
+      "value": 2
+    },
+    "avFaultDomainCount": {
+      "value": 2
+    },
+    "vmName": {
+      "value": "sbx-awuoracle02"
+    },
+    "vmSize": {
+      "value": "Standard_DS11"
+    },
+    "osDiskSize": {
+      "value": 128
+    },
+    "managedDiskType": {
+      "value": "Premium_LRS"
+    },
+    "diskCount": {
+      "value": 2
+    },
+    "disk01Size": {
+      "value": 128
+    },
+    "disk02Size": {
+      "value": 128
+    },
+    "vnetResGrp": {
+      "value": "WBA-sandbox-Migrated"
+    },
+    "vnetName": {
+      "value": "WBA-sandbox"
+    },
+    "subnetName": {
+      "value": "wba-sandbox-db"
+    },
+    "diagStorAcctName": {
+      "value": "sbxoradiag"
+    }
+  },
+  "deploymentDetails": {
+    "subscriptionName": "WAGS Sandbox",
+    "resourceGroupName": "sbx-oracle",
+    "templateFile": ".\\vm.baseline.single.av.1.3.json"
+  }
+}

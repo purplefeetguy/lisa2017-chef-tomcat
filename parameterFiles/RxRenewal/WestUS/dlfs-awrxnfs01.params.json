@@ -1,0 +1,59 @@
+{
+  "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "location": {
+      "value": "West US"
+    },
+    "AppNameTag": {
+      "value": "RxR"
+    },
+    "AppEnvTag": {
+      "value": "DevTest"
+    },
+    "SecZoneTag": {
+      "value": "NonSen"
+    },
+    "ipAddress": {
+      "value": "10.217.36.21"
+    },
+    "vmName": {
+      "value": "dlfs-awrxnfs01"
+    },
+    "vmSize": {
+      "value": "Standard_DS3_v2"
+    },
+    "osDiskSize": {
+      "value": 128
+    },
+    "diskCount": {
+      "value": 2
+    },
+    "disk01size": {
+      "value": 128
+    },
+    "disk02size": {
+      "value": 128
+    },
+    "managedDiskType": {
+      "value": "Standard_LRS"
+    },
+    "vnetResGrp": {
+      "value": "wbadtn-network"
+    },
+    "vnetName": {
+      "value": "WBA-DTN"
+    },
+    "subnetName": {
+      "value": "WBA-DTN-APP6"
+    },
+    "diagStorAcctName": {
+      "value": "rxmsdevnfsdiag01"
+    }
+  },
+  "deploymentDetails": {
+    "subscriptionName": "WBA-DTN",
+    "resourceGroupName": "rxr-dev-avalset",
+    "templateFile": ".\\vm.baseline.single.1.3.json"
+  }
+}

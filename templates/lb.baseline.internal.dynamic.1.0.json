@@ -1,0 +1,91 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters":
+    {
+      "location": {
+          "type": "string",
+          "defaultValue": "West US",
+          "metadata": { "description": "Deployment location" }
+      },
+      "tagAppNameValue": { "type" : "string" },
+      "tagAppEnvValue": { "type" : "string" },
+      "tagSecZoneValue": {"type" : "string" },
+      "loadBalancerName" : { "type" : "string" },
+      "loadBalancerFrontendIP": {"type": "string"},
+      "vnetResGrp": { "type" : "string" },
+      "vnetName": { "type" : "string" },
+      "subnetName": { "type" : "string" },
+      "backEndPoolName": { "type": "string" }
+    },
+    "variables":
+    {
+      "apiVersion": "2015-06-15",
+      "tagAppName": "AppName",
+      "tagAppEnv": "AppEnv",
+      "tagSecZone": "SecZone",
+      "vnetID": "[concat('/subscriptions/', subscription().subscriptionId, '/resourceGroups/', parameters('vnetResGrp'), '/providers/', 'Microsoft.Network/virtualNetworks/', parameters('vnetName'))]",
+      "loadBalancerSubnetRef": "[concat(variables('vnetID'),'/subnets/', parameters('subnetName'))]",
+      "probeIntervalSeconds": 15,
+      "idleTimeoutMinutes": 15
+    },
+    "resources": [
+      {
+        "apiVersion": "2015-05-01-preview",
+        "type": "Microsoft.Network/loadBalancers",
+        "name": "[parameters('loadBalancerName')]",
+        "location": "[parameters('location')]",
+        "tags": {
+          "[variables('tagAppName')]": "[parameters('tagAppNameValue')]",
+          "[variables('tagAppEnv')]": "[parameters('tagAppEnvValue')]",
+          "[variables('tagSecZone')]": "[parameters('tagSecZoneValue')]"
+        },
+        "properties": {
+          "frontendIPConfigurations": [
+            {
+              "name": "[parameters('backEndPoolName')]",
+              "properties": {
+                "subnet": { "id": "[variables('loadBalancerSubnetRef')]" },
+                "privateIPAddress": "[parameters('loadBalancerFrontendIP')]",
+                "privateIPAllocationMethod": "Dynamic"
+              }
+            }
+          ],
+          "backendAddressPools": [
+            { "name": "[parameters('backEndPoolName')]" }
+          ],
+          "loadBalancingRules": [
+            {
+              "name": "[parameters('backEndPoolName')]",
+              "properties": {
+                "frontendIPConfiguration": {
+                  "id": "[concat(resourceId('Microsoft.Network/loadBalancers', parameters('loadBalancerName')), '/frontendIpConfigurations/', parameters('backEndPoolName'))]"
+                },
+                "backendAddressPool": {
+                  "id": "[concat(resourceId('Microsoft.Network/loadBalancers', parameters('loadBalancerName')), '/backendAddressPools/', parameters('backEndPoolName'))]"
+                },
+                "probe": {
+                  "id": "[concat(resourceId('Microsoft.Network/loadBalancers', parameters('loadBalancerName')), '/probes/', parameters('backEndPoolName'))]"
+                },
+                "protocol": "Tcp",
+                "frontendPort": 443,
+                "backendPort": 443,
+                "idleTimeoutInMinutes": "[variables('idleTimeoutMinutes')]"
+              }
+            }
+          ],
+          "probes": [
+            {
+              "name": "[parameters('backEndPoolName')]",
+              "properties": {
+                "protocol": "Tcp",
+                "port": 443,
+                "intervalInSeconds": "[variables('probeIntervalSeconds')]",
+                "numberOfProbes": 2
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }

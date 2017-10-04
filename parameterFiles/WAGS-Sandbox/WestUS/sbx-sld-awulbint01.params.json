@@ -1,0 +1,21 @@
+{
+    "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+      "location": { "value": "westus" },
+      "tagAppNameValue": { "value": "CloudArch" },
+      "tagAppEnvValue": { "value": "Sandbox" },
+      "tagSecZoneValue": { "value": "Non-Sensitive" },
+      "loadBalancerName": { "value": "sbx-cldarch-internal-lb-01" },    
+      "backEndPoolName": { "value": "sbx-cldarch-internal-be-lb-01" },
+      "vnetResGrp": { "value" : "WBA-sandbox-Migrated" },
+      "vnetName": { "value" : "WBA-sandbox" },
+      "subnetName": { "value" : "AppGateway2" },
+      "loadBalancerFrontendIP": {"value": ""}
+    },
+    "deploymentDetails": {
+      "subscriptionName": "WAGS Sandbox",
+      "resourceGroupName": "sbx-cldarch-internal-lb",
+      "templateFile": "lb.baseline.internal.dynamic.av.1.0.json"
+    }
+  }

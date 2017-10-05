@@ -15,13 +15,13 @@
       "value": "NonSen"
     },
     "ipAddress": {
-      "value": "10.217.8.45"
+      "value": "10.217.36.19"
     },
     "vmName": {
-      "value": "tla-awurxos0101"
+      "value": "tla-awurxos0103"
     },
     "vmSize": {
-      "value": "Standard_A2m_v2"
+      "value": "Standard_DS12_v2"
     },
     "osDiskSize": {
       "value": 128
@@ -42,15 +42,15 @@
       "value": "WBA-DTN"
     },
     "subnetName": {
-      "value": "WBA-DTN-APP5"
+      "value": "WBA-DTN-APP6"
     },
     "diagStorAcctName": {
-      "value": "rxmsdevappdiag02"
+      "value": "rxrdiagoswatcher01"
     }
   },
   "deploymentDetails": {
     "subscriptionName": "WBA-DTN",
-    "resourceGroupName": "rxr-prodfix",
+    "resourceGroupName": "rxr-osw-app",
     "templateFile": ".\\vm.baseline.single.1.3.json"
   }
 }

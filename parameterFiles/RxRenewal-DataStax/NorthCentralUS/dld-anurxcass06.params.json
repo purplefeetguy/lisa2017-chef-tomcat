@@ -1,0 +1,74 @@
+{
+  "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "location": {
+      "value": "North Central US"
+    },
+    "AppNameTag": {
+      "value": "rx-dev-nc-cassandra"
+    },
+    "AppEnvTag": {
+      "value": "db"
+    },
+    "SecZoneTag": {
+      "value": "Sensitive Dev-Test"
+    },
+    "avName": {
+      "value": "rx-dld-anurxcass"
+    },
+    "avUpdateDomainCount": {
+      "value": 3
+    },
+    "avFaultDomainCount": {
+      "value": 3
+    },
+    "ipAddress": {
+      "value": "10.217.26.114"
+    },
+    "vmName": {
+      "value": "dld-anurxcass06"
+    },
+    "vmSize": {
+      "value": "Standard_DS13_v2"
+    },
+    "osDiskSize": {
+      "value": 128
+    },
+    "managedDiskType": {
+      "value": "Premium_LRS"
+    },
+    "diskCount": {
+      "value": 4
+    },
+    "disk01Size": {
+      "value": 1024
+    },
+    "disk02Size": {
+      "value": 1024
+    },
+    "disk03Size": {
+      "value": 1024
+    },
+    "disk04Size": {
+      "value": 1024
+    },
+    "vnetResGrp": {
+      "value": "dtn-ncus-network"
+    },
+    "vnetName": {
+      "value": "dtn-ncus"
+    },
+    "subnetName": {
+      "value": "db01"
+    },
+    "diagStorAcctName": {
+      "value": "rxdevnucassdiag"
+    }
+  },
+  "deploymentDetails": {
+    "subscriptionName": "WBA-DTN",
+    "resourceGroupName": "rx-dev-nc-cassandra",
+    "templateFile": ".\\vm.baseline.single.av.1.3.json"
+  }
+}

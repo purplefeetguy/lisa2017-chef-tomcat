@@ -39,18 +39,12 @@
       "value": "Premium_LRS"
     },
     "diskCount": {
-      "value": 4
+      "value": 2
     },
     "disk01Size": {
       "value": 1024
     },
     "disk02Size": {
-      "value": 1024
-    },
-    "disk03Size": {
-      "value": 1024
-    },
-    "disk04Size": {
       "value": 1024
     },
     "vnetResGrp": {

@@ -308,7 +308,7 @@
           {
             "name": "ipConfig",
             "properties": {
-              "privateIPAllocationMethod": "Static",
+              "privateIPAllocationMethod": "Dynamic",
               "privateIPAddress": "[parameters('ipAddress')]",
               "subnet": {
                 "id": "[variables('subnetId')]"
@@ -327,6 +327,9 @@
         "[concat('Microsoft.Network/networkInterfaces/', parameters('vmName'), '-nic01')]"
       ],
       "properties": {
+        "availabilitySet": {
+          "id": "[resourceId('Microsoft.Compute/availabilitySets', parameters('avName'))]"
+        },
         "hardwareProfile": {
           "vmSize": "[parameters('vmSize')]"
         },
@@ -378,8 +381,8 @@
         "name": "Aligned"
       },
       "properties": {
-        "platformUpdateDomainCount": 1,
-        "platformFaultDomainCount": 1
+        "platformUpdateDomainCount": "[parameters('avUpdateDomainCount')]",
+        "platformFaultDomainCount": "[parameters('avFaultDomainCount')]"
       }
     }
   ]

@@ -1,0 +1,65 @@
+{
+  "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "location": {
+      "value": "West US"
+    },
+    "AppNameTag": {
+      "value": "sbx-rx-app"
+    },
+    "AppEnvTag": {
+      "value": "app"
+    },
+    "SecZoneTag": {
+      "value": "Sensitive Dev-Test"
+    },
+    "avName": {
+      "value": "sbx-rx-app"
+    },
+    "avUpdateDomainCount": {
+      "value": 3
+    },
+    "avFaultDomainCount": {
+      "value": 3
+    },
+    "ipAddress": {
+      "value": ""
+    },
+    "vmName": {
+      "value": "sbx-awurxapp01"
+    },
+    "vmSize": {
+      "value": "Standard_DS12_v2"
+    },
+    "osDiskSize": {
+      "value": 128
+    },
+    "managedDiskType": {
+      "value": "Standard_LRS"
+    },
+    "diskCount": {
+      "value": 1
+    },
+    "disk01Size": {
+      "value": 128
+    },
+    "vnetResGrp": {
+      "value": "WBA-sandbox-Migrated"
+    },
+    "vnetName": {
+      "value": "WBA-sandbox"
+    },
+    "subnetName": {
+      "value": "wba-sandbox-app"
+    },
+    "diagStorAcctName": {
+      "value": "sbxrxappdiag"
+    }
+  },
+  "deploymentDetails": {
+    "subscriptionName": "WAGS Sandbox",
+    "resourceGroupName": "sbx-rx-app",
+    "templateFile": ".\\vm.baseline.single.dynamic.av.1.3.json"
+  }
+}

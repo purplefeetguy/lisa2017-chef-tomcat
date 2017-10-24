@@ -3,25 +3,25 @@
   "contentVersion": "1.0.0.0",
   "parameters": {
     "location": {
-      "value": "West US"
+      "value": "North Central US"
     },
     "AppNameTag": {
       "value": "RxR"
     },
     "AppEnvTag": {
-      "value": "DevTest"
+      "value": "Prod"
     },
     "SecZoneTag": {
-      "value": "NonSen"
+      "value": "Sen-Prod"
     },
     "ipAddress": {
-      "value": "10.217.36.28"
+      "value": "10.217.32.206"
     },
     "vmName": {
-      "value": "pla-awurxrm02"
+      "value": "pla-anurxrm02"
     },
     "vmSize": {
-      "value": "Standard_DS3_v2"
+      "value": "Standard_D3_v2"
     },
     "osDiskSize": {
       "value": 128
@@ -36,21 +36,21 @@
       "value": "Standard_LRS"
     },
     "vnetResGrp": {
-      "value": "wbadtn-network"
+      "value": "rxr-sen-prod-network-ncus"
     },
     "vnetName": {
-      "value": "WBA-DTN"
+      "value": "pharma-rxr-int-sen-prod"
     },
     "subnetName": {
-      "value": "WBA-DTN-APP6"
+      "value": "rxr-senprod-app"
     },
     "diagStorAcctName": {
-      "value": "rxmsdiagstrgacct01"
+      "value": "rxcmprod2ncusssadiag01"
     }
   },
   "deploymentDetails": {
-    "subscriptionName": "WBA-DTN",
-    "resourceGroupName": "rxms-storage",
+    "subscriptionName": "pharma-rxr-sen-prod",
+    "resourceGroupName": "rxr-sen-prod-2-ncus",
     "templateFile": ".\\vm.baseline.single.1.3.json"
   }
 }

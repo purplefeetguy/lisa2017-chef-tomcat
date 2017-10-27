@@ -157,8 +157,9 @@
     },
     "ipAddress": {
       "type": "string",
+      "defaultValue": "0.0.0.0",
       "metadata": {
-        "description": "Static IP Address of the VM"
+        "description": "Static IP Address of the VM (this value is ignored in a dynamic deployment)"
       }
     },
     "diagStorAcctName": {

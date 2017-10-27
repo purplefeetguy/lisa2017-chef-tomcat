@@ -75,6 +75,12 @@ $StorageTemplateFile  = '.\templates\storage.baseline.single.json'
 $VmStaticTemplateFile = '.\templates\vm.baseline.single.1.3.json'
 $VmDynamicTemplateFile = '.\templates\vm.baseline.single.dynamic.1.3.json'
 
+# This will be needed to get some of the information about the system
+# that was built to be passed to the bootstrapper. There will be an expectation
+# of certain information existing in here, specificaly the username and password
+# in the variables section
+$TemplateObject = Get-Content -Raw -Path $VmDynamicTemplateFile | ConvertFrom-Json
+
 #
 # Validate and use Credential Object
 #
@@ -193,6 +199,7 @@ if( $Premium )
 
 Write-Host "[$(Get-Date)] Creating [ $($MasterCount + $EdgeCount + $DataCount) ] virtual machine(s)..."
 $Results = @()
+$ResultObjects = @()
 
 #
 # Create the group of virtual machines
@@ -217,7 +224,7 @@ ForEach( $HdpType in ('Master', 'Edge', 'Data') )
 
   $ChefEnvironment = 'sandbox' # now would i know this? (it would have to prompt for it)
   $ChefTagsGeneric = "Azure,$($Location.Replace(' ','-')),EIS,EISLinux,Infrastructure,HadoopDb"
-  $ChefDeploymentTag = "Deployment-$($VmPrefix)"
+  $ChefSetTag = "Set-$($VmPrefix)"
   $ChefTags = ''
 
   $ChefRunList = 'recipe[wag_registration],recipe[profile_wag_infrastructure_baseline],recipe[profile_wag_hdp_infra]'
@@ -234,7 +241,7 @@ ForEach( $HdpType in ('Master', 'Edge', 'Data') )
        $Disk01Size = $DataSize
        $Disk02Size = $DataSize
 
-       $ChefTags = "$($ChefDeploymentTag),$($ChefTagsGeneric),HdpMaster"
+       $ChefTags = "$($ChefSetTag),$($ChefTagsGeneric),HdpMaster"
       }
      'Edge' {
       $TypePrefix = 'e'
@@ -246,7 +253,7 @@ ForEach( $HdpType in ('Master', 'Edge', 'Data') )
        $Disk03Size = $DataSize
        $Disk04Size = $DataSize
 
-       $ChefTags = "$($ChefDeploymentTag),$($ChefTagsGeneric),HdpEdge"
+       $ChefTags = "$($ChefSetTag),$($ChefTagsGeneric),HdpEdge"
       }
      'Data' {
        $TypePrefix = 'd'
@@ -264,7 +271,7 @@ ForEach( $HdpType in ('Master', 'Edge', 'Data') )
        $Disk09Size = $DataSize
        $Disk10Size = $DataSize
 
-       $ChefTags = "$($ChefDeploymentTag),$($ChefTagsGeneric),HdpData"
+       $ChefTags = "$($ChefSetTag),$($ChefTagsGeneric),HdpData"
       }
   }
 
@@ -312,18 +319,29 @@ ForEach( $HdpType in ('Master', 'Edge', 'Data') )
                                       -TemplateParameterObject $VmParameters `
                                       -Mode Incremental | Out-Null
 
-    
-    # This needs to be kept in step with the naming specification in the template so it can find it
-    # or i could possibly get it off of the vm resource, will test that out, might be better that way
-    $NicName    = "$($VmParameters.vmName)-nic01"
-    $Nic        = Get-AzureRmNetworkInterface -Name $NicName -ResourceGroupName $ResourceGroupName
-    $Nic.IpConfigurations[0].PrivateIpAllocationMethod = "Static"
-    Set-AzureRmNetworkInterface -NetworkInterface $Nic
 
-    # this needs to be different as well, we need to include more information
-    # that can be passed in on a per-instance basis, probably need to have a new
-    # version of multi-bootstrap that can handle that
+    #
+    # Alter the network interface to be static so it is not lost on deallocation
+    # and get the IP address it was assigned for reporting and use
+    #
+    $ThisVm = Get-AzureRmVM -ResourceGroupName $ResourceGroupName -Name $VmParameters.vmName
+    $Nic = Get-AzureRmResource -ResourceId $ThisVm.NetworkProfile.NetworkInterfaces[0].Id | Get-AzureRmNetworkInterface
+    $Nic.IpConfigurations[0].PrivateIpAllocationMethod = "Static"
+    Set-AzureRmNetworkInterface -NetworkInterface $Nic | Out-Null
+
+    # Set the information that the current version of multideploy takes and is also nice to read
     $Results   += "$($VmParameters.vmName) $($Nic.IpConfigurations[0].PrivateIpAddress)"
+    # Set the detailed information about the entity that can be used for individual
+    # system bootstrap operations
+    $ResultObjects += @{
+      nodeIp=$Nic.IpConfigurations[0].PrivateIpAddress;
+      nodeName=$VmParameters.vmName
+      username=$TemplateObject.variables.adminUsername;
+      password=$TemplateObject.variables.adminPassword;
+      environment=$ChefEnvironment;
+      tags=$ChefTags;
+      runList=$ChefRunList
+    }
 
     #
     # Now to create the parameter file with all of the details about this system
@@ -367,4 +385,4 @@ ForEach( $HdpType in ('Master', 'Edge', 'Data') )
   }
 }
 
-return $Results
+return $ResultObjects

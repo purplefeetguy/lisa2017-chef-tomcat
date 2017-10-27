@@ -268,9 +268,6 @@ ForEach( $HdpType in ('Master', 'Edge', 'Data') )
       }
   }
 
-  # Temporary override to speed up testing
-  $DiskCount = 1
-
   for( $i = 1; $i -le $Count; $i++ )
   {
     $VmParameters = @{

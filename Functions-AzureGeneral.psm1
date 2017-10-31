@@ -25,7 +25,6 @@ function New-ParamFileObject( $ParameterObject, $ParameterVersion = '1.0.0.0' )
 
   Add-Member -InputObject $ParamFileObject -MemberType NoteProperty -Name 'deploymentDetails' -Value $ep
 
-
   return $ParamFileObject
 }
 
@@ -35,7 +34,29 @@ function New-ParamFileObject( $ParameterObject, $ParameterVersion = '1.0.0.0' )
   Generates a blank parameter object to use for serializing
   the settings of individual system definitions to a parameter file
 #>
-function New-ParameterObject()
+function New-ParameterObject( $Version = 1 )
+{
+  Switch($Version)
+  {
+    1 { return New-ParameterObjectV1 }
+    2 { return New-ParameterObjectV2 }
+  }
+}
+
+
+<#
+.SYNOPSIS
+
+.DESCRIPTION
+Long description
+
+.EXAMPLE
+An example
+
+.NOTES
+General notes
+#>
+function New-ParameterObjectV1()
 {
   $p = New-Object PSObject 
 
@@ -94,6 +115,76 @@ function New-ParameterObject()
   $ipAddress = New-PVO -Value ''
   $p | Add-Member -MemberType NoteProperty -Name 'ipAddress' -Value $ipAddress
   # diagStorAcctName
+  $diagStorAcctName = New-PVO -Value ''
+  $p | Add-Member -MemberType NoteProperty -Name 'diagStorAcctName' -Value $diagStorAcctName
+
+  return $p
+}
+
+
+<#
+.SYNOPSIS
+Short description
+
+.DESCRIPTION
+Long description
+
+.EXAMPLE
+An example
+
+.NOTES
+General notes
+#>
+function New-ParameterObjectV2()
+{
+  $p = New-Object PSObject 
+
+  $location = New-PVO -Value ''
+  $p | Add-Member -MemberType NoteProperty -Name 'location' -Value $location
+  $AppNameTag = New-PVO -Value ''
+  $p | Add-Member -MemberType NoteProperty -Name 'AppNameTag' -Value $AppNameTag
+  $AppEnvTag = New-PVO -Value ''
+  $p | Add-Member -MemberType NoteProperty -Name 'AppEnvTag' -Value $AppEnvTag
+  $SecZoneTag = New-PVO -Value ''
+  $p | Add-Member -MemberType NoteProperty -Name 'SecZoneTag' -Value $SecZoneTag
+  $vmName = New-PVO -Value ''
+  $p | Add-Member -MemberType NoteProperty -Name 'vmName' -Value $vmName
+  $vmSize = New-PVO -Value ''
+  $p | Add-Member -MemberType NoteProperty -Name 'vmSize' -Value $vmSize
+  $osDiskSize = New-PVO -Value 32 -Type 'Integer'
+  $p | Add-Member -MemberType NoteProperty -Name 'osDiskSize' -Value $osDiskSize
+  $diskCount = New-PVO -Value 0 -Type 'Integer'
+  $p | Add-Member -MemberType NoteProperty -Name 'diskCount' -Value $diskCount
+  $disk01Size = New-PVO -Value 0 -Type 'Integer'
+  $p | Add-Member -MemberType NoteProperty -Name 'disk01Size' -Value $disk01Size
+  $disk02Size = New-PVO -Value 0 -Type 'Integer'
+  $p | Add-Member -MemberType NoteProperty -Name 'disk02Size' -Value $disk02Size
+  $disk03Size = New-PVO -Value 0 -Type 'Integer'
+  $p | Add-Member -MemberType NoteProperty -Name 'disk03Size' -Value $disk03Size
+  $disk04Size = New-PVO -Value 0 -Type 'Integer'
+  $p | Add-Member -MemberType NoteProperty -Name 'disk04Size' -Value $disk04Size
+  $disk05Size = New-PVO -Value 0 -Type 'Integer'
+  $p | Add-Member -MemberType NoteProperty -Name 'disk05Size' -Value $disk05Size
+  $disk06Size = New-PVO -Value 0 -Type 'Integer'
+  $p | Add-Member -MemberType NoteProperty -Name 'disk06Size' -Value $disk06Size
+  $disk07Size = New-PVO -Value 0 -Type 'Integer'
+  $p | Add-Member -MemberType NoteProperty -Name 'disk07Size' -Value $disk07Size
+  $disk08Size = New-PVO -Value 0 -Type 'Integer'
+  $p | Add-Member -MemberType NoteProperty -Name 'disk08Size' -Value $disk08Size
+  $disk09Size = New-PVO -Value 0 -Type 'Integer'
+  $p | Add-Member -MemberType NoteProperty -Name 'disk09Size' -Value $disk09Size
+  $disk10Size = New-PVO -Value 0 -Type 'Integer'
+  $p | Add-Member -MemberType NoteProperty -Name 'disk10Size' -Value $disk10Size
+  $managedDiskType = New-PVO -Value ''
+  $p | Add-Member -MemberType NoteProperty -Name 'managedDiskType' -Value $managedDiskType
+  $vnetResGrp = New-PVO -Value ''
+  $p | Add-Member -MemberType NoteProperty -Name 'vnetResGrp' -Value $vnetResGrp
+  $vnetName = New-PVO -Value ''
+  $p | Add-Member -MemberType NoteProperty -Name 'vnetName' -Value $vnetName
+  $subnetName = New-PVO -Value ''
+  $p | Add-Member -MemberType NoteProperty -Name 'subnetName' -Value $subnetName
+  $ipAddress = New-PVO -Value ''
+  $p | Add-Member -MemberType NoteProperty -Name 'ipAddress' -Value $ipAddress
   $diagStorAcctName = New-PVO -Value ''
   $p | Add-Member -MemberType NoteProperty -Name 'diagStorAcctName' -Value $diagStorAcctName
 
@@ -178,6 +269,7 @@ function Get-MappedTshirtSize( $TshirtSize )
     "xlarge" { $AzureSize = "Standard_F16S" }
 
     'rx'     { $AzureSize = 'Standard_DS12_v2' }
+    'hdp'    { $AzureSize = 'Standard_DS14_v2' }
   }
 
   return $AzureSize

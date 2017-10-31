@@ -157,9 +157,8 @@
     },
     "ipAddress": {
       "type": "string",
-      "defaultValue": "0.0.0.0",
       "metadata": {
-        "description": "Static IP Address of the VM (this value is ignored in a dynamic deployment)"
+        "description": "Static IP Address of the VM"
       }
     },
     "diagStorAcctName": {
@@ -174,8 +173,8 @@
     "networkApiVersion": "2016-03-30",
     "imagePublisher": "RedHat",
     "imageOffer": "RHEL",
-    "imageVersion": "7.3",
-    "imageRelease": "7.3.2017042521",
+    "imageVersion": "7-LVM",
+    "imageRelease": "7.3.2017091115",
     "adminUsername": "wagsadmin",
     "adminPassword": "Welcome123!",
     "vnetId": "[resourceId(parameters('vnetResGrp'), 'Microsoft.Network/virtualNetworks', parameters('vnetName'))]",
@@ -279,7 +278,7 @@
           {
             "name": "ipConfig",
             "properties": {
-              "privateIPAllocationMethod": "Dynamic",
+              "privateIPAllocationMethod": "Static",
              "privateIPAddress": "[parameters('ipAddress')]",
               "subnet": {
                 "id": "[variables('subnetId')]"

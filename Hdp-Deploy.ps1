@@ -63,7 +63,10 @@ param(
     [Parameter(Mandatory=$false)]
     [int] $DataCount = 5,
     [Parameter(Mandatory=$false)]
-    [string] $OverrideSize = $null
+    [string] $OverrideSize = $null,
+    [Parameter(Mandatory=$false)]
+    [ValidateSet("sandbox","development","test","production")]
+    [string] $Environment = "production"
 )
 
 Import-Module '.\Functions-AzureGeneral.psm1'
@@ -121,7 +124,7 @@ $ExisingVmNames = Get-ExistingVmNames -ResourceGroupName $ResourceGroupName -Loc
 $ClashingNames  = @()
 for( $i = $VmIndex; $i -lt ( $VmIndex + $VmCount ); $i++ )
 {
-  $TargetVmName = $VmPrefix + $i.ToString().PadLeft( 3, '0' )
+  $TargetVmName = $VmPrefix + $i.ToString().PadLeft( 2, '0' )
   if( $ExisingVmNames -Contains $TargetVmName )
   {
     $ClashingNames += $TargetVmName
@@ -201,6 +204,8 @@ Write-Host "[$(Get-Date)] Creating [ $($MasterCount + $EdgeCount + $DataCount) ]
 $Results = @()
 $ResultObjects = @()
 
+$RunningIndex = $VmIndex
+
 #
 # Create the group of virtual machines
 #
@@ -208,7 +213,6 @@ ForEach( $HdpType in ('Master', 'Edge', 'Data') )
 {
   $Count = 0
   $DataSize = 0
-  $TypePrefix = 'm'
 
   $DiskCount  = 0
   $Disk01Size = 0
@@ -222,8 +226,9 @@ ForEach( $HdpType in ('Master', 'Edge', 'Data') )
   $Disk09Size = 0
   $Disk10Size = 0
 
-  $ChefEnvironment = 'sandbox' # now would i know this? (it would have to prompt for it)
-  $ChefTagsGeneric = "Azure,$($Location.Replace(' ','-')),EIS,EISLinux,Infrastructure,HadoopDb"
+  $ChefEnvironment = $Environment
+  $HdpVerTag = "Hortonworks26"
+  $ChefTagsGeneric = "Azure,$($Location.Replace(' ','-')),EIS,EISLinux,Infrastructure,HadoopDb,$($HdpVerTag)"
   $ChefSetTag = "Set-$($VmPrefix)"
   $ChefTags = ''
 
@@ -234,9 +239,9 @@ ForEach( $HdpType in ('Master', 'Edge', 'Data') )
   switch($HdpType)
   {
      'Master' {
-       $TypePrefix = 'm'
+       #$TypePrefix = 'm'
        $Count = $MasterCount 
-       $DataSize = 1024
+       $DataSize = 2048
        $DiskCount = 2
        $Disk01Size = $DataSize
        $Disk02Size = $DataSize
@@ -244,7 +249,7 @@ ForEach( $HdpType in ('Master', 'Edge', 'Data') )
        $ChefTags = "$($ChefSetTag),$($ChefTagsGeneric),HdpMaster"
       }
      'Edge' {
-      $TypePrefix = 'e'
+       #$TypePrefix = 'e'
        $Count = $EdgeCount
        $DataSize = 2048
        $DiskCount = 4
@@ -256,20 +261,20 @@ ForEach( $HdpType in ('Master', 'Edge', 'Data') )
        $ChefTags = "$($ChefSetTag),$($ChefTagsGeneric),HdpEdge"
       }
      'Data' {
-       $TypePrefix = 'd'
+       #$TypePrefix = 'd'
        $Count = $DataCount 
        $DataSize = 2048
-       $DiskCount = 10
+       $DiskCount = 5
        $Disk01Size = $DataSize
        $Disk02Size = $DataSize
        $Disk03Size = $DataSize
        $Disk04Size = $DataSize
        $Disk05Size = $DataSize
-       $Disk06Size = $DataSize
-       $Disk07Size = $DataSize
-       $Disk08Size = $DataSize
-       $Disk09Size = $DataSize
-       $Disk10Size = $DataSize
+       #$Disk06Size = $DataSize
+       #$Disk07Size = $DataSize
+       #$Disk08Size = $DataSize
+       #$Disk09Size = $DataSize
+       #$Disk10Size = $DataSize
 
        $ChefTags = "$($ChefSetTag),$($ChefTagsGeneric),HdpData"
       }
@@ -282,10 +287,10 @@ ForEach( $HdpType in ('Master', 'Edge', 'Data') )
 
       # These need to be adjusted or removed
       AppNameTag='Hadoop';
-      AppEnvTag='Sandbox';
-      SecZoneTag='Sandbox';
-
-      vmName="$($VmPrefix)$($TypePrefix)$($i.ToString().PadLeft( 2, '0' ))"
+      AppEnvTag=$Environment;
+      SecZoneTag='Unknown';
+      vmName="$($VmPrefix)$($RunningIndex.ToString().PadLeft(2, '0'))"
+      #vmName="$($VmPrefix)$($TypePrefix)$($i.ToString().PadLeft( 2, '0' ))"
       vmSize=$AzureSize;
       osDiskSize=128;
 
@@ -382,6 +387,8 @@ ForEach( $HdpType in ('Master', 'Edge', 'Data') )
     $ThisVmParamFile.deploymentDetails.chefRunList      = $ChefRunList
 
     Save-ParamFile -ResourceName $VmParameters.vmName -ParamFileObject $ThisVmParamFile
+
+    $RunningIndex++
   }
 }
 

@@ -171,10 +171,10 @@
   "variables": {
     "computeApiVersion": "2016-04-30-preview",
     "networkApiVersion": "2016-03-30",
-    "imagePublisher": "MicrosoftWindowsServer",
-    "imageOffer": "WindowsServer",
-    "imageVersion": "2012-R2-Datacenter",
-    "imageRelease": "latest",
+    "imagePublisher": "RedHat",
+    "imageOffer": "RHEL",
+    "imageVersion": "7.3",
+    "imageRelease": "7.3.2017042521",
     "adminUsername": "wagsadmin",
     "adminPassword": "Welcome123!",
     "vnetId": "[resourceId(parameters('vnetResGrp'), 'Microsoft.Network/virtualNetworks', parameters('vnetName'))]",
@@ -324,16 +324,7 @@
         "osProfile": {
           "computerName": "[parameters('vmName')]",
           "adminUsername": "[variables('adminUsername')]",
-          "adminPassword": "[variables('adminPassword')]",
-          "windowsConfiguration": {
-            "winRM": {
-              "listeners": [
-                {
-                  "protocol":"Http"
-                }
-              ]
-            }
-          }
+          "adminPassword": "[variables('adminPassword')]"
         },
         "networkProfile": {
           "networkInterfaces": [

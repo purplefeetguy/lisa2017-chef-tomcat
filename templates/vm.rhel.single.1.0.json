@@ -30,7 +30,7 @@
     "vmName": {
       "type": "string",
       "metadata": {
-        "description": "Name of the VM (ex. uldyvm-azpcc01)"
+        "description": "Name of the VM"
       }
     },
     "vmSize": {

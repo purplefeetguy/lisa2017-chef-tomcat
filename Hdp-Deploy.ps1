@@ -57,6 +57,8 @@ param(
     [Parameter(Mandatory=$false)]
     [string] $VmPrefix,
     [Parameter(Mandatory=$false)]
+    [int] $VmIndex = 1,
+    [Parameter(Mandatory=$false)]
     [int] $MasterCount = 3,
     [Parameter(Mandatory=$false)]
     [int] $EdgeCount = 2,
@@ -75,8 +77,8 @@ Import-Module '.\Functions-ResourceGroup.psm1'
 Import-Module '.\FUnctions-Storage.psm1'
 
 $StorageTemplateFile  = '.\templates\storage.baseline.single.json'
-$VmStaticTemplateFile = '.\templates\vm.baseline.single.1.3.json'
-$VmDynamicTemplateFile = '.\templates\vm.baseline.single.dynamic.1.3.json'
+$VmStaticTemplateFile = '.\templates\vm.rhel-lts.single.1.0.json'
+$VmDynamicTemplateFile = '.\templates\vm.rhel-lts.single.1.0.d.json'
 
 # This will be needed to get some of the information about the system
 # that was built to be passed to the bootstrapper. There will be an expectation

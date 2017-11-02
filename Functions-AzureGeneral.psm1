@@ -239,11 +239,11 @@ function Select-SubscriptionName( )
   $SelectedIndex = 0
   for( $i = 0; $i -lt $Subscriptions.Length; $i++ )
   {
-    Write-Host "$($i+1)) $($Subscriptions[$i].SubscriptionName)"
+    Write-Host "$($i+1)) $($Subscriptions[$i].Name)"
   }
   $SelectedIndex = Read-Host "Select a subscription"
 
-  return $Subscriptions[$SelectedIndex-1].SubscriptionName
+  return $Subscriptions[$SelectedIndex-1].Name
 }
 
 

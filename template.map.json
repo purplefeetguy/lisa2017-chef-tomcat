@@ -1,14 +1,37 @@
 [
   {
-    "displayName" : "Standard VM",
-    "mode": "dynamic",
-    "file": "vm.baseline.multi.1.0.json",
-    "companion": "vm.baseline.single.1.0.json"
+    "displayName" : "RHEL Standard VM",
+    "shortName": "rhel",
+    "platformType": "nix",
+    "dynamicTemplate": "vm.rhel.single.1.0.d.json",
+    "staticTemplate": "vm.rhel.single.1.0.json"
   },
   {
-    "displayName": "Standard VM",
-    "mode": "static",
-    "file": "vm.baseline.single.1.0.json",
-    "companion": "vm.baseline.multi.1.0.json"
+    "displayName" : "RHEL LTS Standard VM",
+    "shortName": "rhel-lts",
+    "platformType": "nix",
+    "dynamicTemplate": "vm.rhel-lts.single.1.0.d.json",
+    "staticTemplate": "vm.rhel-lts.single.1.0.json"
+  },
+  {
+    "displayName" : "CentOS Standard VM",
+    "shortName": "centos",
+    "platformType": "nix",
+    "dynamicTemplate": "vm.centos.single.1.0.d.json",
+    "staticTemplate": "vm.centos.single.1.0.json"
+  },
+  {
+    "displayName" : "Windows Standard VM",
+    "shortName": "windows",
+    "platformType": "windows",
+    "dynamicTemplate": "vm.windows.single.1.0.d.json",
+    "staticTemplate": "vm.windows.single.1.0.json"
+  },
+  {
+    "displayName" : "Storage Account",
+    "shortName": "storage",
+    "platformType": "storage",
+    "dynamicTemplate": "storage.baseline.single.json",
+    "staticTemplate": "storage.baseline.single.json"
   }
 ]

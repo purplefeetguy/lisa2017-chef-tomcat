@@ -77,8 +77,9 @@ Import-Module '.\Functions-ResourceGroup.psm1'
 Import-Module '.\FUnctions-Storage.psm1'
 
 $StorageTemplateFile  = '.\templates\storage.baseline.single.json'
-$VmStaticTemplateFile = '.\templates\vm.rhel-lts.single.1.0.json'
-$VmDynamicTemplateFile = '.\templates\vm.rhel-lts.single.1.0.d.json'
+$AvTemplateFile = '.\templates\av.1.0.json'
+$VmStaticTemplateFile = '.\templates\vm.rhel-lts.single.av.1.0.json'
+$VmDynamicTemplateFile = '.\templates\vm.rhel-lts.single.av.1.0.d.json'
 
 # This will be needed to get some of the information about the system
 # that was built to be passed to the bootstrapper. There will be an expectation
@@ -192,15 +193,137 @@ if( $DiagStorage -eq $null )
 }
 
 
+
+#
+# Create the AV sets needed for the master and data nodes
+#
+$MasterAvName = "$($VmPrefix)-master"
+if( $MasterCount -gt 0 )
+{
+  $MasterAv = Get-AzureRmAvailabilitySet -ResourceGroupName $ResourceGroupName -Name $MasterAvName -ErrorAction Ignore
+  if( $MasterAv -eq $null )
+  {
+    Write-Host "[$(Get-Date)] Master availability set did not exist, creating [ $MasterAvName ]"
+
+    $MasterAvParameters = @{
+      avName=$MasterAvName;
+      updateDomainCount=$MasterCount;
+      faultDomainCount=$MasterCount;
+      AppNameTag='Hadoop';
+      AppEnvTag=$Environment;
+      SecZoneTag='Unknown';
+    }
+
+    New-AzureRMResourceGroupDeployment -Name "$($MasterAvName)-av-$(Get-Date -Format yyyyMMddHHmmss)" `
+      -ResourceGroupName $ResourceGroupName `
+      -TemplateFile $AvTemplateFile `
+      -TemplateParameterObject $MasterAvParameters `
+      -Mode Incremental | Out-Null
+
+    $MasterAvDetails = New-AvParameterObject
+    $MasterAvDetails.AppNameTag.value         = $MasterAvParameters.AppNameTag
+    $MasterAvDetails.AppEnvTag.value          = $MasterAvParameters.AppEnvTag
+    $MasterAvDetails.SecZoneTag.value         = $MasterAvParameters.SecZoneTag
+    $MasterAvDetails.avName.value             = $MasterAvParameters.avName
+    $MasterAvDetails.updateDomainCount.value  = $MasterAvParameters.updateDomainCount
+    $MasterAvDetails.faultDomainCount.value   = $MasterAvParameters.faultDomainCount
+
+    $MasterAvFile = New-ParamFileObject -ParameterObject $MasterAvDetails
+    $MasterAvFile.deploymentDetails.subscriptionName   = $SubscriptionName
+    $MasterAvFile.deploymentDetails.resourceGroupName  = $ResourceGroupName
+    $MasterAvFile.deploymentDetails.templateFile       = $AvTemplateFile
+
+    Save-ParamFile -ResourceName $MasterAvParameters.avName -ParamFileObject $MasterAvFile
+  }
+}
+
+$EdgeAvName   = "$($VmPrefix)-edge"
+if( $EdgeCount -gt 0 )
+{
+  $EdgeAv = Get-AzureRmAvailabilitySet -ResourceGroupName $ResourceGroupName -Name $EdgeAvName -ErrorAction Ignore
+  if( $EdgeAv -eq $null )
+  {
+    Write-Host "[$(Get-Date)] Edge availability set did not exist, creating [ $EdgeAvName ]"
+
+    $EdgeAvParameters = @{
+      avName=$EdgeAvName;
+      updateDomainCount=$EdgeCount;
+      faultDomainCount=$EdgeCount;
+      AppNameTag='Hadoop';
+      AppEnvTag=$Environment;
+      SecZoneTag='Unknown';
+    }
+
+    New-AzureRMResourceGroupDeployment -Name "$($EdgeAvName)-av-$(Get-Date -Format yyyyMMddHHmmss)" `
+      -ResourceGroupName $ResourceGroupName `
+      -TemplateFile $AvTemplateFile `
+      -TemplateParameterObject $EdgeAvParameters `
+      -Mode Incremental | Out-Null
+
+    $EdgeAvDetails = New-AvParameterObject
+    $EdgeAvDetails.AppNameTag.value         = $EdgeAvParameters.AppNameTag
+    $EdgeAvDetails.AppEnvTag.value          = $EdgeAvParameters.AppEnvTag
+    $EdgeAvDetails.SecZoneTag.value         = $EdgeAvParameters.SecZoneTag
+    $EdgeAvDetails.avName.value             = $EdgeAvParameters.avName
+    $EdgeAvDetails.updateDomainCount.value  = $EdgeAvParameters.updateDomainCount
+    $EdgeAvDetails.faultDomainCount.value   = $EdgeAvParameters.faultDomainCount
+
+    $EdgeAvFile = New-ParamFileObject -ParameterObject $EdgeAvDetails
+    $EdgeAvFile.deploymentDetails.subscriptionName   = $SubscriptionName
+    $EdgeAvFile.deploymentDetails.resourceGroupName  = $ResourceGroupName
+    $EdgeAvFile.deploymentDetails.templateFile       = $AvTemplateFile
+
+    Save-ParamFile -ResourceName $EdgeAvParameters.avName -ParamFileObject $EdgeAvFile
+  }
+}
+
+$DataAvName   = "$($VmPrefix)-data"
+if( $DataCount -gt 0 )
+{
+  $DataAv = Get-AzureRmAvailabilitySet -ResourceGroupName $ResourceGroupName -Name $DataAvName -ErrorAction Ignore
+  if( $DataAv -eq $null )
+  {
+    Write-Host "[$(Get-Date)] Data availability set did not exist, creating [ $DataAvName ]"
+
+    $DataAvParameters = @{
+      avName=$DataAvName;
+      updateDomainCount=$DataCount;
+      faultDomainCount=$DataCount;
+      AppNameTag='Hadoop';
+      AppEnvTag=$Environment;
+      SecZoneTag='Unknown';
+    }
+
+    New-AzureRMResourceGroupDeployment -Name "$($DataAvName)-av-$(Get-Date -Format yyyyMMddHHmmss)" `
+      -ResourceGroupName $ResourceGroupName `
+      -TemplateFile $AvTemplateFile `
+      -TemplateParameterObject $DataAvParameters `
+      -Mode Incremental | Out-Null
+
+    $DataAvDetails = New-AvParameterObject
+    $DataAvDetails.AppNameTag.value         = $DataAvParameters.AppNameTag
+    $DataAvDetails.AppEnvTag.value          = $DataAvParameters.AppEnvTag
+    $DataAvDetails.SecZoneTag.value         = $DataAvParameters.SecZoneTag
+    $DataAvDetails.avName.value             = $DataAvParameters.avName
+    $DataAvDetails.updateDomainCount.value  = $DataAvParameters.updateDomainCount
+    $DataAvDetails.faultDomainCount.value   = $DataAvParameters.faultDomainCount
+
+    $DataAvFile = New-ParamFileObject -ParameterObject $DataAvDetails
+    $DataAvFile.deploymentDetails.subscriptionName   = $SubscriptionName
+    $DataAvFile.deploymentDetails.resourceGroupName  = $ResourceGroupName
+    $DataAvFile.deploymentDetails.templateFile       = $AvTemplateFile
+
+    Save-ParamFile -ResourceName $DataAvParameters.avName -ParamFileObject $DataAvFile
+  }
+}
+
+
+
+
 $AzureSize = Get-MappedTshirtSize -TshirtSize 'hdp'
 #$DataSize  = Get-MappedDataSize -TshirtSize $VmSize
 
-$DiskType  = 'Standard_LRS'
-if( $Premium )
-{
-  $DiskType = 'Premium_LRS'
-}
-
+$DiskType  = 'Premium_LRS'
 
 Write-Host "[$(Get-Date)] Creating [ $($MasterCount + $EdgeCount + $DataCount) ] virtual machine(s)..."
 $Results = @()
@@ -228,6 +351,8 @@ ForEach( $HdpType in ('Master', 'Edge', 'Data') )
   $Disk09Size = 0
   $Disk10Size = 0
 
+  $AvName = ''
+
   $ChefEnvironment = $Environment
   $HdpVerTag = "Hortonworks26"
   $ChefTagsGeneric = "Azure,$($Location.Replace(' ','-')),EIS,EISLinux,Infrastructure,HadoopDb,$($HdpVerTag)"
@@ -248,6 +373,8 @@ ForEach( $HdpType in ('Master', 'Edge', 'Data') )
        $Disk01Size = $DataSize
        $Disk02Size = $DataSize
 
+       $AvName = $MasterAvName
+
        $ChefTags = "$($ChefSetTag),$($ChefTagsGeneric),HdpMaster"
       }
      'Edge' {
@@ -259,6 +386,8 @@ ForEach( $HdpType in ('Master', 'Edge', 'Data') )
        $Disk02Size = $DataSize
        $Disk03Size = $DataSize
        $Disk04Size = $DataSize
+
+       $AvName = $EdgeAvName
 
        $ChefTags = "$($ChefSetTag),$($ChefTagsGeneric),HdpEdge"
       }
@@ -278,9 +407,13 @@ ForEach( $HdpType in ('Master', 'Edge', 'Data') )
        #$Disk09Size = $DataSize
        #$Disk10Size = $DataSize
 
+       $AvName = $DataAvName
+
        $ChefTags = "$($ChefSetTag),$($ChefTagsGeneric),HdpData"
       }
   }
+
+  #$DiskCount = 1
 
   for( $i = 1; $i -le $Count; $i++ )
   {
@@ -316,6 +449,7 @@ ForEach( $HdpType in ('Master', 'Edge', 'Data') )
       vnetName=$VnetName;
       subnetName=$SubnetName;
       diagStorAcctName=$DiagStorageName;
+      avName=$AvName;
     }
 
     Write-Host "[$(Get-Date)] Creating machine [ $($VmParameters.vmName) ]..."
@@ -353,7 +487,7 @@ ForEach( $HdpType in ('Master', 'Edge', 'Data') )
     #
     # Now to create the parameter file with all of the details about this system
     #
-    $ThisVmParam = New-ParameterObject -Version 2
+    $ThisVmParam = New-ParameterObject -Version 3
     $ThisVmParam.location.value           = $VmParameters.location
     $ThisVmParam.AppNameTag.value         = $VmParameters.AppNameTag
     $ThisVmParam.AppEnvTag.value          = $VmParameters.AppEnvTag
@@ -378,6 +512,7 @@ ForEach( $HdpType in ('Master', 'Edge', 'Data') )
     $ThisVmParam.subnetName.value         = $VmParameters.subnetName
     $ThisVmParam.ipAddress.value          = $Nic.IpConfigurations[0].PrivateIpAddress
     $ThisVmParam.diagStorAcctName.value   = $VmParameters.diagStorAcctName
+    $ThisVmParam.avName.value             = $VmParameters.avName
 
     $ThisVmParamFile = New-ParamFileObject -ParameterObject $ThisVmParam
     $ThisVmParamFile.deploymentDetails.subscriptionName   = $SubscriptionName

@@ -1,0 +1,58 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "AppNameTag": {
+      "type": "string",
+      "metadata": {
+        "description": "Tag for application name (ex. PCC)"
+      }
+    },
+    "AppEnvTag": {
+      "type": "string",
+      "metadata": {
+        "description": "Tag for application environment (ex. Dev, QA, Prodfix, Perf, Prod)"
+      }
+    },
+    "SecZoneTag": {
+      "type": "string",
+      "metadata": {
+        "description": "Tag for security zone (ex. Internal Non-Sensitive Dev-Test)"
+      }
+    },
+    "avName": {
+      "type": "string",
+      "minLength": 1
+    },
+    "updateDomainCount": {
+      "type": "int"
+    },
+    "faultDomainCount": {
+      "type": "int"
+    }
+  },
+  "variables": {
+    "computeApiVersion": "2016-04-30-preview"
+  },
+  "resources": [
+    {
+      "name": "[parameters('avName')]",
+      "type": "Microsoft.Compute/availabilitySets",
+      "location": "[resourceGroup().location]",
+      "apiVersion": "[variables('computeApiVersion')]",
+      "dependsOn": [],
+      "sku": {
+        "name": "Aligned"
+      },
+      "tags": {
+        "AppName": "[parameters('AppNameTag')]",
+        "AppEnv": "[parameters('AppEnvTag')]",
+        "SecZone": "[parameters('SecZoneTag')]"
+      },
+      "properties": {
+        "platformUpdateDomainCount": "[parameters('updateDomainCount')]",
+        "platformFaultDomainCount": "[parameters('faultDomainCount')]"
+      }
+    }
+  ]
+}

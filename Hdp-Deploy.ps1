@@ -57,6 +57,8 @@ param(
     [Parameter(Mandatory=$false)]
     [string] $VmPrefix,
     [Parameter(Mandatory=$false)]
+    [int] $VmIndex = 1,
+    [Parameter(Mandatory=$false)]
     [int] $MasterCount = 3,
     [Parameter(Mandatory=$false)]
     [int] $EdgeCount = 2,

@@ -36,6 +36,10 @@
   Flag to indicate that a previously provisioned system should be destroyed
   and completely re-deployed.
   WARNING: This is a destructive option, the existing instance will be wiped out
+
+  2 nodes - 8TB on edge (as 4 disks)
+  3 nodes - 2TB on master (as 2 disk)
+  5 nodes - 20TB on data (as 10 disks)
 #>
 [CmdletBinding()]
 param(
@@ -55,25 +59,35 @@ param(
     [Parameter(Mandatory=$false)]
     [int] $VmIndex = 1,
     [Parameter(Mandatory=$false)]
+    [int] $VmCount = 1,
+    [Parameter(Mandatory=$false)]
     [ValidateSet("xsmall","small","medium","large","xlarge","rx")]
     [string] $VmSize = 'small',
     [Parameter(Mandatory=$false)]
-    [int] $VmCount = 1,
+    [string] $Platform,
     [Parameter(Mandatory=$false)]
-    [bool] $Premium = $false
+    [ValidateSet("sandbox","development","test","production")]
+    [string] $Environment = "production",
+    [Parameter(Mandatory=$false)]
+    [string] $SetId,
+    [Parameter(Mandatory=$false)]
+    [switch] $NoChef,
+    [Parameter(Mandatory=$false)]
+    [string] $ChefRunList = "recipe[profile_wag_infrastructure_baseline]",
+    [Parameter(Mandatory=$false)]
+    [string] $ChefTags
 )
 
+Import-Module '.\Functions-General.psm1'
 Import-Module '.\Functions-AzureGeneral.psm1'
 Import-Module '.\Functions-Vnet.psm1'
 Import-Module '.\Functions-ResourceGroup.psm1'
-Import-Module '.\FUnctions-Storage.psm1'
+Import-Module '.\Functions-Storage.psm1'
 
-$StorageTemplateFile  = '.\templates\storage.baseline.single.json'
-$VmMultiTemplateFile  = '.\templates\vm.baseline.multi.1.0.json'
-$VmSingleTemplateFile = '.\templates\vm.baseline.single.1.0.json'
+
 
 #
-# Validate and use Credential Object
+# Select \ Validate and use Credential Object
 #
 if ( $Credentials -eq $null )
 {
@@ -82,14 +96,9 @@ if ( $Credentials -eq $null )
 Add-AzureRmAccount -Credential $Credentials | Out-Null
 
 
-#$Location = "West US"
-#if( $Location -eq $null )
-#{
-#  Read-Host "Enter Target Location"
-#}
 
 #
-# Validate or select target subscription
+# Select \ Validate target subscription
 # and then gather associated information needed
 #
 if ( $SubscriptionName -eq $null -Or $SubscriptionName -eq '' )
@@ -97,20 +106,62 @@ if ( $SubscriptionName -eq $null -Or $SubscriptionName -eq '' )
   $SubscriptionName = Select-SubscriptionName
 }
 $Subscription = Select-AzureRmSubscription -SubscriptionName $SubscriptionName | Out-Null
+
+
+#$Location = "West US"
+#if( $Location -eq $null )
+#{
+#  Read-Host "Enter Target Location"
+#}
+
 $VnetInfo     = Get-VnetInfo -SubscriptionName $SubscriptionName -Location $Location
 $VnetRgName   = $VnetInfo[0]
 $VnetName     = $VnetInfo[1]
 
 
+
+#
+# Select \ Validate the target subnet name
+#
+if( $SubnetName -eq $null -Or $SubnetName -eq '' )
+{
+  $SubnetName = Select-SubnetName -VnetGroup $VnetRgName -VnetName $VnetName
+}
+
+
+
+$StorageTemplate     = Get-TemplateByShortName -ShortName "storage"
+$StorageTemplateFile = Get-ResolvedTemplatePath -TemplateFile $StorageTemplate.dynamicTemplate
+
+#
+# Prompt \ Validate Platform Selection
+#
+if( $Platform -eq $null -Or $Platform -eq '' )
+{
+  $Platform = Select-Platform
+}
+
+$PlatformTemplate      = Get-TemplateByShortName -ShortName $Platform
+$TemplateObject        = Get-TemplateObjectFromFile -TemplateFile $PlatformTemplate.dynamicTemplate
+$VmStaticTemplateFile  = Get-ResolvedTemplatePath -TemplateFile $PlatformTemplate.staticTemplate
+$VmDynamicTemplateFile = Get-ResolvedTemplatePath -TemplateFile $PlatformTemplate.dynamicTemplate
+
+
+
+
+
+
 #
 # Test to ensure that there are no overlaps with existing VM names
 # (We are doing this as early as possible to save steps and empty creations)
+# TODO: this should probably scan the created set too, since we need to protect
+# against creations from other resource groups that would conflict with names in DNS
 #
 $ExisingVmNames = Get-ExistingVmNames -ResourceGroupName $ResourceGroupName -Location $Location
 $ClashingNames  = @()
 for( $i = $VmIndex; $i -lt ( $VmIndex + $VmCount ); $i++ )
 {
-  $TargetVmName = $VmPrefix + $i.ToString().PadLeft( 3, '0' )
+  $TargetVmName = $VmPrefix + $i.ToString().PadLeft( 2, '0' )
   if( $ExisingVmNames -Contains $TargetVmName )
   {
     $ClashingNames += $TargetVmName
@@ -123,15 +174,6 @@ if( $ClashingNames.Length -gt 0 )
   Write-Host "       $($ClashingNames -Join ', ')"
   Write-Host '       Adjust your range values and try again.'
   exit
-}
-
-
-#
-# Validate or select the target subnet name
-#
-if( $SubnetName -eq $null -Or $SubnetName -eq '' )
-{
-  $SubnetName = Select-SubnetName -VnetGroup $VnetRgName -VnetName $VnetName
 }
 
 
@@ -176,89 +218,150 @@ if( $DiagStorage -eq $null )
 }
 
 
+# The new templates can support a pretty customized set of data disks, but there needs to be a good
+# way to specify that information, for now this is going to be single disk
 $AzureSize = Get-MappedTshirtSize -TshirtSize $VmSize
 $DataSize  = Get-MappedDataSize -TshirtSize $VmSize
 
-$DiskType  = 'Standard_LRS'
-if( $Premium )
+$DiskCount  = 1
+$Disk01Size = $DataSize
+$Disk02Size = 0
+$Disk03Size = 0
+$Disk04Size = 0
+$Disk05Size = 0
+$Disk06Size = 0
+$Disk07Size = 0
+$Disk08Size = 0
+$Disk09Size = 0
+$Disk10Size = 0
+
+
+# not sure if i want to support non-premium right now
+$DiskType  = 'Premium_LRS'
+#if( $Premium )
+#{
+#  $DiskType = 'Premium_LRS'
+#}
+
+#
+# Chef Stuff
+#
+$ChefEnvironment = $Environment
+
+$ChefSetTag = "Set-$($VmPrefix)"
+if( $SetId -ne $null -And $SetId -ne '' )
 {
-  $DiskType = 'Premium_LRS'
+  $ChefSetTag = $SetId
 }
 
+$ChefTagsComputed = @(
+  "Azure",
+  $Location.Replace(' ', '-'),
+  $ChefSetTag
+)
+$ChefTagsProvided = $ChefTags -Split ','
+
+$ChefTagsMerged = $ChefTagsComputed + $ChefTagsProvided | Select-Object -Unique
+$ChefTagsString = $ChefTagsMerged -Join ','
+
+
+
+Write-Host "[$(Get-Date)] Creating [ $($VmCount) ] virtual machine(s)..."
+$Results = @()
+$ResultObjects = @()
 
 #
 # Create the group of virtual machines
 #
-$VmParameters = @{
-  location=$Location;
-
-  # These need to be adjusted or removed
-  tagAppNameValue='DynamicDeployment';
-  tagAppEnvValue='DynamicDeployment';
-  tagSecZoneValue='DynamicDeployment';
-
-  vmNamePrefix=$VmPrefix;
-  vmIndexOffset=$VmIndex;
-  vmCount=$VmCount;
-  vmSize=$AzureSize;
-  dataDiskSizeInGB=$DataSize;
-
-  # This will need to be specified
-  managedDiskType=$DiskType;
-
-  # This should be able to be specified as well
-  # maybe as part of a standard selection where you say linux or windows
-  imagePublisher='RedHat';
-  imageOffer='RHEL';
-  imageVersion='7.3';
-  imageRelease='latest'; # @TODO: how do i find out which one was used for storage?
-
-  adminUserName='wagsadmin';
-  adminPassword='Welcome123!';
-  vnetResGrp=$VnetRgName;
-  vnetName=$VnetName;
-  subnetName=$SubnetName;
-  diagStorAcctName=$DiagStorageName;
-}
-
-Write-Host "[$(Get-Date)] Creating [ $($VmCount) ] virtual machine(s)..."
-New-AzureRMResourceGroupDeployment -Name "$($VmPrefix)-vm-$(Get-Date -Format yyyyMMddHHmmss)" `
-                                   -ResourceGroupName $ResourceGroupName `
-                                   -TemplateFile $VmMultiTemplateFile `
-                                   -TemplateParameterObject $VmParameters `
-                                   -Mode Incremental | Out-Null
-
-#
-# Afterwards we need to collect the information about each of them
-# so that we can create the parameter files
-# and also to return the appropriate list for bootstrapping
-#
-$Results = @()
-for( $i = $VmParameters.vmIndexOffset; $i -lt ( $VmParameters.vmIndexOffset + $VmParameters.vmCount ); $i++ )
+for( $i = $VmIndex; $i -lt ($VmIndex + $VmCount); $i++ )
 {
-  $ThisVmName = "$($VmParameters.vmNamePrefix)$($i.ToString().PadLeft( 2, '0' ))"
-  $NicName    = "$($ThisVmName)nic01"
-  $Nic        = Get-AzureRmNetworkInterface -Name $NicName -ResourceGroupName $ResourceGroupName
-  $Results   += "$($ThisVmName) $($Nic.IpConfigurations[0].PrivateIpAddress)"
+  $VmParameters = @{
+    location=$Location;
+
+    # These need to be adjusted or removed
+    AppNameTag='Unknown';
+    AppEnvTag=$Environment;
+    SecZoneTag='Unknown';
+    vmName="$($VmPrefix)$($i.ToString().PadLeft(2, '0'))"
+    vmSize=$AzureSize;
+    osDiskSize=128;
+
+    # the zero disks will be ignored
+    diskCount=$DiskCount;
+    disk01Size=$Disk01Size;
+    disk02Size=$Disk02Size;
+    disk03Size=$Disk03Size;
+    disk04Size=$Disk04Size;
+    disk05Size=$Disk05Size;
+    disk06Size=$Disk06Size;
+    disk07Size=$Disk07Size;
+    disk08Size=$Disk08Size;
+    disk09Size=$Disk09Size;
+    disk10Size=$Disk10Size;
+
+    # This will need to be specified
+    managedDiskType=$DiskType;
+
+    vnetResGrp=$VnetRgName;
+    vnetName=$VnetName;
+    subnetName=$SubnetName;
+    diagStorAcctName=$DiagStorageName;
+  }
+
+  Write-Host "[$(Get-Date)] Creating machine [ $($VmParameters.vmName) ]..."
+  New-AzureRMResourceGroupDeployment -Name "$($VmParameters.vmName)-$(Get-Date -Format yyyyMMddHHmmss)" `
+                                    -ResourceGroupName $ResourceGroupName `
+                                    -TemplateFile $VmDynamicTemplateFile `
+                                    -TemplateParameterObject $VmParameters `
+                                    -Mode Incremental | Out-Null
+
+
+  #
+  # Alter the network interface to be static so it is not lost on deallocation
+  # and get the IP address it was assigned for reporting and use
+  #
+  $ThisVm = Get-AzureRmVM -ResourceGroupName $ResourceGroupName -Name $VmParameters.vmName
+  $Nic = Get-AzureRmResource -ResourceId $ThisVm.NetworkProfile.NetworkInterfaces[0].Id | Get-AzureRmNetworkInterface
+  $Nic.IpConfigurations[0].PrivateIpAllocationMethod = "Static"
+  Set-AzureRmNetworkInterface -NetworkInterface $Nic | Out-Null
+
+  # Set the information that the current version of multideploy takes and is also nice to read
+  $Results   += "$($VmParameters.vmName) $($Nic.IpConfigurations[0].PrivateIpAddress)"
+  # Set the detailed information about the entity that can be used for individual
+  # system bootstrap operations
+  $ResultObjects += @{
+    nodeIp=$Nic.IpConfigurations[0].PrivateIpAddress;
+    nodeName=$VmParameters.vmName
+    username=$TemplateObject.variables.adminUsername;
+    password=$TemplateObject.variables.adminPassword;
+    environment=$ChefEnvironment;
+    tags=$ChefTagsString;
+    runList=$ChefRunList
+  }
 
   #
   # Now to create the parameter file with all of the details about this system
   #
-  $ThisVmParam                          = New-ParameterObject
+  $ThisVmParam = New-ParameterObject -Version 2
   $ThisVmParam.location.value           = $VmParameters.location
-  $ThisVmParam.tagAppNameValue.value    = $VmParameters.tagAppNameValue
-  $ThisVmParam.tagAppEnvValue.value     = $VmParameters.tagAppEnvValue
-  $ThisVmParam.tagSecZoneValue.value    = $VmParameters.tagSecZoneValue
-  $ThisVmParam.vmName.value             = $ThisVmName
+  $ThisVmParam.AppNameTag.value         = $VmParameters.AppNameTag
+  $ThisVmParam.AppEnvTag.value          = $VmParameters.AppEnvTag
+  $ThisVmParam.SecZoneTag.value         = $VmParameters.SecZoneTag
+  $ThisVmParam.vmName.value             = $VmParameters.vmName
   $ThisVmParam.vmSize.value             = $VmParameters.vmSize
-  $ThisVmParam.dataDiskSizeInGB.value   = $VmParameters.dataDiskSizeInGB
+  $ThisVmParam.osDiskSize.value         = $VmParameters.osDiskSize
+  $ThisVmParam.diskCount.value          = $VmParameters.diskCount
+  $ThisVmParam.disk01Size.value         = $VmParameters.disk01Size
+  $ThisVmParam.disk02Size.value         = $VmParameters.disk02Size
+  $ThisVmParam.disk03Size.value         = $VmParameters.disk03Size
+  $ThisVmParam.disk04Size.value         = $VmParameters.disk04Size
+  $ThisVmParam.disk05Size.value         = $VmParameters.disk05Size
+  $ThisVmParam.disk06Size.value         = $VmParameters.disk06Size
+  $ThisVmParam.disk07Size.value         = $VmParameters.disk07Size
+  $ThisVmParam.disk08Size.value         = $VmParameters.disk08Size
+  $ThisVmParam.disk09Size.value         = $VmParameters.disk09Size
+  $ThisVmParam.disk10Size.value         = $VmParameters.disk10Size
   $ThisVmParam.managedDiskType.value    = $VmParameters.managedDiskType
-  $ThisVmParam.imagePublisher.value     = $VmParameters.imagePublisher
-  $ThisVmParam.imageOffer.value         = $VmParameters.imageOffer
-  $ThisVmParam.imageVersion.value       = $VmParameters.imageVersion
-  $ThisVmParam.imageRelease.value       = $VmParameters.imageRelease # Need to find a way to convert the 'latest' value into which one it was
-  $ThisVmParam.adminUserName.value      = $VmParameters.adminUserName
-  $ThisVmParam.adminPassword.value      = $VmParameters.adminPassword
   $ThisVmParam.vnetResGrp.value         = $VmParameters.vnetResGrp
   $ThisVmParam.vnetName.value           = $VmParameters.vnetName
   $ThisVmParam.subnetName.value         = $VmParameters.subnetName
@@ -268,8 +371,13 @@ for( $i = $VmParameters.vmIndexOffset; $i -lt ( $VmParameters.vmIndexOffset + $V
   $ThisVmParamFile = New-ParamFileObject -ParameterObject $ThisVmParam
   $ThisVmParamFile.deploymentDetails.subscriptionName   = $SubscriptionName
   $ThisVmParamFile.deploymentDetails.resourceGroupName  = $ResourceGroupName
-  $ThisVmParamFile.deploymentDetails.templateFile       = $VmSingleTemplateFile
-  Save-ParamFile -ResourceName $ThisVmName -ParamFileObject $ThisVmParamFile
+  $ThisVmParamFile.deploymentDetails.templateFile       = $VmStaticTemplateFile
+
+  $ThisVmParamFile.deploymentDetails.chefEnvironment  = $ChefEnvironment
+  $ThisVmParamFile.deploymentDetails.chefTags         = $ChefTagsString
+  $ThisVmParamFile.deploymentDetails.chefRunList      = $ChefRunList
+
+  Save-ParamFile -ResourceName $VmParameters.vmName -ParamFileObject $ThisVmParamFile
 }
 
-return $Results
+return $ResultObjects

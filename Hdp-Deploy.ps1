@@ -209,10 +209,12 @@ if( $MasterCount -gt 0 )
   {
     Write-Host "[$(Get-Date)] Master availability set did not exist, creating [ $MasterAvName ]"
 
+    $MasterFaultCount = if( $MasterCount -le 3 ){ $MasterCount } else { 3 }
+
     $MasterAvParameters = @{
       avName=$MasterAvName;
       updateDomainCount=$MasterCount;
-      faultDomainCount=$MasterCount;
+      faultDomainCount=$MasterFaultCount;
       AppNameTag=$AppNameTag;
       AppEnvTag=$AppEnvTag;
       SecZoneTag=$SecZoneTag;
@@ -249,10 +251,12 @@ if( $EdgeCount -gt 0 )
   {
     Write-Host "[$(Get-Date)] Edge availability set did not exist, creating [ $EdgeAvName ]"
 
+    $EdgeFaultCount = if( $EdgeCount -le 3 ){ $EdgeCount } else { 3 }
+
     $EdgeAvParameters = @{
       avName=$EdgeAvName;
       updateDomainCount=$EdgeCount;
-      faultDomainCount=$EdgeCount;
+      faultDomainCount=$EdgeFaultCount;
       AppNameTag=$AppNameTag;
       AppEnvTag=$AppEnvTag;
       SecZoneTag=$SecZoneTag;
@@ -289,10 +293,12 @@ if( $DataCount -gt 0 )
   {
     Write-Host "[$(Get-Date)] Data availability set did not exist, creating [ $DataAvName ]"
 
+    $DataFaultCount = if( $DataCount -le 3 ){ $DataCount } else { 3 }
+
     $DataAvParameters = @{
       avName=$DataAvName;
       updateDomainCount=$DataCount;
-      faultDomainCount=$DataCount;
+      faultDomainCount=$DataFaultCount;
       AppNameTag=$AppNameTag;
       AppEnvTag=$AppEnvTag;
       SecZoneTag=$SecZoneTag;
@@ -417,6 +423,7 @@ ForEach( $HdpType in ('Master', 'Edge', 'Data') )
       }
   }
 
+  # Test override to speed up build sequence
   #$DiskCount = 1
 
   for( $i = 1; $i -le $Count; $i++ )

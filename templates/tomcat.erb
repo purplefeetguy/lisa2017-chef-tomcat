@@ -1,0 +1,39 @@
+#!/bin/bash
+## description: Tomcat Start Stop Restart
+## processname: tomcat
+## chkconfig: 234 20 80
+NAME=tomcat
+JAVA_HOME=/usr/lib/jvm/java-1.7.0-openjdk-1.7.0.151.x86_64
+export JAVA_HOME
+PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/sbin:/usr/local/bin:$JAVA_HOME/bin:$PATH
+export PATH
+CATALINA_HOME=/opt/tomcat
+#
+tomcat_pid() {
+  `pgrep -f $NAME`
+}
+
+case $1 in
+start)
+sh $CATALINA_HOME/bin/startup.sh
+;;
+stop)
+sh $CATALINA_HOME/bin/shutdown.sh
+;;
+restart)
+sh $CATALINA_HOME/bin/shutdown.sh
+sh $CATALINA_HOME/bin/startup.sh
+;;
+status)
+  pid=$(tomcat_pid)
+  if [ -n "$pid" ] ; then
+    printf "$NAME process running with pid: $pid\n"
+    exit 0
+  else
+    log_daemon_msg "$NAME Process is not running\n"
+    log_end_msg 0
+    exit 1
+  fi
+;;
+esac
+exit 0

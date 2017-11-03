@@ -193,6 +193,10 @@ if( $DiagStorage -eq $null )
 }
 
 
+$AppEnvTag = 'DTN'
+$SecZoneTag = 'WBA Internal Non-Sensitive'
+$AppNameTag = 'Rx Hadoop'
+
 
 #
 # Create the AV sets needed for the master and data nodes
@@ -209,9 +213,9 @@ if( $MasterCount -gt 0 )
       avName=$MasterAvName;
       updateDomainCount=$MasterCount;
       faultDomainCount=$MasterCount;
-      AppNameTag='Hadoop';
-      AppEnvTag=$Environment;
-      SecZoneTag='Unknown';
+      AppNameTag=$AppNameTag;
+      AppEnvTag=$AppEnvTag;
+      SecZoneTag=$SecZoneTag;
     }
 
     New-AzureRMResourceGroupDeployment -Name "$($MasterAvName)-av-$(Get-Date -Format yyyyMMddHHmmss)" `
@@ -249,9 +253,9 @@ if( $EdgeCount -gt 0 )
       avName=$EdgeAvName;
       updateDomainCount=$EdgeCount;
       faultDomainCount=$EdgeCount;
-      AppNameTag='Hadoop';
-      AppEnvTag=$Environment;
-      SecZoneTag='Unknown';
+      AppNameTag=$AppNameTag;
+      AppEnvTag=$AppEnvTag;
+      SecZoneTag=$SecZoneTag;
     }
 
     New-AzureRMResourceGroupDeployment -Name "$($EdgeAvName)-av-$(Get-Date -Format yyyyMMddHHmmss)" `
@@ -289,9 +293,9 @@ if( $DataCount -gt 0 )
       avName=$DataAvName;
       updateDomainCount=$DataCount;
       faultDomainCount=$DataCount;
-      AppNameTag='Hadoop';
-      AppEnvTag=$Environment;
-      SecZoneTag='Unknown';
+      AppNameTag=$AppNameTag;
+      AppEnvTag=$AppEnvTag;
+      SecZoneTag=$SecZoneTag;
     }
 
     New-AzureRMResourceGroupDeployment -Name "$($DataAvName)-av-$(Get-Date -Format yyyyMMddHHmmss)" `
@@ -368,10 +372,10 @@ ForEach( $HdpType in ('Master', 'Edge', 'Data') )
      'Master' {
        #$TypePrefix = 'm'
        $Count = $MasterCount 
-       $DataSize = 2048
-       $DiskCount = 2
+       $DataSize = 1024
+       $DiskCount = 3
        $Disk01Size = $DataSize
-       $Disk02Size = $DataSize
+       #$Disk02Size = $DataSize
 
        $AvName = $MasterAvName
 
@@ -381,11 +385,11 @@ ForEach( $HdpType in ('Master', 'Edge', 'Data') )
        #$TypePrefix = 'e'
        $Count = $EdgeCount
        $DataSize = 2048
-       $DiskCount = 4
+       $DiskCount = 2
        $Disk01Size = $DataSize
        $Disk02Size = $DataSize
-       $Disk03Size = $DataSize
-       $Disk04Size = $DataSize
+       #$Disk03Size = $DataSize
+       #$Disk04Size = $DataSize
 
        $AvName = $EdgeAvName
 
@@ -421,9 +425,9 @@ ForEach( $HdpType in ('Master', 'Edge', 'Data') )
       location=$Location;
 
       # These need to be adjusted or removed
-      AppNameTag='Hadoop';
-      AppEnvTag=$Environment;
-      SecZoneTag='Unknown';
+      AppNameTag=$AppNameTag;
+      AppEnvTag=$AppEnvTag;
+      SecZoneTag=$SecZoneTag;
       vmName="$($VmPrefix)$($RunningIndex.ToString().PadLeft(2, '0'))"
       #vmName="$($VmPrefix)$($TypePrefix)$($i.ToString().PadLeft( 2, '0' ))"
       vmSize=$AzureSize;

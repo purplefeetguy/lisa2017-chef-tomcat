@@ -59,6 +59,8 @@ param(
     [Parameter(Mandatory=$false)]
     [int] $VmIndex = 1,
     [Parameter(Mandatory=$false)]
+    [int] $ManagementCount = 1,
+    [Parameter(Mandatory=$false)]
     [int] $MasterCount = 3,
     [Parameter(Mandatory=$false)]
     [int] $EdgeCount = 2,
@@ -197,143 +199,75 @@ $AppEnvTag = 'DTN'
 $SecZoneTag = 'WBA Internal Non-Sensitive'
 $AppNameTag = 'Rx Hadoop'
 
+$NodeTypes = ('Management', 'Master', 'Edge', 'Data')
 
 #
-# Create the AV sets needed for the master and data nodes
+# Create the AV sets needed for each type of node
 #
-$MasterAvName = "$($VmPrefix)-master"
-if( $MasterCount -gt 0 )
+ForEach( $AvType in $NodeTypes )
 {
-  $MasterAv = Get-AzureRmAvailabilitySet -ResourceGroupName $ResourceGroupName -Name $MasterAvName -ErrorAction Ignore
-  if( $MasterAv -eq $null )
+  $ThisAvTypeCount = 0
+  switch($AvType)
   {
-    Write-Host "[$(Get-Date)] Master availability set did not exist, creating [ $MasterAvName ]"
-
-    $MasterFaultCount = if( $MasterCount -le 3 ){ $MasterCount } else { 3 }
-
-    $MasterAvParameters = @{
-      avName=$MasterAvName;
-      updateDomainCount=$MasterCount;
-      faultDomainCount=$MasterFaultCount;
-      AppNameTag=$AppNameTag;
-      AppEnvTag=$AppEnvTag;
-      SecZoneTag=$SecZoneTag;
-    }
-
-    New-AzureRMResourceGroupDeployment -Name "$($MasterAvName)-av-$(Get-Date -Format yyyyMMddHHmmss)" `
-      -ResourceGroupName $ResourceGroupName `
-      -TemplateFile $AvTemplateFile `
-      -TemplateParameterObject $MasterAvParameters `
-      -Mode Incremental | Out-Null
-
-    $MasterAvDetails = New-AvParameterObject
-    $MasterAvDetails.AppNameTag.value         = $MasterAvParameters.AppNameTag
-    $MasterAvDetails.AppEnvTag.value          = $MasterAvParameters.AppEnvTag
-    $MasterAvDetails.SecZoneTag.value         = $MasterAvParameters.SecZoneTag
-    $MasterAvDetails.avName.value             = $MasterAvParameters.avName
-    $MasterAvDetails.updateDomainCount.value  = $MasterAvParameters.updateDomainCount
-    $MasterAvDetails.faultDomainCount.value   = $MasterAvParameters.faultDomainCount
-
-    $MasterAvFile = New-ParamFileObject -ParameterObject $MasterAvDetails
-    $MasterAvFile.deploymentDetails.subscriptionName   = $SubscriptionName
-    $MasterAvFile.deploymentDetails.resourceGroupName  = $ResourceGroupName
-    $MasterAvFile.deploymentDetails.templateFile       = $AvTemplateFile
-
-    Save-ParamFile -ResourceName $MasterAvParameters.avName -ParamFileObject $MasterAvFile
+    'Management' { $ThisAvTypeCount = $ManagementCount }
+    'Master'     { $ThisAvTypeCount = $MasterCount     }
+    'Edge'       { $ThisAvTypeCount = $EdgeCount       }
+    'Data'       { $ThisAvTypeCount = $DataCount       }
   }
-}
 
-$EdgeAvName   = "$($VmPrefix)-edge"
-if( $EdgeCount -gt 0 )
-{
-  $EdgeAv = Get-AzureRmAvailabilitySet -ResourceGroupName $ResourceGroupName -Name $EdgeAvName -ErrorAction Ignore
-  if( $EdgeAv -eq $null )
+  if( $ThisAvTypeCount -lt 1 )
   {
-    Write-Host "[$(Get-Date)] Edge availability set did not exist, creating [ $EdgeAvName ]"
-
-    $EdgeFaultCount = if( $EdgeCount -le 3 ){ $EdgeCount } else { 3 }
-
-    $EdgeAvParameters = @{
-      avName=$EdgeAvName;
-      updateDomainCount=$EdgeCount;
-      faultDomainCount=$EdgeFaultCount;
-      AppNameTag=$AppNameTag;
-      AppEnvTag=$AppEnvTag;
-      SecZoneTag=$SecZoneTag;
-    }
-
-    New-AzureRMResourceGroupDeployment -Name "$($EdgeAvName)-av-$(Get-Date -Format yyyyMMddHHmmss)" `
-      -ResourceGroupName $ResourceGroupName `
-      -TemplateFile $AvTemplateFile `
-      -TemplateParameterObject $EdgeAvParameters `
-      -Mode Incremental | Out-Null
-
-    $EdgeAvDetails = New-AvParameterObject
-    $EdgeAvDetails.AppNameTag.value         = $EdgeAvParameters.AppNameTag
-    $EdgeAvDetails.AppEnvTag.value          = $EdgeAvParameters.AppEnvTag
-    $EdgeAvDetails.SecZoneTag.value         = $EdgeAvParameters.SecZoneTag
-    $EdgeAvDetails.avName.value             = $EdgeAvParameters.avName
-    $EdgeAvDetails.updateDomainCount.value  = $EdgeAvParameters.updateDomainCount
-    $EdgeAvDetails.faultDomainCount.value   = $EdgeAvParameters.faultDomainCount
-
-    $EdgeAvFile = New-ParamFileObject -ParameterObject $EdgeAvDetails
-    $EdgeAvFile.deploymentDetails.subscriptionName   = $SubscriptionName
-    $EdgeAvFile.deploymentDetails.resourceGroupName  = $ResourceGroupName
-    $EdgeAvFile.deploymentDetails.templateFile       = $AvTemplateFile
-
-    Save-ParamFile -ResourceName $EdgeAvParameters.avName -ParamFileObject $EdgeAvFile
+    continue
   }
-}
 
-$DataAvName   = "$($VmPrefix)-data"
-if( $DataCount -gt 0 )
-{
-  $DataAv = Get-AzureRmAvailabilitySet -ResourceGroupName $ResourceGroupName -Name $DataAvName -ErrorAction Ignore
-  if( $DataAv -eq $null )
+  $ThisAvName = "$(VmPrefix)-$($AvType)"
+  $ThisAv = Get-AzureRmAvailabilitySet -ResourceGroupName $ResourceGroupName -Name $ThisAvName -ErrorAction Ignore
+  if( $ThisAv -ne $null )
   {
-    Write-Host "[$(Get-Date)] Data availability set did not exist, creating [ $DataAvName ]"
-
-    $DataFaultCount = if( $DataCount -le 3 ){ $DataCount } else { 3 }
-
-    $DataAvParameters = @{
-      avName=$DataAvName;
-      updateDomainCount=$DataCount;
-      faultDomainCount=$DataFaultCount;
-      AppNameTag=$AppNameTag;
-      AppEnvTag=$AppEnvTag;
-      SecZoneTag=$SecZoneTag;
-    }
-
-    New-AzureRMResourceGroupDeployment -Name "$($DataAvName)-av-$(Get-Date -Format yyyyMMddHHmmss)" `
-      -ResourceGroupName $ResourceGroupName `
-      -TemplateFile $AvTemplateFile `
-      -TemplateParameterObject $DataAvParameters `
-      -Mode Incremental | Out-Null
-
-    $DataAvDetails = New-AvParameterObject
-    $DataAvDetails.AppNameTag.value         = $DataAvParameters.AppNameTag
-    $DataAvDetails.AppEnvTag.value          = $DataAvParameters.AppEnvTag
-    $DataAvDetails.SecZoneTag.value         = $DataAvParameters.SecZoneTag
-    $DataAvDetails.avName.value             = $DataAvParameters.avName
-    $DataAvDetails.updateDomainCount.value  = $DataAvParameters.updateDomainCount
-    $DataAvDetails.faultDomainCount.value   = $DataAvParameters.faultDomainCount
-
-    $DataAvFile = New-ParamFileObject -ParameterObject $DataAvDetails
-    $DataAvFile.deploymentDetails.subscriptionName   = $SubscriptionName
-    $DataAvFile.deploymentDetails.resourceGroupName  = $ResourceGroupName
-    $DataAvFile.deploymentDetails.templateFile       = $AvTemplateFile
-
-    Save-ParamFile -ResourceName $DataAvParameters.avName -ParamFileObject $DataAvFile
+    continue
   }
+
+  Write-Host "[$(Get-Date)] $($AvType) availability set did not exist, creating [ $($ThisAvName) ]"
+  $ThisFaultCount = if( $ThisAvTypeCount -le 3 ){ $ThisAvTypeCount } else { 3 }
+
+  $ThisAvParameters = @{
+    avName=$ThisAvName;
+    updateDomainCount=$ThisAvTypeCount;
+    faultDomainCount=$ThisFaultCount;
+    AppNameTag=$AppNameTag;
+    AppEnvTag=$AppEnvTag;
+    SecZoneTag=$SecZoneTag;
+  }
+
+  New-AzureRMResourceGroupDeployment -Name "$($ThisAvName)-av-$(Get-Date -Format yyyyMMddHHmmss)" `
+    -ResourceGroupName $ResourceGroupName `
+    -TemplateFile $AvTemplateFile `
+    -TemplateParameterObject $ThisAvParameters `
+    -Mode Incremental | Out-Null
+
+  $ThisAvDetails = New-AvParameterObject
+  $ThisAvDetails.AppNameTag.value         = $ThisAvParameters.AppNameTag
+  $ThisAvDetails.AppEnvTag.value          = $ThisAvParameters.AppEnvTag
+  $ThisAvDetails.SecZoneTag.value         = $ThisAvParameters.SecZoneTag
+  $ThisAvDetails.avName.value             = $ThisAvParameters.avName
+  $ThisAvDetails.updateDomainCount.value  = $ThisAvParameters.updateDomainCount
+  $ThisAvDetails.faultDomainCount.value   = $ThisAvParameters.faultDomainCount
+
+  $ThisAvFile = New-ParamFileObject -ParameterObject $ThisAvDetails
+  $ThisAvFile.deploymentDetails.subscriptionName   = $SubscriptionName
+  $ThisAvFile.deploymentDetails.resourceGroupName  = $ResourceGroupName
+  $ThisAvFile.deploymentDetails.templateFile       = $AvTemplateFile
+
+  Save-ParamFile -ResourceName $ThisAvParameters.avName -ParamFileObject $ThisAvFile
 }
 
 
 
-
+#
+# Create the VMs with the appropriate changes for each type
+#
 $AzureSize = Get-MappedTshirtSize -TshirtSize 'hdp'
 #$DataSize  = Get-MappedDataSize -TshirtSize $VmSize
-
-$DiskType  = 'Premium_LRS'
 
 Write-Host "[$(Get-Date)] Creating [ $($MasterCount + $EdgeCount + $DataCount) ] virtual machine(s)..."
 $Results = @()
@@ -341,12 +275,11 @@ $ResultObjects = @()
 
 $RunningIndex = $VmIndex
 
-#
-# Create the group of virtual machines
-#
-ForEach( $HdpType in ('Master', 'Edge', 'Data') )
+
+ForEach( $HdpType in $NodeTypes )
 {
-  $Count = 0
+  $Count    = 0
+  $LvmSize  = 512
   $DataSize = 0
 
   $DiskCount  = 0
@@ -361,7 +294,9 @@ ForEach( $HdpType in ('Master', 'Edge', 'Data') )
   $Disk09Size = 0
   $Disk10Size = 0
 
-  $AvName = ''
+  $DiskType = 'Premium_LRS'
+
+  $AvName = "$(VmPrefix)-$($HdpType)"
 
   $ChefEnvironment = $Environment
   $HdpVerTag = "Hortonworks26"
@@ -369,58 +304,68 @@ ForEach( $HdpType in ('Master', 'Edge', 'Data') )
   $ChefSetTag = "Set-$($VmPrefix)"
   $ChefTags = ''
 
-  $ChefRunList = 'recipe[wag_registration],recipe[profile_wag_infrastructure_baseline],recipe[profile_wag_hdp_infra]'
+  $ChefRunList = 'recipe[wag_registration],recipe[profile_wag_infrastructure_baseline],recipe[profile_wag_hadoop]'
   # i think it may make sense to create profiles for the sub-components
 
   # It doesn't quite follow our naming standards, but for now i want to be able to differenciate
   switch($HdpType)
   {
-     'Master' {
-       #$TypePrefix = 'm'
-       $Count = $MasterCount 
-       $DataSize = 1024
-       $DiskCount = 3
-       $Disk01Size = $DataSize
-       #$Disk02Size = $DataSize
+    'Management' {
+      #$TypePrefix = 'm'
+      $Count = $ManagementCount 
+      $DataSize = 1024
+      $DiskCount = 4
+      $Disk01Size = $LvmSize
+      $Disk02Size = $DataSize
+      $Disk03Size = $DataSize
+      $Disk04Size = $DataSize
 
-       $AvName = $MasterAvName
+      $ChefTags = "$($ChefSetTag),$($ChefTagsGeneric),HdpManagement"
+    }
+    'Master' {
+      #$TypePrefix = 'm'
+      $Count = $MasterCount 
+      $DataSize = 1024
+      $DiskCount = 4
+      $Disk01Size = $LvmSize
+      $Disk02Size = $DataSize
+      $Disk03Size = $DataSize
+      $Disk04Size = $DataSize
 
-       $ChefTags = "$($ChefSetTag),$($ChefTagsGeneric),HdpMaster"
-      }
-     'Edge' {
-       #$TypePrefix = 'e'
-       $Count = $EdgeCount
-       $DataSize = 2048
-       $DiskCount = 2
-       $Disk01Size = $DataSize
-       $Disk02Size = $DataSize
-       #$Disk03Size = $DataSize
-       #$Disk04Size = $DataSize
+      $ChefTags = "$($ChefSetTag),$($ChefTagsGeneric),HdpMaster"
+    }
+    'Edge' {
+      #$TypePrefix = 'e'
+      $Count = $EdgeCount
+      $DataSize = 2048
+      $DiskCount = 3
+      $Disk01Size = $LvmSize
+      $Disk02Size = $DataSize
+      $Disk03Size = $DataSize
+      #$Disk04Size = $DataSize
 
-       $AvName = $EdgeAvName
+      $ChefTags = "$($ChefSetTag),$($ChefTagsGeneric),HdpEdge"
+    }
+    'Data' {
+      #$TypePrefix = 'd'
+      $Count = $DataCount 
+      $DataSize = 2048
+      $DiskCount = 6
+      $Disk01Size = $LvmSize
+      $Disk02Size = $DataSize
+      $Disk03Size = $DataSize
+      $Disk04Size = $DataSize
+      $Disk05Size = $DataSize
+      $Disk06Size = $DataSize
+      #$Disk07Size = $DataSize
+      #$Disk08Size = $DataSize
+      #$Disk09Size = $DataSize
+      #$Disk10Size = $DataSize
 
-       $ChefTags = "$($ChefSetTag),$($ChefTagsGeneric),HdpEdge"
-      }
-     'Data' {
-       #$TypePrefix = 'd'
-       $Count = $DataCount 
-       $DataSize = 2048
-       $DiskCount = 5
-       $Disk01Size = $DataSize
-       $Disk02Size = $DataSize
-       $Disk03Size = $DataSize
-       $Disk04Size = $DataSize
-       $Disk05Size = $DataSize
-       #$Disk06Size = $DataSize
-       #$Disk07Size = $DataSize
-       #$Disk08Size = $DataSize
-       #$Disk09Size = $DataSize
-       #$Disk10Size = $DataSize
+      $DiskType = 'Standard_LRS'
 
-       $AvName = $DataAvName
-
-       $ChefTags = "$($ChefSetTag),$($ChefTagsGeneric),HdpData"
-      }
+      $ChefTags = "$($ChefSetTag),$($ChefTagsGeneric),HdpData"
+    }
   }
 
   # Test override to speed up build sequence

@@ -45,8 +45,8 @@ function Get-TemplateShortNames()
 
   foreach($mapItem in $map)
   {
-    if( $mapItem.shortName -eq "storage" )
-    { # Don't return the storage account template in the selectable list
+    if( $template.platformType -eq "storage" -or $template.platformType -eq "availability-set" )
+    { # Don't return the storage account or av template in the selectable list
       continue
     }
     $shortNames += $mapItem.shortName
@@ -110,7 +110,7 @@ function Select-Platform( )
 
   foreach( $template in $templatesAll )
   {
-    if( $template.platformType -eq "storage" )
+    if( $template.platformType -eq "storage" -or $template.platformType -eq "availability-set" )
     {
       continue
     }

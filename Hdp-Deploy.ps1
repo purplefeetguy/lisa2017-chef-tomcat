@@ -59,6 +59,8 @@ param(
     [Parameter(Mandatory=$false)]
     [int] $VmIndex = 1,
     [Parameter(Mandatory=$false)]
+    [int] $ManagementCount = 1,
+    [Parameter(Mandatory=$false)]
     [int] $MasterCount = 3,
     [Parameter(Mandatory=$false)]
     [int] $EdgeCount = 2,
@@ -77,8 +79,9 @@ Import-Module '.\Functions-ResourceGroup.psm1'
 Import-Module '.\FUnctions-Storage.psm1'
 
 $StorageTemplateFile  = '.\templates\storage.baseline.single.json'
-$VmStaticTemplateFile = '.\templates\vm.rhel-lts.single.1.0.json'
-$VmDynamicTemplateFile = '.\templates\vm.rhel-lts.single.1.0.d.json'
+$AvTemplateFile = '.\templates\av.1.0.json'
+$VmStaticTemplateFile = '.\templates\vm.rhel-lts.single.av.1.0.json'
+$VmDynamicTemplateFile = '.\templates\vm.rhel-lts.single.av.1.0.d.json'
 
 # This will be needed to get some of the information about the system
 # that was built to be passed to the bootstrapper. There will be an expectation
@@ -192,28 +195,91 @@ if( $DiagStorage -eq $null )
 }
 
 
-$AzureSize = Get-MappedTshirtSize -TshirtSize 'hdp'
-#$DataSize  = Get-MappedDataSize -TshirtSize $VmSize
+$AppEnvTag = 'DTN'
+$SecZoneTag = 'WBA Internal Non-Sensitive'
+$AppNameTag = 'Rx Hadoop'
 
-$DiskType  = 'Standard_LRS'
-if( $Premium )
+$NodeTypes = ('Management', 'Master', 'Edge', 'Data')
+
+#
+# Create the AV sets needed for each type of node
+#
+ForEach( $AvType in $NodeTypes )
 {
-  $DiskType = 'Premium_LRS'
+  $ThisAvTypeCount = 0
+  switch($AvType)
+  {
+    'Management' { $ThisAvTypeCount = $ManagementCount }
+    'Master'     { $ThisAvTypeCount = $MasterCount     }
+    'Edge'       { $ThisAvTypeCount = $EdgeCount       }
+    'Data'       { $ThisAvTypeCount = $DataCount       }
+  }
+
+  if( $ThisAvTypeCount -lt 1 )
+  {
+    continue
+  }
+
+  $ThisAvName = "$($VmPrefix)-$($AvType)"
+  $ThisAv = Get-AzureRmAvailabilitySet -ResourceGroupName $ResourceGroupName -Name $ThisAvName -ErrorAction Ignore
+  if( $ThisAv -ne $null )
+  {
+    continue
+  }
+
+  Write-Host "[$(Get-Date)] $($AvType) availability set did not exist, creating [ $($ThisAvName) ]"
+  $ThisFaultCount = if( $ThisAvTypeCount -le 3 ){ $ThisAvTypeCount } else { 3 }
+
+  $ThisAvParameters = @{
+    avName=$ThisAvName;
+    updateDomainCount=$ThisAvTypeCount;
+    faultDomainCount=$ThisFaultCount;
+    AppNameTag=$AppNameTag;
+    AppEnvTag=$AppEnvTag;
+    SecZoneTag=$SecZoneTag;
+  }
+
+  New-AzureRMResourceGroupDeployment -Name "$($ThisAvName)-av-$(Get-Date -Format yyyyMMddHHmmss)" `
+    -ResourceGroupName $ResourceGroupName `
+    -TemplateFile $AvTemplateFile `
+    -TemplateParameterObject $ThisAvParameters `
+    -Mode Incremental | Out-Null
+
+  $ThisAvDetails = New-AvParameterObject
+  $ThisAvDetails.AppNameTag.value         = $ThisAvParameters.AppNameTag
+  $ThisAvDetails.AppEnvTag.value          = $ThisAvParameters.AppEnvTag
+  $ThisAvDetails.SecZoneTag.value         = $ThisAvParameters.SecZoneTag
+  $ThisAvDetails.avName.value             = $ThisAvParameters.avName
+  $ThisAvDetails.updateDomainCount.value  = $ThisAvParameters.updateDomainCount
+  $ThisAvDetails.faultDomainCount.value   = $ThisAvParameters.faultDomainCount
+
+  $ThisAvFile = New-ParamFileObject -ParameterObject $ThisAvDetails
+  $ThisAvFile.deploymentDetails.subscriptionName   = $SubscriptionName
+  $ThisAvFile.deploymentDetails.resourceGroupName  = $ResourceGroupName
+  $ThisAvFile.deploymentDetails.templateFile       = $AvTemplateFile
+
+  Save-ParamFile -ResourceName $ThisAvParameters.avName -ParamFileObject $ThisAvFile
 }
 
 
-Write-Host "[$(Get-Date)] Creating [ $($MasterCount + $EdgeCount + $DataCount) ] virtual machine(s)..."
+
+#
+# Create the VMs with the appropriate changes for each type
+#
+$AzureSize = Get-MappedTshirtSize -TshirtSize 'hdp'
+#$DataSize  = Get-MappedDataSize -TshirtSize $VmSize
+
+Write-Host "[$(Get-Date)] Creating [ $($ManagementCount + $MasterCount + $EdgeCount + $DataCount) ] virtual machine(s)..."
 $Results = @()
 $ResultObjects = @()
 
 $RunningIndex = $VmIndex
 
-#
-# Create the group of virtual machines
-#
-ForEach( $HdpType in ('Master', 'Edge', 'Data') )
+
+ForEach( $HdpType in $NodeTypes )
 {
-  $Count = 0
+  $Count    = 0
+  $LvmSize  = 512
   $DataSize = 0
 
   $DiskCount  = 0
@@ -228,59 +294,78 @@ ForEach( $HdpType in ('Master', 'Edge', 'Data') )
   $Disk09Size = 0
   $Disk10Size = 0
 
+  $DiskType = 'Premium_LRS'
+
+  $AvName = "$($VmPrefix)-$($HdpType)"
+
   $ChefEnvironment = $Environment
   $HdpVerTag = "Hortonworks26"
-  $ChefTagsGeneric = "Azure,$($Location.Replace(' ','-')),EIS,EISLinux,Infrastructure,HadoopDb,$($HdpVerTag)"
+  $ChefTagsGeneric = "Azure,$($Location.Replace(' ','-')),EIS,EISLinux,Infrastructure,HadoopDb,$($HdpVerTag),Patch,ExpandRoot"
   $ChefSetTag = "Set-$($VmPrefix)"
   $ChefTags = ''
 
-  $ChefRunList = 'recipe[wag_registration],recipe[profile_wag_infrastructure_baseline],recipe[profile_wag_hdp_infra]'
+  $ChefRunList = 'recipe[wag_registration],recipe[profile_wag_infrastructure_baseline],recipe[profile_wag_hadoop]'
   # i think it may make sense to create profiles for the sub-components
 
   # It doesn't quite follow our naming standards, but for now i want to be able to differenciate
   switch($HdpType)
   {
-     'Master' {
-       #$TypePrefix = 'm'
-       $Count = $MasterCount 
-       $DataSize = 2048
-       $DiskCount = 2
-       $Disk01Size = $DataSize
-       $Disk02Size = $DataSize
+    'Management' {
+      $Count = $ManagementCount 
+      $DataSize = 1024
+      $DiskCount = 5
+      $Disk01Size = $LvmSize
+      $Disk02Size = $DataSize
+      $Disk03Size = $DataSize
+      $Disk04Size = $DataSize
+      $Disk05Size = $DataSize
 
-       $ChefTags = "$($ChefSetTag),$($ChefTagsGeneric),HdpMaster"
-      }
-     'Edge' {
-       #$TypePrefix = 'e'
-       $Count = $EdgeCount
-       $DataSize = 2048
-       $DiskCount = 4
-       $Disk01Size = $DataSize
-       $Disk02Size = $DataSize
-       $Disk03Size = $DataSize
-       $Disk04Size = $DataSize
+      $ChefTags = "$($ChefSetTag),$($ChefTagsGeneric),HdpManagement"
+    }
+    'Master' {
+      $Count = $MasterCount 
+      $DataSize = 1024
+      $DiskCount = 4
+      $Disk01Size = $LvmSize
+      $Disk02Size = $DataSize
+      $Disk03Size = $DataSize
+      $Disk04Size = $DataSize
 
-       $ChefTags = "$($ChefSetTag),$($ChefTagsGeneric),HdpEdge"
-      }
-     'Data' {
-       #$TypePrefix = 'd'
-       $Count = $DataCount 
-       $DataSize = 2048
-       $DiskCount = 5
-       $Disk01Size = $DataSize
-       $Disk02Size = $DataSize
-       $Disk03Size = $DataSize
-       $Disk04Size = $DataSize
-       $Disk05Size = $DataSize
-       #$Disk06Size = $DataSize
-       #$Disk07Size = $DataSize
-       #$Disk08Size = $DataSize
-       #$Disk09Size = $DataSize
-       #$Disk10Size = $DataSize
+      $ChefTags = "$($ChefSetTag),$($ChefTagsGeneric),HdpMaster"
+    }
+    'Edge' {
+      $Count = $EdgeCount
+      $DataSize = 2048
+      $DiskCount = 3
+      $Disk01Size = $LvmSize
+      $Disk02Size = $DataSize
+      $Disk03Size = $DataSize
 
-       $ChefTags = "$($ChefSetTag),$($ChefTagsGeneric),HdpData"
-      }
+      $ChefTags = "$($ChefSetTag),$($ChefTagsGeneric),HdpEdge"
+    }
+    'Data' {
+      $Count = $DataCount 
+      $DataSize = 2048
+      $DiskCount = 6
+      $Disk01Size = $LvmSize
+      $Disk02Size = $DataSize
+      $Disk03Size = $DataSize
+      $Disk04Size = $DataSize
+      $Disk05Size = $DataSize
+      $Disk06Size = $DataSize
+      #$Disk07Size = $DataSize
+      #$Disk08Size = $DataSize
+      #$Disk09Size = $DataSize
+      #$Disk10Size = $DataSize
+
+      $DiskType = 'Standard_LRS'
+
+      $ChefTags = "$($ChefSetTag),$($ChefTagsGeneric),HdpData"
+    }
   }
+
+  # Test override to speed up build sequence
+  #$DiskCount = 1
 
   for( $i = 1; $i -le $Count; $i++ )
   {
@@ -288,9 +373,9 @@ ForEach( $HdpType in ('Master', 'Edge', 'Data') )
       location=$Location;
 
       # These need to be adjusted or removed
-      AppNameTag='Hadoop';
-      AppEnvTag=$Environment;
-      SecZoneTag='Unknown';
+      AppNameTag=$AppNameTag;
+      AppEnvTag=$AppEnvTag;
+      SecZoneTag=$SecZoneTag;
       vmName="$($VmPrefix)$($RunningIndex.ToString().PadLeft(2, '0'))"
       #vmName="$($VmPrefix)$($TypePrefix)$($i.ToString().PadLeft( 2, '0' ))"
       vmSize=$AzureSize;
@@ -316,6 +401,7 @@ ForEach( $HdpType in ('Master', 'Edge', 'Data') )
       vnetName=$VnetName;
       subnetName=$SubnetName;
       diagStorAcctName=$DiagStorageName;
+      avName=$AvName;
     }
 
     Write-Host "[$(Get-Date)] Creating machine [ $($VmParameters.vmName) ]..."
@@ -342,7 +428,8 @@ ForEach( $HdpType in ('Master', 'Edge', 'Data') )
     # system bootstrap operations
     $ResultObjects += @{
       nodeIp=$Nic.IpConfigurations[0].PrivateIpAddress;
-      nodeName=$VmParameters.vmName
+      # this should be definable, and optional
+      nodeName="$($VmParameters.vmName).walgreens.com"
       username=$TemplateObject.variables.adminUsername;
       password=$TemplateObject.variables.adminPassword;
       environment=$ChefEnvironment;
@@ -353,7 +440,7 @@ ForEach( $HdpType in ('Master', 'Edge', 'Data') )
     #
     # Now to create the parameter file with all of the details about this system
     #
-    $ThisVmParam = New-ParameterObject -Version 2
+    $ThisVmParam = New-ParameterObject -Version 3
     $ThisVmParam.location.value           = $VmParameters.location
     $ThisVmParam.AppNameTag.value         = $VmParameters.AppNameTag
     $ThisVmParam.AppEnvTag.value          = $VmParameters.AppEnvTag
@@ -378,6 +465,7 @@ ForEach( $HdpType in ('Master', 'Edge', 'Data') )
     $ThisVmParam.subnetName.value         = $VmParameters.subnetName
     $ThisVmParam.ipAddress.value          = $Nic.IpConfigurations[0].PrivateIpAddress
     $ThisVmParam.diagStorAcctName.value   = $VmParameters.diagStorAcctName
+    $ThisVmParam.avName.value             = $VmParameters.avName
 
     $ThisVmParamFile = New-ParamFileObject -ParameterObject $ThisVmParam
     $ThisVmParamFile.deploymentDetails.subscriptionName   = $SubscriptionName

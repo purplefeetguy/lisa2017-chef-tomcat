@@ -29,6 +29,28 @@ function New-ParamFileObject( $ParameterObject, $ParameterVersion = '1.0.0.0' )
 }
 
 
+function New-AvParameterObject()
+{
+  $p = New-Object PSObject 
+
+  $AppNameTag = New-PVO -Value ''
+  $p | Add-Member -MemberType NoteProperty -Name 'AppNameTag' -Value $AppNameTag
+  $AppEnvTag = New-PVO -Value ''
+  $p | Add-Member -MemberType NoteProperty -Name 'AppEnvTag' -Value $AppEnvTag
+  $SecZoneTag = New-PVO -Value ''
+  $p | Add-Member -MemberType NoteProperty -Name 'SecZoneTag' -Value $SecZoneTag
+  $avName = New-PVO -Value ''
+  $p | Add-Member -MemberType NoteProperty -Name 'avName' -Value $avName
+  $updateDomainCount = New-PVO -Value 0 -Type 'Integer'
+  $p | Add-Member -MemberType NoteProperty -Name 'updateDomainCount' -Value $updateDomainCount
+  $faultDomainCount = New-PVO -Value 0 -Type 'Integer'
+  $p | Add-Member -MemberType NoteProperty -Name 'faultDomainCount' -Value $faultDomainCount
+
+  return $p
+}
+
+
+
 <#
 .SYNOPSIS
   Generates a blank parameter object to use for serializing
@@ -40,6 +62,7 @@ function New-ParameterObject( $Version = 1 )
   {
     1 { return New-ParameterObjectV1 }
     2 { return New-ParameterObjectV2 }
+    3 { return New-ParameterObjectV3 }
   }
 }
 
@@ -192,6 +215,65 @@ function New-ParameterObjectV2()
 }
 
 
+function New-ParameterObjectV3()
+{
+  $p = New-Object PSObject 
+
+  $location = New-PVO -Value ''
+  $p | Add-Member -MemberType NoteProperty -Name 'location' -Value $location
+  $AppNameTag = New-PVO -Value ''
+  $p | Add-Member -MemberType NoteProperty -Name 'AppNameTag' -Value $AppNameTag
+  $AppEnvTag = New-PVO -Value ''
+  $p | Add-Member -MemberType NoteProperty -Name 'AppEnvTag' -Value $AppEnvTag
+  $SecZoneTag = New-PVO -Value ''
+  $p | Add-Member -MemberType NoteProperty -Name 'SecZoneTag' -Value $SecZoneTag
+  $vmName = New-PVO -Value ''
+  $p | Add-Member -MemberType NoteProperty -Name 'vmName' -Value $vmName
+  $vmSize = New-PVO -Value ''
+  $p | Add-Member -MemberType NoteProperty -Name 'vmSize' -Value $vmSize
+  $osDiskSize = New-PVO -Value 32 -Type 'Integer'
+  $p | Add-Member -MemberType NoteProperty -Name 'osDiskSize' -Value $osDiskSize
+  $diskCount = New-PVO -Value 0 -Type 'Integer'
+  $p | Add-Member -MemberType NoteProperty -Name 'diskCount' -Value $diskCount
+  $disk01Size = New-PVO -Value 0 -Type 'Integer'
+  $p | Add-Member -MemberType NoteProperty -Name 'disk01Size' -Value $disk01Size
+  $disk02Size = New-PVO -Value 0 -Type 'Integer'
+  $p | Add-Member -MemberType NoteProperty -Name 'disk02Size' -Value $disk02Size
+  $disk03Size = New-PVO -Value 0 -Type 'Integer'
+  $p | Add-Member -MemberType NoteProperty -Name 'disk03Size' -Value $disk03Size
+  $disk04Size = New-PVO -Value 0 -Type 'Integer'
+  $p | Add-Member -MemberType NoteProperty -Name 'disk04Size' -Value $disk04Size
+  $disk05Size = New-PVO -Value 0 -Type 'Integer'
+  $p | Add-Member -MemberType NoteProperty -Name 'disk05Size' -Value $disk05Size
+  $disk06Size = New-PVO -Value 0 -Type 'Integer'
+  $p | Add-Member -MemberType NoteProperty -Name 'disk06Size' -Value $disk06Size
+  $disk07Size = New-PVO -Value 0 -Type 'Integer'
+  $p | Add-Member -MemberType NoteProperty -Name 'disk07Size' -Value $disk07Size
+  $disk08Size = New-PVO -Value 0 -Type 'Integer'
+  $p | Add-Member -MemberType NoteProperty -Name 'disk08Size' -Value $disk08Size
+  $disk09Size = New-PVO -Value 0 -Type 'Integer'
+  $p | Add-Member -MemberType NoteProperty -Name 'disk09Size' -Value $disk09Size
+  $disk10Size = New-PVO -Value 0 -Type 'Integer'
+  $p | Add-Member -MemberType NoteProperty -Name 'disk10Size' -Value $disk10Size
+  $managedDiskType = New-PVO -Value ''
+  $p | Add-Member -MemberType NoteProperty -Name 'managedDiskType' -Value $managedDiskType
+  $vnetResGrp = New-PVO -Value ''
+  $p | Add-Member -MemberType NoteProperty -Name 'vnetResGrp' -Value $vnetResGrp
+  $vnetName = New-PVO -Value ''
+  $p | Add-Member -MemberType NoteProperty -Name 'vnetName' -Value $vnetName
+  $subnetName = New-PVO -Value ''
+  $p | Add-Member -MemberType NoteProperty -Name 'subnetName' -Value $subnetName
+  $ipAddress = New-PVO -Value ''
+  $p | Add-Member -MemberType NoteProperty -Name 'ipAddress' -Value $ipAddress
+  $diagStorAcctName = New-PVO -Value ''
+  $p | Add-Member -MemberType NoteProperty -Name 'diagStorAcctName' -Value $diagStorAcctName
+  $avName = New-PVO -Value ''
+  $p | Add-Member -MemberType NoteProperty -Name 'avName' -Value $avName
+
+  return $p
+}
+
+
 <#
 .SYNOPSIS
   This is a another helper since all parameters are actually
@@ -211,11 +293,19 @@ function New-PVO( $Value, $Type = 'String' )
 .SYNOPSIS
   Save the file to disk
 #>
-function Save-ParamFile( $ResourceName, $ParamFileObject )
+function Save-ParamFile( $ResourceName, $ParamFileObject, $Overwrite = $false )
 {
   New-Item -ItemType Directory -Path .\created -Force | Out-Null
   try {
-    $ParamFileObject | ConvertTo-Json -Depth 10 | Out-File ".\created\$($ResourceName).param.json" -NoClobber
+    if( $Overwrite )
+    {
+      $ParamFileObject | ConvertTo-Json -Depth 10 | Out-File ".\created\$($ResourceName).param.json"
+    }
+    else
+    {
+      $ParamFileObject | ConvertTo-Json -Depth 10 | Out-File ".\created\$($ResourceName).param.json" -NoClobber
+    }
+    
   }
   catch 
   {

@@ -33,5 +33,12 @@
     "platformType": "storage",
     "dynamicTemplate": "storage.baseline.single.json",
     "staticTemplate": "storage.baseline.single.json"
+  },
+  {
+    "displayName" : "Availability Set",
+    "shortName": "av",
+    "platformType": "availability-set",
+    "dynamicTemplate": "av.1.0.json",
+    "staticTemplate": "av.1.0.json"
   }
 ]

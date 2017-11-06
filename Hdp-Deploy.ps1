@@ -311,19 +311,18 @@ ForEach( $HdpType in $NodeTypes )
   switch($HdpType)
   {
     'Management' {
-      #$TypePrefix = 'm'
       $Count = $ManagementCount 
       $DataSize = 1024
-      $DiskCount = 4
+      $DiskCount = 5
       $Disk01Size = $LvmSize
       $Disk02Size = $DataSize
       $Disk03Size = $DataSize
       $Disk04Size = $DataSize
+      $Disk05Size = $DataSize
 
       $ChefTags = "$($ChefSetTag),$($ChefTagsGeneric),HdpManagement"
     }
     'Master' {
-      #$TypePrefix = 'm'
       $Count = $MasterCount 
       $DataSize = 1024
       $DiskCount = 4
@@ -335,19 +334,16 @@ ForEach( $HdpType in $NodeTypes )
       $ChefTags = "$($ChefSetTag),$($ChefTagsGeneric),HdpMaster"
     }
     'Edge' {
-      #$TypePrefix = 'e'
       $Count = $EdgeCount
       $DataSize = 2048
       $DiskCount = 3
       $Disk01Size = $LvmSize
       $Disk02Size = $DataSize
       $Disk03Size = $DataSize
-      #$Disk04Size = $DataSize
 
       $ChefTags = "$($ChefSetTag),$($ChefTagsGeneric),HdpEdge"
     }
     'Data' {
-      #$TypePrefix = 'd'
       $Count = $DataCount 
       $DataSize = 2048
       $DiskCount = 6

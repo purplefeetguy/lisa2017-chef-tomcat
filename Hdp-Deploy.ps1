@@ -220,7 +220,7 @@ ForEach( $AvType in $NodeTypes )
     continue
   }
 
-  $ThisAvName = "$(VmPrefix)-$($AvType)"
+  $ThisAvName = "$($VmPrefix)-$($AvType)"
   $ThisAv = Get-AzureRmAvailabilitySet -ResourceGroupName $ResourceGroupName -Name $ThisAvName -ErrorAction Ignore
   if( $ThisAv -ne $null )
   {
@@ -269,7 +269,7 @@ ForEach( $AvType in $NodeTypes )
 $AzureSize = Get-MappedTshirtSize -TshirtSize 'hdp'
 #$DataSize  = Get-MappedDataSize -TshirtSize $VmSize
 
-Write-Host "[$(Get-Date)] Creating [ $($MasterCount + $EdgeCount + $DataCount) ] virtual machine(s)..."
+Write-Host "[$(Get-Date)] Creating [ $($ManagementCount + $MasterCount + $EdgeCount + $DataCount) ] virtual machine(s)..."
 $Results = @()
 $ResultObjects = @()
 
@@ -296,11 +296,11 @@ ForEach( $HdpType in $NodeTypes )
 
   $DiskType = 'Premium_LRS'
 
-  $AvName = "$(VmPrefix)-$($HdpType)"
+  $AvName = "$($VmPrefix)-$($HdpType)"
 
   $ChefEnvironment = $Environment
   $HdpVerTag = "Hortonworks26"
-  $ChefTagsGeneric = "Azure,$($Location.Replace(' ','-')),EIS,EISLinux,Infrastructure,HadoopDb,$($HdpVerTag)"
+  $ChefTagsGeneric = "Azure,$($Location.Replace(' ','-')),EIS,EISLinux,Infrastructure,HadoopDb,$($HdpVerTag),Patch,ExpandRoot"
   $ChefSetTag = "Set-$($VmPrefix)"
   $ChefTags = ''
 
@@ -428,7 +428,8 @@ ForEach( $HdpType in $NodeTypes )
     # system bootstrap operations
     $ResultObjects += @{
       nodeIp=$Nic.IpConfigurations[0].PrivateIpAddress;
-      nodeName=$VmParameters.vmName
+      # this should be definable, and optional
+      nodeName="$($VmParameters.vmName).walgreens.com"
       username=$TemplateObject.variables.adminUsername;
       password=$TemplateObject.variables.adminPassword;
       environment=$ChefEnvironment;

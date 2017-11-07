@@ -1,0 +1,62 @@
+{
+  "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "location": {
+      "value": "West US"
+    },
+    "AppNameTag": {
+      "value": "RxR"
+    },
+    "AppEnvTag": {
+      "value": "DevTest"
+    },
+    "SecZoneTag": {
+      "value": "NonSen"
+    },
+    "avName": {
+      "value": "rxr-dev-kfk"
+    },
+    "avUpdateDomainCount": {
+      "value": 6
+    },
+    "avFaultDomainCount": {
+      "value": 3
+    },
+    "ipAddress": {
+      "value": "10.217.36.30"
+    },
+    "vmName": {
+      "value": "sla-awurxkb0103"
+    },
+    "vmSize": {
+      "value": "Standard_DS13_v2"
+    },
+    "osDiskSizeInGB": {
+      "value": 128
+    },
+    "dataDiskSizeInGB": {
+      "value": 1024
+    },
+    "managedDiskType": {
+      "value": "Standard_LRS"
+    },
+    "vnetResGrp": {
+      "value": "wbadtn-network"
+    },
+    "vnetName": {
+      "value": "WBA-DTN"
+    },
+    "subnetName": {
+      "value": "WBA-DTN-APP6"
+    },
+    "diagStorAcctName": {
+      "value": "rxmsdevappdiag02"
+    }
+  },
+  "deploymentDetails": {
+    "subscriptionName": "WBA-DTN",
+    "resourceGroupName": "rxms-sit-app",
+    "templateFile": ".\\vm.single.av.1.0.json"
+  }
+}

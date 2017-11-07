@@ -1,0 +1,16 @@
+{
+  "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "location": { "value": "westus" },
+    "tagAppNameValue": { "value" : "RXR" },
+    "tagAppEnvValue": { "value" : "Dev" },
+    "tagSecZoneValue": {"value" : "NSEN" },
+    "loadBalancerName": { "value": "rxr-sit-zk" },
+    "backEndPoolName": { "value": "kfkz" },
+    "vnetResGrp": { "value": "wbadtn-network" },
+    "vnetName": { "value" : "WBA-DTN" },
+    "subnetName": { "value": "WBA-DTN-APP6" },
+    "loadBalancerFrontendIP": { "value": "10.217.36.34" }
+  }
+}

@@ -1,0 +1,68 @@
+{
+  "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "location": {
+      "value": "West US"
+    },
+    "AppNameTag": {
+      "value": "rx-test-cassandra"
+    },
+    "AppEnvTag": {
+      "value": "db"
+    },
+    "SecZoneTag": {
+      "value": "Non-Sensitive Dev-Test"
+    },
+    "avName": {
+      "value": "rx-tld-awurxcass"
+    },
+    "avUpdateDomainCount": {
+      "value": 3
+    },
+    "avFaultDomainCount": {
+      "value": 3
+    },
+    "ipAddress": {
+      "value": "10.217.37.17"
+    },
+    "vmName": {
+      "value": "tld-awurxcass06"
+    },
+    "vmSize": {
+      "value": "Standard_DS13_v2"
+    },
+    "osDiskSize": {
+      "value": 128
+    },
+    "managedDiskType": {
+      "value": "Premium_LRS"
+    },
+    "diskCount": {
+      "value": 2
+    },
+    "disk01Size": {
+      "value": 1024
+    },
+    "disk02Size": {
+      "value": 1024
+    },
+    "vnetResGrp": {
+      "value": "wbadtn-network"
+    },
+    "vnetName": {
+      "value": "WBA-DTN"
+    },
+    "subnetName": {
+      "value": "WBA-DTN-DB1"
+    },
+    "diagStorAcctName": {
+      "value": "rxtestcassdiag"
+    }
+  },
+  "deploymentDetails": {
+    "subscriptionName": "WBA-DTN",
+    "resourceGroupName": "rx-test-cassandra",
+    "templateFile": ".\\vm.baseline.single.av.1.3.json"
+  }
+}

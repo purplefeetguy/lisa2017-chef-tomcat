@@ -18,10 +18,10 @@
       "value": "10.217.8.45"
     },
     "vmName": {
-      "value": "tla-awurxos0101"
+      "value": "fla-awurxos0102"
     },
     "vmSize": {
-      "value": "Standard_A2m_v2"
+      "value": "Standard_F8s"
     },
     "osDiskSize": {
       "value": 128
@@ -45,7 +45,7 @@
       "value": "WBA-DTN-APP5"
     },
     "diagStorAcctName": {
-      "value": "rxmsdevappdiag02"
+      "value": "rxrprodfixdiag"
     }
   },
   "deploymentDetails": {

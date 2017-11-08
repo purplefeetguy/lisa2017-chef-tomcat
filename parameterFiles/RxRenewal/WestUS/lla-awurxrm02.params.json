@@ -15,13 +15,13 @@
       "value": "NonSen"
     },
     "ipAddress": {
-      "value": "10.217.8.45"
+      "value": "10.217.36.27"
     },
     "vmName": {
-      "value": "tla-awurxos0101"
+      "value": "lla-awurxrm02"
     },
     "vmSize": {
-      "value": "Standard_A2m_v2"
+      "value": "Standard_DS3_v2"
     },
     "osDiskSize": {
       "value": 128
@@ -30,7 +30,7 @@
       "value": 1
     },
     "disk01size": {
-      "value": 128
+      "value": 512
     },
     "managedDiskType": {
       "value": "Standard_LRS"
@@ -42,15 +42,15 @@
       "value": "WBA-DTN"
     },
     "subnetName": {
-      "value": "WBA-DTN-APP5"
+      "value": "WBA-DTN-APP6"
     },
     "diagStorAcctName": {
-      "value": "rxmsdevappdiag02"
+      "value": "rxmsdiagstrgacct01"
     }
   },
   "deploymentDetails": {
     "subscriptionName": "WBA-DTN",
-    "resourceGroupName": "rxr-prodfix",
+    "resourceGroupName": "rxms-storage",
     "templateFile": ".\\vm.baseline.single.1.3.json"
   }
 }

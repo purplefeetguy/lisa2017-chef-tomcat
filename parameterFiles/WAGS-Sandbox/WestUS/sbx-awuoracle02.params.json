@@ -6,37 +6,46 @@
       "value": "West US"
     },
     "AppNameTag": {
-      "value": "RXR"
+      "value": "SBX-Oracle"
     },
     "AppEnvTag": {
-      "value": "SBX"
+      "value": "db"
     },
     "SecZoneTag": {
-      "value": "dtn"
-    },
-    "avName": {
-      "value": "rxr-sbx-rxmsapp"
-    },
-    "avUpdateDomainCount": {
-      "value": 6
-    },
-    "avFaultDomainCount": {
-      "value": 3
+      "value": "sbx"
     },
     "ipAddress": {
-      "value": ""
+      "value": "10.217.10.135"
+    },
+    "avName": {
+      "value": "sbx-oracle-db"
+    },
+    "avUpdateDomainCount": {
+      "value": 2
+    },
+    "avFaultDomainCount": {
+      "value": 2
     },
     "vmName": {
-      "value": "sbx-pla-awurxms01"
+      "value": "sbx-awuoracle02"
     },
     "vmSize": {
-      "value": "Standard_DS12_v2"
+      "value": "Standard_DS11"
     },
-    "dataDiskSizeInGB": {
+    "osDiskSize": {
       "value": 128
     },
     "managedDiskType": {
-      "value": "Standard_LRS"
+      "value": "Premium_LRS"
+    },
+    "diskCount": {
+      "value": 2
+    },
+    "disk01Size": {
+      "value": 128
+    },
+    "disk02Size": {
+      "value": 128
     },
     "vnetResGrp": {
       "value": "WBA-sandbox-Migrated"
@@ -45,15 +54,15 @@
       "value": "WBA-sandbox"
     },
     "subnetName": {
-      "value": "wba-sandbox-app"
+      "value": "wba-sandbox-db"
     },
     "diagStorAcctName": {
-      "value": "sbxrxmsappdiag"
+      "value": "sbxoradiag"
     }
   },
   "deploymentDetails": {
     "subscriptionName": "WAGS Sandbox",
-    "resourceGroupName": "rxr-dtn-sbx-wus",
-    "templateFile": ".\\vm.single.dynamic.av.1.0.json"
+    "resourceGroupName": "sbx-oracle",
+    "templateFile": ".\\vm.baseline.single.av.1.3.json"
   }
 }

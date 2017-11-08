@@ -6,19 +6,19 @@
       "value": "West US"
     },
     "AppNameTag": {
-      "value": "RXR"
+      "value": "SBX-Datastax-Cassandra"
     },
     "AppEnvTag": {
-      "value": "SBX"
+      "value": "db"
     },
     "SecZoneTag": {
-      "value": "dtn"
+      "value": "sbx"
     },
     "avName": {
-      "value": "rxr-sbx-rxmsdb"
+      "value": "sbx-datastax-cassandra"
     },
     "avUpdateDomainCount": {
-      "value": 6
+      "value": 3
     },
     "avFaultDomainCount": {
       "value": 3
@@ -27,16 +27,25 @@
       "value": ""
     },
     "vmName": {
-      "value": "sbx-pld-awurxms01"
+      "value": "sbx-awurxcass01"
     },
     "vmSize": {
-      "value": "Standard_DS12_v2"
+      "value": "Standard_DS13_v2"
     },
-    "dataDiskSizeInGB": {
-      "value": 512
+    "osDiskSize": {
+      "value": 128
     },
     "managedDiskType": {
-      "value": "Standard_LRS"
+      "value": "Premium_LRS"
+    },
+    "diskCount": {
+      "value": 2
+    },
+    "disk01Size": {
+      "value": 1024
+    },
+    "disk02Size": {
+      "value": 1024
     },
     "vnetResGrp": {
       "value": "WBA-sandbox-Migrated"
@@ -45,15 +54,15 @@
       "value": "WBA-sandbox"
     },
     "subnetName": {
-      "value": "wba-sandbox-app"
+      "value": "wba-sandbox-db"
     },
     "diagStorAcctName": {
-      "value": "sbxrxmsdbdiag"
+      "value": "rxdsecassdiag"
     }
   },
   "deploymentDetails": {
     "subscriptionName": "WAGS Sandbox",
-    "resourceGroupName": "rxr-dtn-sbx-wus",
-    "templateFile": ".\\vm.oracle.single.dynamic.av.1.0.json"
+    "resourceGroupName": "sbx-rx-dse-cassandra",
+    "templateFile": ".\\vm.baseline.single.dynamic.av.1.3.json"
   }
 }

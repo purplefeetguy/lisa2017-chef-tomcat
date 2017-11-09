@@ -43,8 +43,21 @@
 #>
 [CmdletBinding()]
 param(
+    [Parameter(Mandatory=$true)]
+    [string] $ResourceGroupName,
+    [Parameter(Mandatory=$true)]
+    [string] $VmPrefix,
+
+    [Parameter(Mandatory=$true)]
+    [string] $AppName = "",
+    [Parameter(Mandatory=$true)]
+    [string] $AppEnv = "",
+    [Parameter(Mandatory=$true)]
+    [string] $SecZone = "",
+
     [Parameter(Mandatory=$false)]
     [PsCredential] $Credentials,
+
     [Parameter(Mandatory=$false)]
     [string] $SubscriptionName,
     [Parameter(Mandatory=$false)]
@@ -52,12 +65,10 @@ param(
     [string] $Location = 'West US',
     [Parameter(Mandatory=$false)]
     [string] $SubnetName,
-    [Parameter(Mandatory=$false)]
-    [string] $ResourceGroupName,
-    [Parameter(Mandatory=$false)]
-    [string] $VmPrefix,
+
     [Parameter(Mandatory=$false)]
     [int] $VmIndex = 1,
+
     [Parameter(Mandatory=$false)]
     [int] $ManagementCount = 1,
     [Parameter(Mandatory=$false)]
@@ -66,17 +77,21 @@ param(
     [int] $EdgeCount = 2,
     [Parameter(Mandatory=$false)]
     [int] $DataCount = 5,
+
     [Parameter(Mandatory=$false)]
     [string] $OverrideSize = $null,
     [Parameter(Mandatory=$false)]
     [ValidateSet("sandbox","development","test","production")]
-    [string] $Environment = "production"
+    [string] $Environment = "production",
+
+    [Parameter(Mandatory=$false)]
+    [string] $SetId
 )
 
 Import-Module '.\Functions-AzureGeneral.psm1'
 Import-Module '.\Functions-Vnet.psm1'
 Import-Module '.\Functions-ResourceGroup.psm1'
-Import-Module '.\FUnctions-Storage.psm1'
+Import-Module '.\Functions-Storage.psm1'
 
 $StorageTemplateFile  = '.\templates\storage.baseline.single.json'
 $AvTemplateFile = '.\templates\av.1.0.json'
@@ -195,9 +210,9 @@ if( $DiagStorage -eq $null )
 }
 
 
-$AppEnvTag = 'DTN'
-$SecZoneTag = 'WBA Internal Non-Sensitive'
-$AppNameTag = 'Rx Hadoop'
+#$AppEnvTag = 'DTN'
+#$SecZoneTag = 'WBA Internal Non-Sensitive'
+#$AppNameTag = 'Rx Hadoop'
 
 $NodeTypes = ('Management', 'Master', 'Edge', 'Data')
 
@@ -234,9 +249,9 @@ ForEach( $AvType in $NodeTypes )
     avName=$ThisAvName;
     updateDomainCount=$ThisAvTypeCount;
     faultDomainCount=$ThisFaultCount;
-    AppNameTag=$AppNameTag;
-    AppEnvTag=$AppEnvTag;
-    SecZoneTag=$SecZoneTag;
+    AppNameTag=$AppName;
+    AppEnvTag=$AppEnv;
+    SecZoneTag=$SecZone;
   }
 
   New-AzureRMResourceGroupDeployment -Name "$($ThisAvName)-av-$(Get-Date -Format yyyyMMddHHmmss)" `
@@ -301,7 +316,13 @@ ForEach( $HdpType in $NodeTypes )
   $ChefEnvironment = $Environment
   $HdpVerTag = "Hortonworks26"
   $ChefTagsGeneric = "Azure,$($Location.Replace(' ','-')),EIS,EISLinux,Infrastructure,HadoopDb,$($HdpVerTag),Patch,ExpandRoot"
-  $ChefSetTag = "Set-$($VmPrefix)"
+
+  $ChefSetTag = "Instance-$($VmPrefix)"
+  if( $SetId -ne $null -and $SetId -ne '' )
+  {
+    $ChefSetTag = $SetId
+  }
+
   $ChefTags = ''
 
   $ChefRunList = 'recipe[wag_registration],recipe[profile_wag_infrastructure_baseline],recipe[profile_wag_hadoop]'
@@ -341,6 +362,8 @@ ForEach( $HdpType in $NodeTypes )
       $Disk02Size = $DataSize
       $Disk03Size = $DataSize
 
+      $DiskType = 'Standard_LRS'
+
       $ChefTags = "$($ChefSetTag),$($ChefTagsGeneric),HdpEdge"
     }
     'Data' {
@@ -373,9 +396,9 @@ ForEach( $HdpType in $NodeTypes )
       location=$Location;
 
       # These need to be adjusted or removed
-      AppNameTag=$AppNameTag;
-      AppEnvTag=$AppEnvTag;
-      SecZoneTag=$SecZoneTag;
+      AppNameTag=$AppName;
+      AppEnvTag=$AppEnv;
+      SecZoneTag=$SecZone;
       vmName="$($VmPrefix)$($RunningIndex.ToString().PadLeft(2, '0'))"
       #vmName="$($VmPrefix)$($TypePrefix)$($i.ToString().PadLeft( 2, '0' ))"
       vmSize=$AzureSize;
